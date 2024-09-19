@@ -2,7 +2,7 @@
 
 ## 0.0.2
 
-- Clean up gem setup
+- Clean up gem setup, add more to gemspec
 
 ## 0.0.1
 

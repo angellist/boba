@@ -17,8 +17,11 @@ Gem::Specification.new do |spec|
 
   spec.files       = Dir.glob("lib/**/*.rb") + ["README.md", "LICENSE"]
 
-  spec.metadata    = {
-    "source_code_uri"   => "https://github.com/angellist/boba/tree/v#{::Boba::VERSION}",
+  spec.metadata = {
+    "bug_tracker_uri"       => "https://github.com/angellist/boba/issues",
+    "changelog_uri"         => "https://github.com/angellist/boba/blob/#{::Boba::VERSION}/History.md",
+    "homepage_uri"          => spec.homepage,
+    "source_code_uri"       => "https://github.com/angellist/boba/tree/#{::Boba::VERSION}",
     "rubygems_mfa_required" => "true",
   }
 
