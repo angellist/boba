@@ -17,6 +17,11 @@ Gem::Specification.new do |spec|
 
   spec.files       = Dir.glob("lib/**/*.rb") + ["README.md", "LICENSE"]
 
+  spec.metadata    = {
+    "source_code_uri"   => "https://github.com/angellist/boba/tree/v#{::Boba::VERSION}",
+    "rubygems_mfa_required" => "true",
+  }
+
   spec.required_ruby_version = '>= 3.0.0'
 
   spec.add_dependency("sorbet-static-and-runtime", "~> 0.5")
