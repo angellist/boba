@@ -14,7 +14,7 @@ Boba like a collection of compilers that you can pick and choose from.
 Add Boba to your development dependencies in your gemfile:
 ```ruby
 group :development do
-  gem 'boba'
+  gem 'boba', require: false
 end
 ```
 
