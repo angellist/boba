@@ -52,6 +52,8 @@ GEM
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
     json (2.7.2)
+    kramdown (2.4.0)
+      rexml
     language_server-protocol (3.17.0.3)
     logger (1.6.1)
     loofah (2.22.0)
@@ -174,6 +176,7 @@ PLATFORMS
 
 DEPENDENCIES
   boba!
+  kramdown
   money-rails
   rubocop-rspec
   rubocop-shopify

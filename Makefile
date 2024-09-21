@@ -13,3 +13,8 @@ clean:
 .PHONY: release
 release: clean build
 	gem push boba-*.gem
+
+
+.PHONY: docs
+docs:
+	bundle exec rake generate_dsl_documentation

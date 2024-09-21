@@ -10,11 +10,12 @@ module Tapioca
     module Compilers
       # `Tapioca::Dsl::Compilers::MoneyRails` decorates RBI files for classes that use the `monetize` method provided
       # by the `money-rails` gem.
+      # https://github.com/RubyMoney/money-rails
       #
       # For example, with the following ActiveRecord model:
       # ~~~rb
       # class Product < ActiveRecord::Base
-      #  monetize :price_cents
+      #   monetize :price_cents
       # end
       # ~~~
       #

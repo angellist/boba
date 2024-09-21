@@ -6,8 +6,11 @@ Boba is a collection of compilers for Sorbet & Tapioca.
 
 Tapioca is very opinionated about what types of compilers or changes are accepted into the repository. See
 [here](https://github.com/Shopify/tapioca?tab=readme-ov-file#dsl-compilers). Boba come in all
-different shapes, sizes, consistencies, etc, and is much less opinionated about what is or is not accepted. Think of
-Boba like a collection of compilers that you can pick and choose from.
+different shapes, sizes, consistencies, etc, and is much less opinionated about what is or is not accepted. Boba is a collection of optional compilers that you can pick and choose from.
+
+### Available Compilers
+
+See [the compilers manual](https://github.com/angellist/boba/blob/main/manual/compilers.md) for a list of available compilers.
 
 ## Usage
 
@@ -26,6 +29,7 @@ dsl:
     Compiler1
     Compiler2
 ```
+This makes it easy to selectively enable only the compilers you want to use in your project.
 
 ## Contributing
 
@@ -39,9 +43,10 @@ Since Boba is intended to be used alongside Tapioca and the compilers provided b
 we will not accept compilers which overwrite the Tapioca default compilers. See the [Tapioca Manual](https://github.com/Shopify/tapioca/blob/main/manual/compilers.md) for a list of these
 compilers. Instead, compilers which extend or overwrite the default Tapioca compilers should be given unique names.
 
-Contributed compilers should be documented and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
+Contributed compilers should be well documented, and named after and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
+
+Compilers for Gems, DSLs, or modules that are not publicly available will not be accepted.
 
 ## Todo
 
 1. Specs & spec harness
-2. Docs & doc harness
