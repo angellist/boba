@@ -27,8 +27,21 @@ dsl:
     Compiler2
 ```
 
+## Contributing
+
+Bugs and feature requests are welcome and should be [filed as issues on github](https://github.com/angellist/boba/issues).
+
+### New Compilers
+
+Compilers for any commonly used Ruby or Rails gems are welcome to be contributed. See the [Writing New Compilers section of the Tapioca docs](https://github.com/Shopify/tapioca?tab=readme-ov-file#writing-custom-dsl-compilers) for an introduction to writing compilers.
+
+Since Boba is intended to be used alongside Tapioca and the compilers provided by Boba are intended to be fully optional,
+we will not accept compilers which overwrite the Tapioca default compilers. See the [Tapioca Manual](https://github.com/Shopify/tapioca/blob/main/manual/compilers.md) for a list of these
+compilers. Instead, compilers which extend or overwrite the default Tapioca compilers should be given unique names.
+
+Contributed compilers should be documented and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
+
 ## Todo
 
-1. Contributing Section
-2. Specs & spec harness
-3. Docs & doc harness
+1. Specs & spec harness
+2. Docs & doc harness
