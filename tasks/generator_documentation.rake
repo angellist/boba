@@ -71,7 +71,7 @@ task generate_dsl_documentation: :yard_for_generate_documentation do
 
   def load_registry
     YARD::Registry.all(:class).filter_map do |code_object|
-      next unless code_object.superclass.to_s == "Tapioca::Dsl::Compiler"
+      next unless code_object.superclass.to_s.include?("Tapioca::Dsl::Compiler")
 
       RegistryEntry.new(code_object.name.to_s, code_object)
     end.sort_by(&:name)

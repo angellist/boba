@@ -2169,6 +2169,8 @@ RDoc::Encoding::HEADER_REGEXP = T.let(T.unsafe(nil), Regexp)
 class RDoc::Generator::Darkfish
   include ::ERB::Escape
   include ::ERB::Util
+  include ::ActiveSupport::CoreExt::ERBUtil
+  include ::ActiveSupport::CoreExt::ERBUtilPrivate
 
   # Initialize a few instance variables before we start
   #

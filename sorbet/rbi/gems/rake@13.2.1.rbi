@@ -112,7 +112,7 @@ class Module
   def rake_extension(method); end
 end
 
-# source://rake//lib/rake.rb#24
+# source://rake//lib/rake/cloneable.rb#2
 module Rake
   extend ::FileUtils::StreamUtils_
   extend ::FileUtils
@@ -1015,6 +1015,12 @@ class Rake::FileList
   def compact!(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
+  def compact_blank(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def compact_blank!(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def concat(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
@@ -1109,6 +1115,9 @@ class Rake::FileList
   # source://rake//lib/rake/file_list.rb#150
   def exclude(*patterns, &block); end
 
+  # source://rake//lib/rake/file_list.rb#77
+  def exclude?(*args, &block); end
+
   # Should the given file name be excluded from the list?
   #
   # NOTE: This method was formerly named "exclude?", but Rails
@@ -1121,6 +1130,9 @@ class Rake::FileList
   #
   # source://rake//lib/rake/file_list.rb#364
   def excluded_from_list?(fn); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def excluding(*args, &block); end
 
   # Return a new file list that only contains file names from the current
   # file list that exist on the file system.
@@ -1147,7 +1159,13 @@ class Rake::FileList
   def ext(newext = T.unsafe(nil)); end
 
   # source://rake//lib/rake/file_list.rb#77
+  def extract_options!(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def fetch(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def fifth(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
   def fill(*args, &block); end
@@ -1182,6 +1200,15 @@ class Rake::FileList
   # source://rake//lib/rake/file_list.rb#77
   def flatten!(*args, &block); end
 
+  # source://rake//lib/rake/file_list.rb#77
+  def forty_two(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def fourth(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def from(*args, &block); end
+
   # source://rake//lib/rake/file_list.rb#68
   def grep(*args, &block); end
 
@@ -1209,6 +1236,9 @@ class Rake::FileList
   # source://rake//lib/rake/file_list.rb#391
   def import(array); end
 
+  # source://rake//lib/rake/file_list.rb#77
+  def in_order_of(*args, &block); end
+
   # Add file names defined by glob patterns to the file list.  If an array
   # is given, add each element of the array.
   #
@@ -1223,7 +1253,16 @@ class Rake::FileList
   def include?(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
+  def including(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def index(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def index_by(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def index_with(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
   def inject(*args, &block); end
@@ -1269,6 +1308,9 @@ class Rake::FileList
   # source://rake//lib/rake/file_list.rb#77
   def length(*args, &block); end
 
+  # source://rake//lib/rake/file_list.rb#77
+  def many?(*args, &block); end
+
   # source://rake//lib/rake/file_list.rb#68
   def map(*args, &block); end
 
@@ -1282,6 +1324,9 @@ class Rake::FileList
   def max_by(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
+  def maximum(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def member?(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
@@ -1289,6 +1334,9 @@ class Rake::FileList
 
   # source://rake//lib/rake/file_list.rb#77
   def min_by(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def minimum(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
   def minmax(*args, &block); end
@@ -1322,7 +1370,13 @@ class Rake::FileList
   def permutation(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
+  def pick(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def place(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def pluck(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
   def pop(*args, &block); end
@@ -1383,6 +1437,12 @@ class Rake::FileList
   # source://rake//lib/rake/file_list.rb#77
   def sample(*args, &block); end
 
+  # source://rake//lib/rake/file_list.rb#77
+  def second(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def second_to_last(*args, &block); end
+
   # source://rake//lib/rake/file_list.rb#68
   def select(*args, &block); end
 
@@ -1418,6 +1478,9 @@ class Rake::FileList
 
   # source://rake//lib/rake/file_list.rb#77
   def slice_when(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def sole(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#68
   def sort(*args, &block); end
@@ -1457,6 +1520,15 @@ class Rake::FileList
   # source://rake//lib/rake/file_list.rb#77
   def tally(*args, &block); end
 
+  # source://rake//lib/rake/file_list.rb#77
+  def third(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def third_to_last(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def to(*args, &block); end
+
   # Return the internal array object.
   #
   # source://rake//lib/rake/file_list.rb#176
@@ -1468,6 +1540,12 @@ class Rake::FileList
   def to_ary; end
 
   # source://rake//lib/rake/file_list.rb#77
+  def to_formatted_s(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def to_fs(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def to_h(*args, &block); end
 
   # Convert a FileList to a string by joining all elements with a space.
@@ -1476,7 +1554,13 @@ class Rake::FileList
   def to_s; end
 
   # source://rake//lib/rake/file_list.rb#77
+  def to_sentence(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
   def to_set(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def to_xml(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
   def transpose(*args, &block); end
@@ -1495,6 +1579,9 @@ class Rake::FileList
 
   # source://rake//lib/rake/file_list.rb#68
   def values_at(*args, &block); end
+
+  # source://rake//lib/rake/file_list.rb#77
+  def without(*args, &block); end
 
   # source://rake//lib/rake/file_list.rb#77
   def zip(*args, &block); end

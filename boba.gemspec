@@ -3,11 +3,11 @@
 lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
-require 'boba/version'
+require "boba/version"
 
 Gem::Specification.new do |spec|
   spec.name        = "boba"
-  spec.version     = ::Boba::VERSION
+  spec.version     = Boba::VERSION
   spec.summary     = "Custom Tapioca compilers"
 
   spec.authors     = ["Angellist"]
@@ -18,15 +18,15 @@ Gem::Specification.new do |spec|
   spec.files       = Dir.glob("lib/**/*.rb") + ["README.md", "LICENSE"]
 
   spec.metadata = {
-    "bug_tracker_uri"       => "https://github.com/angellist/boba/issues",
-    "changelog_uri"         => "https://github.com/angellist/boba/blob/#{::Boba::VERSION}/History.md",
-    "homepage_uri"          => spec.homepage,
-    "source_code_uri"       => "https://github.com/angellist/boba/tree/#{::Boba::VERSION}",
+    "bug_tracker_uri" => "https://github.com/angellist/boba/issues",
+    "changelog_uri" => "https://github.com/angellist/boba/blob/#{Boba::VERSION}/History.md",
+    "homepage_uri" => spec.homepage,
+    "source_code_uri" => "https://github.com/angellist/boba/tree/#{Boba::VERSION}",
     "rubygems_mfa_required" => "true",
   }
 
-  spec.required_ruby_version = '>= 3.0.0'
+  spec.required_ruby_version = ">= 3.0.0"
 
   spec.add_dependency("sorbet-static-and-runtime", "~> 0.5")
-  spec.add_dependency('tapioca', '~> 0.16')
+  spec.add_dependency("tapioca", "~> 0.16.2")
 end
