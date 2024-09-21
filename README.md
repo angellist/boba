@@ -32,4 +32,3 @@ dsl:
 1. Contributing Section
 2. Specs & spec harness
 3. Docs & doc harness
-4. Rubocop

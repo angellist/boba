@@ -1,0 +1,28 @@
+inherit_gem:
+  rubocop-shopify: rubocop.yml
+
+require:
+ - rubocop-sorbet
+ - rubocop-rspec
+
+AllCops:
+  NewCops: disable
+  Exclude:
+  - "vendor/**/*"
+  Include:
+  - "sorbet/rbi/shims/**/*.rbi"
+
+Sorbet:
+  Enabled: true
+
+Sorbet/FalseSigil:
+  Enabled: false
+
+Sorbet/TrueSigil:
+  Enabled: true
+  Include:
+    - "**/*.rb"
+    - "**/*.rake"
+
+Sorbet/ConstantsFromStrings:
+  Enabled: false
