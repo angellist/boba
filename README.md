@@ -4,9 +4,7 @@
 
 Boba is a collection of compilers for Sorbet & Tapioca.
 
-Tapioca is very opinionated about what types of compilers or changes are accepted into the repository. See
-[here](https://github.com/Shopify/tapioca?tab=readme-ov-file#dsl-compilers). Boba come in all
-different shapes, sizes, consistencies, etc, and is much less opinionated about what is or is not accepted. Boba is a collection of optional compilers that you can pick and choose from.
+Tapioca is very opinionated about what types of compilers or changes are accepted into the repository. See [here](https://github.com/Shopify/tapioca?tab=readme-ov-file#dsl-compilers). Boba come in all different shapes, sizes, consistencies, etc, and is much less opinionated about what is or is not accepted. Boba is a collection of optional compilers that you can pick and choose from.
 
 ### Available Compilers
 
@@ -21,8 +19,7 @@ group :development do
 end
 ```
 
-We recommend you also use the `only` configuration option in your Tapioca config (typically `sorbet/tapioca/config.yml`)
-to specify only the Tapioca compilers you wish to use.
+We recommend you also use the `only` configuration option in your Tapioca config (typically `sorbet/tapioca/config.yml`) to specify only the Tapioca compilers you wish to use.
 ```yml
 dsl:
   only:
@@ -30,6 +27,36 @@ dsl:
     Compiler2
 ```
 This makes it easy to selectively enable only the compilers you want to use in your project.
+
+### Typing Relations
+
+If you'd like to use relation types in your sigs that are less broad than `ActiveRecord::Relation`, such as those specific to a model, Boba provides a railtie to initialize these constants for each class. Move Boba in your gemfile out of the development group:
+
+```ruby
+  gem 'boba'
+```
+
+The railtie will automatically define the `PrivateRelation` constant on each model that inherits from `ActiveRecord::Base`. It can then be used in typing, like thus:
+```ruby
+class Post < ::ActiveRecord::Base
+  scope :recent -> { where('created_at > ?', Date.current) }
+
+  belongs_to :author
+  has_many :comments
+end
+
+sig { params(author: Author).returns(Post::PrivateRelation) }
+def posts_from_author(author); end
+```
+
+and the following should not raise an error:
+
+```ruby
+sig { params(author: Author).returns(Post::PrivateRelation) }
+def recent_posts_from_author(author)
+  posts_from_author(author).recent
+end
+```
 
 ## Contributing
 
@@ -39,9 +66,7 @@ Bugs and feature requests are welcome and should be [filed as issues on github](
 
 Compilers for any commonly used Ruby or Rails gems are welcome to be contributed. See the [Writing New Compilers section of the Tapioca docs](https://github.com/Shopify/tapioca?tab=readme-ov-file#writing-custom-dsl-compilers) for an introduction to writing compilers.
 
-Since Boba is intended to be used alongside Tapioca and the compilers provided by Boba are intended to be fully optional,
-we will not accept compilers which overwrite the Tapioca default compilers. See the [Tapioca Manual](https://github.com/Shopify/tapioca/blob/main/manual/compilers.md) for a list of these
-compilers. Instead, compilers which extend or overwrite the default Tapioca compilers should be given unique names.
+Since Boba is intended to be used alongside Tapioca and the compilers provided by Boba are intended to be fully optional, we will not accept compilers which overwrite the Tapioca default compilers. See the [Tapioca Manual](https://github.com/Shopify/tapioca/blob/main/manual/compilers.md) for a list of these compilers. Instead, compilers which extend or overwrite the default Tapioca compilers should be given unique names.
 
 Contributed compilers should be well documented, and named after and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
 

@@ -16,5 +16,6 @@ docs:
 
 
 # release
+#   make clean && make build
 # 	gem push boba-[version].gem
 #		gh release create [version]

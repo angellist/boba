@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.4
+
+- Add railtie to make `PrivateRelation` type available at runtime
+
 ## 0.0.3
 
 - Add extended versions of AR default column and association compilers, general cleanup
