@@ -14,8 +14,7 @@ clean:
 docs:
 	bundle exec rake generate_dsl_documentation
 
-
 # release
-#   make clean && make build
+#   make clean && make docs && make build
 # 	gem push boba-[version].gem
 #		gh release create [version]

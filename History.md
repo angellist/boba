@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.5
+
+- Add extended state machines compiler to fix typing on state machines class methods
+
 ## 0.0.4
 
 - Add railtie to make `PrivateRelation` type available at runtime
