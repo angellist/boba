@@ -1,5 +1,11 @@
 # Boba History
 
+## 0.0.6
+
+- Fix a bug inheriting from default Tapioca compilers if corresponding Tapioca default compilers don't exist because
+  the project does not actually use the corresponding DSL or gem.
+  - Fixes `StateMachinesExtended`, `ActiveRecordAssocationsPersisted`, `ActiveRecordColumnsPersisted`
+
 ## 0.0.5
 
 - Add extended state machines compiler to fix typing on state machines class methods
@@ -22,4 +28,4 @@
 
 ## 0.0.0
 
-Initial Commit
+- Initial Commit

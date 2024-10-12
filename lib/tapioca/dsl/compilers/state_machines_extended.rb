@@ -1,9 +1,9 @@
 # typed: ignore
 # frozen_string_literal: true
 
-return unless defined?(Tapioca)
-
 require "tapioca/dsl/compilers/state_machines"
+
+return unless defined?(Tapioca::Dsl::Compilers::StateMachines)
 
 module Tapioca
   module Dsl

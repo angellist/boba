@@ -1,7 +1,9 @@
 # typed: ignore
 # frozen_string_literal: true
 
-return unless defined?(ActiveRecord::Base)
+require "tapioca/dsl/compilers/active_record_columns"
+
+return unless defined?(Tapioca::Dsl::Compilers::ActiveRecordColumns)
 
 require "tapioca/dsl/helpers/active_record_column_type_helper"
 

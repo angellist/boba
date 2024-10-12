@@ -1,7 +1,9 @@
 # typed: ignore
 # frozen_string_literal: true
 
-return unless defined?(ActiveRecord::Base)
+require "tapioca/dsl/compilers/active_record_associations"
+
+return unless defined?(Tapioca::Dsl::Compilers::ActiveRecordAssociations)
 
 module Tapioca
   module Dsl

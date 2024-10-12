@@ -8,7 +8,7 @@ build:
 
 .PHONY: clean
 clean:
-	rm -r boba-*.gem
+	rm -fr boba-*.gem
 
 .PHONY: docs
 docs:
