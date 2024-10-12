@@ -150,7 +150,7 @@ module Tapioca
 
         sig { params(column_name: String).returns([String, String]) }
         def column_type_for(column_name)
-          return ["T.untyped", "T.untyped"] if @column_type_option.untyped?
+          return ["T.untyped", "T.untyped"] if column_type_option.untyped?
 
           nilable_column = !has_non_null_database_constraint?(column_name) &&
             !has_unconditional_presence_validator?(column_name)
@@ -169,7 +169,7 @@ module Tapioca
               getter_type
             end
 
-          if @column_type_option.persisted? && (virtual_attribute?(column_name) || !nilable_column)
+          if column_type_option.persisted? && (virtual_attribute?(column_name) || !nilable_column)
             [getter_type, setter_type]
           else
             getter_type = as_nilable_type(getter_type) unless column_type_helper.send(

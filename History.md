@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.7
+
+- Fix bug in `ActiveRecordColumnsPersisted` where `@column_type_option` can be `nil`.
+
 ## 0.0.6
 
 - Fix a bug inheriting from default Tapioca compilers if corresponding Tapioca default compilers don't exist because
