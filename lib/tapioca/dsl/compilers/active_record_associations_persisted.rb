@@ -5,6 +5,8 @@ require "tapioca/dsl/compilers/active_record_associations"
 
 return unless defined?(Tapioca::Dsl::Compilers::ActiveRecordAssociations)
 
+require "boba/active_record/reflection_service"
+
 module Tapioca
   module Dsl
     module Compilers
@@ -188,37 +190,12 @@ module Tapioca
           association_class = type_for(reflection)
           return as_nilable_type(association_class) unless association_type_option.persisted?
 
-          if has_one_and_required_reflection?(reflection) || belongs_to_and_non_optional_reflection?(reflection)
+          if Boba::ActiveRecord::ReflectionService.has_one_and_required_reflection?(reflection)
+            association_class
+          elsif Boba::ActiveRecord::ReflectionService.belongs_to_and_non_optional_reflection?(reflection)
             association_class
           else
             as_nilable_type(association_class)
-          end
-        end
-
-        # Note - one can do more here. If the association's attribute has an unconditional presence validation, it
-        # should also be considered required.
-        sig { params(reflection: ReflectionType).returns(T::Boolean) }
-        def has_one_and_required_reflection?(reflection)
-          reflection.has_one? && !!reflection.options[:required]
-        end
-
-        # Note - one can do more here. If the FK defining the belongs_to association is non-nullable at the DB level, or
-        # if the association's attribute has an unconditional presence validation, it should also be considered
-        # non-optional.
-        sig { params(reflection: ReflectionType).returns(T::Boolean) }
-        def belongs_to_and_non_optional_reflection?(reflection)
-          return false unless reflection.belongs_to?
-
-          optional = if reflection.options.key?(:required)
-            !reflection.options[:required]
-          else
-            reflection.options[:optional]
-          end
-
-          if optional.nil?
-            !!reflection.active_record.belongs_to_required_by_default
-          else
-            !optional
           end
         end
       end

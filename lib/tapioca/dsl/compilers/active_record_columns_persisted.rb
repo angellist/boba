@@ -5,6 +5,7 @@ require "tapioca/dsl/compilers/active_record_columns"
 
 return unless defined?(Tapioca::Dsl::Compilers::ActiveRecordColumns)
 
+require "boba/active_record/attribute_service"
 require "tapioca/dsl/helpers/active_record_column_type_helper"
 
 module Tapioca
@@ -152,8 +153,14 @@ module Tapioca
         def column_type_for(column_name)
           return ["T.untyped", "T.untyped"] if column_type_option.untyped?
 
-          nilable_column = !has_non_null_database_constraint?(column_name) &&
-            !has_unconditional_presence_validator?(column_name)
+          nilable_column = !Boba::ActiveRecord::AttributeService.has_non_null_database_constraint?(
+            @constant,
+            column_name,
+          )
+          nilable_column &&= !Boba::ActiveRecord::AttributeService.has_unconditional_presence_validator?(
+            @constant,
+            column_name,
+          )
 
           column_type = @constant.attribute_types[column_name]
           getter_type = column_type_helper.send(
@@ -169,7 +176,8 @@ module Tapioca
               getter_type
             end
 
-          if column_type_option.persisted? && (virtual_attribute?(column_name) || !nilable_column)
+          virtual_attribute = Boba::ActiveRecord::AttributeService.virtual_attribute?(@constant, column_name)
+          if column_type_option.persisted? && (virtual_attribute || !nilable_column)
             [getter_type, setter_type]
           else
             getter_type = as_nilable_type(getter_type) unless column_type_helper.send(
@@ -177,30 +185,6 @@ module Tapioca
               column_type,
             )
             [getter_type, as_nilable_type(setter_type)]
-          end
-        end
-
-        sig { params(column_name: String).returns(T::Boolean) }
-        def virtual_attribute?(column_name)
-          @constant.columns_hash[column_name].nil?
-        end
-
-        sig { params(column_name: String).returns(T::Boolean) }
-        def has_non_null_database_constraint?(column_name)
-          column = @constant.columns_hash[column_name]
-          return false if column.nil?
-
-          !column.null
-        end
-
-        sig { params(column_name: String).returns(T::Boolean) }
-        def has_unconditional_presence_validator?(column_name)
-          return false unless @constant.respond_to?(:validators_on)
-
-          @constant.validators_on(column_name).any? do |validator|
-            next false unless validator.is_a?(ActiveRecord::Validations::PresenceValidator)
-
-            !validator.options.key?(:if) && !validator.options.key?(:unless) && !validator.options.key?(:on)
           end
         end
 

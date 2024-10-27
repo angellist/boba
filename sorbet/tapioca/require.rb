@@ -6,4 +6,5 @@
 require "rails/all"
 require "rails/generators"
 require "rails/generators/app_base"
+require "tapioca/dsl/compilers"
 require "zeitwerk"

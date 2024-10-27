@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.8
+
+- `ActiveRecordAssocationsPersisted` generate non-nilable types when there's an unconditional validation on the association, an unconditional validation on the foreign key for the association, or when there's a non-`null` db constraint on the foreign key.
+
 ## 0.0.7
 
 - Fix bug in `ActiveRecordColumnsPersisted` where `@column_type_option` can be `nil`.
