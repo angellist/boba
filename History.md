@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.10
+
+- Handle abstract classes in `StateMachinesExtended` better
+
 ## 0.0.9
 
 - Added `AttrJson` compiler

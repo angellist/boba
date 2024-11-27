@@ -19,6 +19,8 @@ module Tapioca
         ].freeze
 
         def decorate
+          # This should really get checked at the gather_constants level but here we are...
+          return if T::AbstractUtils.abstract_module?(constant)
           return if constant.state_machines.empty?
 
           # This is a hack to make sure the instance methods are defined on the constant. Somehow the constant is being
