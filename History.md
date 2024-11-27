@@ -1,5 +1,12 @@
 # Boba History
 
+## 0.0.9
+
+- Added `AttrJson` compiler
+- Added `Paperclip` compiler
+- Fixed a bug in `StateMachinesExtended` compiler where isntance methods were undefined.
+- Bump tapioca dependency to latest (16.4)
+
 ## 0.0.8
 
 - `ActiveRecordAssocationsPersisted` generate non-nilable types when there's an unconditional validation on the association, an unconditional validation on the foreign key for the association, or when there's a non-`null` db constraint on the foreign key.

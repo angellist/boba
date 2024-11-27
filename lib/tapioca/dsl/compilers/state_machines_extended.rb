@@ -21,6 +21,11 @@ module Tapioca
         def decorate
           return if constant.state_machines.empty?
 
+          # This is a hack to make sure the instance methods are defined on the constant. Somehow the constant is being
+          # loaded but the actual `state_machine` call is not being executed, so the instance methods don't exist yet.
+          # Instantiating an empty class fixes it.
+          constant.try(:new)
+
           super()
 
           root.create_path(T.unsafe(constant)) do |klass|
