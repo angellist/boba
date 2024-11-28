@@ -81,7 +81,3 @@ Since Boba is intended to be used alongside Tapioca and the compilers provided b
 Contributed compilers should be well documented, and named after and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
 
 Compilers for Gems, DSLs, or modules that are not publicly available will not be accepted.
-
-## Todo
-
-1. Specs & spec harness
