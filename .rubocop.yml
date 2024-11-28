@@ -14,6 +14,18 @@ AllCops:
   Include:
   - "sorbet/rbi/shims/**/*.rbi"
 
+RSpec/BeforeAfterAll:
+  Enabled: false
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/LeadingSubject:
+  Enabled: false
+
+RSpec/NoExpectationExample:
+  Enabled: false
+
 Sorbet:
   Enabled: true
 
