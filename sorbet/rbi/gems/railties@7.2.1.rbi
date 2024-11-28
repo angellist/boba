@@ -1714,7 +1714,7 @@ end
 class Rails::Command::Base < ::Thor
   include ::Rails::Command::Actions
 
-  # source://thor/1.3.1/lib/thor/base.rb#155
+  # source://thor/1.3.2/lib/thor/base.rb#155
   def current_subcommand; end
 
   # source://railties//lib/rails/command/base.rb#172
@@ -3494,22 +3494,22 @@ class Rails::Generators::AppBase < ::Rails::Generators::Base
   # source://railties//lib/rails/generators/app_base.rb#137
   def initialize(positional_argv, option_argv, *_arg2); end
 
-  # source://thor/1.3.1/lib/thor/base.rb#163
+  # source://thor/1.3.2/lib/thor/base.rb#163
   def app_path; end
 
-  # source://thor/1.3.1/lib/thor/base.rb#163
+  # source://thor/1.3.2/lib/thor/base.rb#163
   def app_path=(_arg0); end
 
   # Returns the value of attribute rails_template.
   #
-  # source://thor/1.3.1/lib/thor/base.rb#163
+  # source://thor/1.3.2/lib/thor/base.rb#163
   def rails_template; end
 
   # Sets the attribute rails_template
   #
   # @param value the value to set the attribute rails_template to.
   #
-  # source://thor/1.3.1/lib/thor/base.rb#163
+  # source://thor/1.3.2/lib/thor/base.rb#163
   def rails_template=(_arg0); end
 
   # source://railties//lib/rails/generators/base.rb#401
@@ -4666,16 +4666,16 @@ class Rails::Generators::NamedBase < ::Rails::Generators::Base
 
   # Returns the value of attribute file_name.
   #
-  # source://thor/1.3.1/lib/thor/base.rb#155
+  # source://thor/1.3.2/lib/thor/base.rb#155
   def file_name; end
 
   # source://railties//lib/rails/generators/named_base.rb#29
   def js_template(source, destination); end
 
-  # source://thor/1.3.1/lib/thor/base.rb#163
+  # source://thor/1.3.2/lib/thor/base.rb#163
   def name; end
 
-  # source://thor/1.3.1/lib/thor/base.rb#163
+  # source://thor/1.3.2/lib/thor/base.rb#163
   def name=(_arg0); end
 
   # source://railties//lib/rails/generators/named_base.rb#23
