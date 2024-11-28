@@ -78,6 +78,7 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+    ansi (1.5.0)
     ast (2.4.2)
     attr_json (2.5.0)
       activerecord (>= 6.0.0, < 8.1)
@@ -120,6 +121,13 @@ GEM
       rake
     mini_mime (1.1.5)
     minitest (5.25.1)
+    minitest-hooks (1.5.2)
+      minitest (> 5.3)
+    minitest-reporters (1.7.1)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
     monetize (1.13.0)
       money (~> 6.12)
     money (6.19.0)
@@ -274,6 +282,9 @@ PLATFORMS
 DEPENDENCIES
   attr_json
   boba!
+  minitest
+  minitest-hooks
+  minitest-reporters
   money-rails
   paperclip
   rails (~> 7.2)

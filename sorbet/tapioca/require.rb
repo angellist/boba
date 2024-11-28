@@ -3,6 +3,7 @@
 
 # Add your extra requires here (`bin/tapioca require` can be used to bootstrap this list)
 
+require "minitest/spec"
 require "money-rails/active_record/monetizable"
 require "rails/all"
 require "rails/generators"

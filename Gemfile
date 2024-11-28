@@ -6,6 +6,10 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
+  gem "minitest"
+  gem "minitest-hooks"
+  gem "minitest-reporters"
+
   gem "attr_json"
   gem "money-rails"
   gem "paperclip"
