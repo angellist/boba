@@ -205,6 +205,47 @@ module MoneyRails
   extend ::MoneyRails::Configuration
 end
 
+# source://money-rails//lib/money-rails/active_record/monetizable.rb#6
+module MoneyRails::ActiveRecord; end
+
+# source://money-rails//lib/money-rails/active_record/monetizable.rb#7
+module MoneyRails::ActiveRecord::Monetizable
+  extend ::ActiveSupport::Concern
+
+  mixes_in_class_methods ::MoneyRails::ActiveRecord::Monetizable::ClassMethods
+
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#277
+  def currency_for(name, instance_currency_name, field_currency_name); end
+
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#181
+  def read_monetized(name, subunit_name, options = T.unsafe(nil), *args); end
+
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#221
+  def write_monetized(name, subunit_name, value, validation_enabled, instance_currency_name, options); end
+end
+
+# source://money-rails//lib/money-rails/active_record/monetizable.rb#11
+module MoneyRails::ActiveRecord::Monetizable::ClassMethods
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#22
+  def monetize(*fields); end
+
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#12
+  def monetized_attributes; end
+
+  # @raise [ArgumentError]
+  #
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#154
+  def register_currency(currency_name); end
+
+  private
+
+  # source://money-rails//lib/money-rails/active_record/monetizable.rb#170
+  def track_monetized_attribute(name, value); end
+end
+
+# source://money-rails//lib/money-rails/active_record/monetizable.rb#8
+class MoneyRails::ActiveRecord::Monetizable::ReadOnlyCurrencyException < ::MoneyRails::Error; end
+
 # MoneyRails configuration module.
 # This is extended by MoneyRails to provide configuration settings.
 #

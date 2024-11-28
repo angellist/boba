@@ -1326,6 +1326,60 @@ module Tapioca::Dsl::Compilers; end
 # source://tapioca//lib/tapioca/dsl/compilers.rb#13
 Tapioca::Dsl::Compilers::NAMESPACES = T.let(T.unsafe(nil), Array)
 
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#6
+module Tapioca::Dsl::Helpers; end
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#7
+module Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper; end
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#15
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AssociationMethodsModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#27
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AssociationRelationClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#28
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AssociationRelationGroupChainClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#21
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AssociationRelationMethodsModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#29
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AssociationRelationWhereChainClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#30
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AssociationsCollectionProxyClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#14
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::AttributeMethodsModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#22
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::CommonRelationMethodsModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#16
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::DelegatedTypesModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#10
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::ReflectionType = T.type_alias { T.any(::ActiveRecord::Reflection::AssociationReflection, ::ActiveRecord::Reflection::ThroughReflection) }
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#24
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::RelationClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#25
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::RelationGroupChainClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#20
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::RelationMethodsModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#26
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::RelationWhereChainClassName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#17
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::SecureTokensModuleName = T.let(T.unsafe(nil), String)
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#18
+Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper::StoredAttributesModuleName = T.let(T.unsafe(nil), String)
+
 # source://tapioca//lib/tapioca/dsl/pipeline.rb#6
 class Tapioca::Dsl::Pipeline
   # source://tapioca//lib/tapioca/dsl/pipeline.rb#40
