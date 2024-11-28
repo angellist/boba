@@ -11,4 +11,5 @@ group :development do
   gem "rubocop-shopify"
   gem "rubocop-sorbet"
   gem "rails", "~> 7.2"
+  gem "state_machines"
 end

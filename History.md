@@ -1,5 +1,10 @@
 # Boba History
 
+## 0.0.11
+
+- Dupe Tapioca `StateMachines` compiler and fix bug with abstract classes and preloading instance methods.
+- Fix sorting bug in `Paperclip` compiler.
+
 ## 0.0.10
 
 - Handle abstract classes in `StateMachinesExtended` better

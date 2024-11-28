@@ -10,5 +10,4 @@ This list is an evergeen list of currently available compilers.
 * [AttrJson](compiler_attrjson.md)
 * [MoneyRails](compiler_moneyrails.md)
 * [Paperclip](compiler_paperclip.md)
-* [StateMachinesExtended](compiler_statemachinesextended.md)
 <!-- END_COMPILER_LIST -->

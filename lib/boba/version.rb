@@ -2,5 +2,5 @@
 # frozen_string_literal: true
 
 module Boba
-  VERSION = "0.0.9"
+  VERSION = "0.0.11"
 end

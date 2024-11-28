@@ -49,7 +49,9 @@ module Tapioca
 
         sig { override.void }
         def decorate
-          attachments = ::Paperclip::AttachmentRegistry.names_for(constant)
+          # this is a bit awkward, but load order determines the return order here, so sort to ensure consistency across
+          # all environments.
+          attachments = ::Paperclip::AttachmentRegistry.names_for(constant).sort
           return if attachments.empty?
 
           root.create_path(constant) do |klass|
