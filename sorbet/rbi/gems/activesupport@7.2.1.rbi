@@ -7,7 +7,7 @@
 
 # :include: ../README.rdoc
 #
-# source://activesupport//lib/active_support/delegation.rb#5
+# source://activesupport//lib/active_support/deep_mergeable.rb#3
 module ActiveSupport
   extend ::ActiveSupport::LazyLoadHooks
   extend ::ActiveSupport::Autoload
@@ -14712,7 +14712,7 @@ end
 # source://activesupport//lib/active_support/xml_mini/rexml.rb#11
 ActiveSupport::XmlMini_REXML::CONTENT_KEY = T.let(T.unsafe(nil), String)
 
-# source://activesupport//lib/active_support/core_ext/array/extract_options.rb#14
+# source://activesupport//lib/active_support/core_ext/object/blank.rb#95
 class Array
   include ::Enumerable
 
@@ -16786,7 +16786,7 @@ ERB::Util::TAG_NAME_REPLACEMENT_CHAR = T.let(T.unsafe(nil), String)
 # source://activesupport//lib/active_support/core_ext/erb/util.rb#44
 ERB::Util::TAG_NAME_START_CODEPOINTS = T.let(T.unsafe(nil), String)
 
-# source://activesupport//lib/active_support/core_ext/object/json.rb#147
+# source://activesupport//lib/active_support/core_ext/enumerable.rb#18
 module Enumerable
   include ::ActiveSupport::ToJsonWithActiveSupportEncoder
   extend ::ActiveSupport::EnumerableCoreExt::Constants
@@ -17816,7 +17816,7 @@ end
 # Note that it can also be scoped per-fiber if +Rails.application.config.active_support.isolation_level+
 # is set to +:fiber+.
 #
-# source://activesupport//lib/active_support/core_ext/module/delegation.rb#3
+# source://activesupport//lib/active_support/core_ext/module/attribute_accessors.rb#8
 class Module
   include ::Module::Concerning
 
@@ -19579,7 +19579,7 @@ class Process::Status
   def as_json(options = T.unsafe(nil)); end
 end
 
-# source://activesupport//lib/active_support/core_ext/object/json.rb#159
+# source://activesupport//lib/active_support/core_ext/enumerable.rb#233
 class Range
   include ::ActiveSupport::RangeWithFormat
   include ::ActiveSupport::CompareWithRange
@@ -19686,7 +19686,7 @@ end
 #
 #   'ScaleScore'.tableize # => "scale_scores"
 #
-# source://activesupport//lib/active_support/core_ext/string/multibyte.rb#5
+# source://activesupport//lib/active_support/core_ext/object/blank.rb#135
 class String
   include ::Comparable
 

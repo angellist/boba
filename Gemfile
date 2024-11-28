@@ -6,10 +6,12 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
+  gem "attr_json"
   gem "money-rails"
+  gem "paperclip"
+  gem "rails", "~> 7.2"
   gem "rubocop-rspec"
   gem "rubocop-shopify"
   gem "rubocop-sorbet"
-  gem "rails", "~> 7.2"
   gem "state_machines"
 end
