@@ -2452,6 +2452,191 @@ Tapioca::Gemfile::GemSpec::IGNORED_GEMS = T.let(T.unsafe(nil), Array)
 # source://tapioca//lib/tapioca/gemfile.rb#10
 Tapioca::Gemfile::Spec = T.type_alias { T.any(::Bundler::StubSpecification, ::Gem::Specification) }
 
+# source://tapioca//lib/tapioca/helpers/test/content.rb#5
+module Tapioca::Helpers; end
+
+# source://tapioca//lib/tapioca/helpers/test/content.rb#6
+module Tapioca::Helpers::Test; end
+
+# source://tapioca//lib/tapioca/helpers/test/content.rb#7
+module Tapioca::Helpers::Test::Content
+  requires_ancestor { Kernel }
+
+  # @raise [ArgumentError]
+  #
+  # source://tapioca//lib/tapioca/helpers/test/content.rb#39
+  sig { params(name: ::String, content: ::String).returns(::String) }
+  def add_content_file(name, content); end
+
+  # source://tapioca//lib/tapioca/helpers/test/content.rb#32
+  sig { params(name: ::String, content: ::String, require_file: T::Boolean).returns(::String) }
+  def add_ruby_file(name, content, require_file: T.unsafe(nil)); end
+
+  # source://tapioca//lib/tapioca/helpers/test/content.rb#27
+  sig { void }
+  def remove_tmp_path; end
+
+  # source://tapioca//lib/tapioca/helpers/test/content.rb#14
+  sig { void }
+  def teardown; end
+
+  # source://tapioca//lib/tapioca/helpers/test/content.rb#20
+  sig { params(args: ::String).returns(::String) }
+  def tmp_path(*args); end
+end
+
+# source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#13
+module Tapioca::Helpers::Test::DslCompiler
+  include ::Tapioca::Helpers::Test::Isolation::Forking
+  include ::Tapioca::Helpers::Test::Isolation
+  include ::Tapioca::Helpers::Test::Content
+  include ::Tapioca::Helpers::Test::Template
+
+  requires_ancestor { Kernel }
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#29
+  sig { params(compiler_classes: T.class_of(Tapioca::Dsl::Compiler)).void }
+  def activate_other_dsl_compilers(*compiler_classes); end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#54
+  sig { returns(::Tapioca::Helpers::Test::DslCompiler::CompilerContext) }
+  def context; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#44
+  sig { returns(T::Array[::String]) }
+  def gathered_constants; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#49
+  sig { returns(T::Array[::String]) }
+  def generated_errors; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#39
+  sig do
+    params(
+      constant_name: T.any(::String, ::Symbol),
+      compiler_options: T::Hash[::Symbol, T.untyped]
+    ).returns(::String)
+  end
+  def rbi_for(constant_name, compiler_options: T.unsafe(nil)); end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#24
+  sig { params(compiler_class: T.class_of(Tapioca::Dsl::Compiler)).void }
+  def use_dsl_compiler(compiler_class); end
+end
+
+# source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#60
+class Tapioca::Helpers::Test::DslCompiler::CompilerContext
+  include ::Tapioca::SorbetHelper
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#72
+  sig { params(compiler_class: T.class_of(Tapioca::Dsl::Compiler)).void }
+  def initialize(compiler_class); end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#80
+  sig { params(compiler_classes: T::Array[T.class_of(Tapioca::Dsl::Compiler)]).void }
+  def activate_other_dsl_compilers(compiler_classes); end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#85
+  sig { returns(T::Array[T.class_of(Tapioca::Dsl::Compiler)]) }
+  def activated_compiler_classes; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#66
+  sig { returns(T.class_of(Tapioca::Dsl::Compiler)) }
+  def compiler_class; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#135
+  sig { returns(T::Array[::String]) }
+  def errors; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#90
+  sig { returns(T::Array[::String]) }
+  def gathered_constants; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#69
+  sig { returns(T::Array[T.class_of(Tapioca::Dsl::Compiler)]) }
+  def other_compiler_classes; end
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#100
+  sig do
+    params(
+      constant_name: T.any(::String, ::Symbol),
+      compiler_options: T::Hash[::Symbol, T.untyped]
+    ).returns(::String)
+  end
+  def rbi_for(constant_name, compiler_options: T.unsafe(nil)); end
+
+  private
+
+  # source://tapioca//lib/tapioca/helpers/test/dsl_compiler.rb#142
+  sig { returns(::Tapioca::Dsl::Pipeline) }
+  def pipeline; end
+end
+
+# Copied from ActiveSupport::Testing::Isolation since we cannot require
+# constants from ActiveSupport without polluting the global namespace.
+#
+# source://tapioca//lib/tapioca/helpers/test/isolation.rb#9
+module Tapioca::Helpers::Test::Isolation
+  include ::Tapioca::Helpers::Test::Isolation::Forking
+
+  # source://tapioca//lib/tapioca/helpers/test/isolation.rb#22
+  def run; end
+
+  class << self
+    # source://tapioca//lib/tapioca/helpers/test/isolation.rb#17
+    sig { returns(T::Boolean) }
+    def forking_env?; end
+  end
+end
+
+# source://tapioca//lib/tapioca/helpers/test/isolation.rb#30
+module Tapioca::Helpers::Test::Isolation::Forking
+  requires_ancestor { Kernel }
+
+  # source://tapioca//lib/tapioca/helpers/test/isolation.rb#37
+  sig { params(_blk: T.untyped).returns(::String) }
+  def run_in_isolation(&_blk); end
+end
+
+# source://tapioca//lib/tapioca/helpers/test/isolation.rb#75
+module Tapioca::Helpers::Test::Isolation::Subprocess
+  requires_ancestor { Kernel }
+
+  # Crazy H4X to get this working in windows / jruby with
+  # no forking.
+  #
+  # source://tapioca//lib/tapioca/helpers/test/isolation.rb#86
+  sig { params(_blk: T.untyped).returns(::String) }
+  def run_in_isolation(&_blk); end
+end
+
+# source://tapioca//lib/tapioca/helpers/test/isolation.rb#81
+Tapioca::Helpers::Test::Isolation::Subprocess::ORIG_ARGV = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/helpers/test/template.rb#7
+module Tapioca::Helpers::Test::Template
+  requires_ancestor { Kernel }
+
+  # source://tapioca//lib/tapioca/helpers/test/template.rb#39
+  sig { params(str: ::String, indent: ::Integer).returns(::String) }
+  def indented(str, indent); end
+
+  # source://tapioca//lib/tapioca/helpers/test/template.rb#23
+  sig { params(selector: ::String).returns(T::Boolean) }
+  def rails_version(selector); end
+
+  # source://tapioca//lib/tapioca/helpers/test/template.rb#18
+  sig { params(selector: ::String).returns(T::Boolean) }
+  def ruby_version(selector); end
+
+  # source://tapioca//lib/tapioca/helpers/test/template.rb#28
+  sig { params(src: ::String, trim_mode: ::String).returns(::String) }
+  def template(src, trim_mode: T.unsafe(nil)); end
+end
+
+# source://tapioca//lib/tapioca/helpers/test/template.rb#13
+Tapioca::Helpers::Test::Template::ERB_SUPPORTS_KVARGS = T.let(T.unsafe(nil), Array)
+
 # source://tapioca//lib/tapioca.rb#33
 Tapioca::LIB_ROOT_DIR = T.let(T.unsafe(nil), String)
 
