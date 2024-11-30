@@ -111,7 +111,7 @@ module Tapioca
       #   end
       # end
       # ~~~
-      class StateMachines < Compiler
+      class StateMachinesExtended < Compiler
         extend T::Sig
 
         ACTIVE_RECORD_RELATION_MODULE_NAMES = [

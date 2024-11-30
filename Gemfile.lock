@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    boba (0.0.11)
+    boba (0.0.12)
       sorbet-static-and-runtime (~> 0.5)
-      tapioca (~> 0.16.4)
+      tapioca (<= 0.16.5)
 
 GEM
   remote: https://rubygems.org/

@@ -13,6 +13,8 @@ class Boba::RelationsRailtie < Rails::Railtie
           super(child)
 
           child.const_set("PrivateRelation", Object)
+          child.const_set("PrivateAssociationRelation", Object)
+          child.const_set("PrivateCollectionProxy", Object)
         end
       end
 

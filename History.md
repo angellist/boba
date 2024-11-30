@@ -1,5 +1,11 @@
 # Boba History
 
+## 0.0.12
+
+- Rename `StateMachines` compiler back to `StateMachinesExtended` to avoid load order nonsense with Tapioca.
+- Add all base relation types used to the AR railtie so they're all defined at runtime.
+- Make Tapioca version more conservative, since we're overriding compiler internals and incremental bumps could break them.
+
 ## 0.0.11
 
 - Dupe Tapioca `StateMachines` compiler and fix bug with abstract classes and preloading instance methods.

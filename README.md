@@ -1,6 +1,6 @@
 # Boba
 
-> :warning: This gem is in pre-release and is not ready for use.
+> :warning: This software is currently under active development. It should not be considered stable until 1.0.0.
 
 Boba is a collection of compilers for Sorbet & Tapioca.
 
