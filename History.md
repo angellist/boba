@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.13
+
+- Add `RelationType` alias to railtie as well as `ActiveRecordRelationTypes` compiler to generate it into RBI files. Fix railtie constants.
+
 ## 0.0.12
 
 - Rename `StateMachines` compiler back to `StateMachinesExtended` to avoid load order nonsense with Tapioca.

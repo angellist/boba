@@ -1,7 +1,7 @@
-# frozen_string_literal: true
 # typed: true
+# frozen_string_literal: true
 
-return if !defined?(AttrJson::Record)
+return unless defined?(AttrJson::Record)
 
 module Tapioca
   module Dsl
@@ -39,7 +39,7 @@ module Tapioca
         # Class methods module is already defined in the gem rbi, so just reference it here.
         ClassMethodsModuleName = "AttrJson::Record::ClassMethods"
         InstanceMethodModuleName = "AttrJsonGeneratedMethods"
-        ConstantType = type_member {{ fixed: T.any(T.class_of(::AttrJson::Record), T.class_of(::AttrJson::Model)) }}
+        ConstantType = type_member { { fixed: T.any(T.class_of(::AttrJson::Record), T.class_of(::AttrJson::Model)) } }
 
         class << self
           extend T::Sig
@@ -65,7 +65,7 @@ module Tapioca
         private
 
         def decorate_attributes(rbi_scope)
-          T.unsafe(constant).attr_json_registry
+          constant.attr_json_registry
             .definitions
             .sort_by(&:name) # this is annoying, but we need to sort to force consistent ordering or the rbi checks fail
             .each do |definition|
@@ -122,7 +122,7 @@ module Tapioca
 
           sorbet_type = "::#{sorbet_type}"
           sorbet_type = "T::Array[#{sorbet_type}]" if array
-          sorbet_type = "T.nilable(#{sorbet_type})" if nilable # todo: improve this
+          sorbet_type = "T.nilable(#{sorbet_type})" if nilable # TODO: improve this
 
           sorbet_type
         end

@@ -36,7 +36,8 @@ If you'd like to use relation types in your sigs that are less broad than `Activ
   gem 'boba'
 ```
 
-The railtie will automatically define the `PrivateRelation` constant on each model that inherits from `ActiveRecord::Base`. It can then be used in typing, like thus:
+The railtie will automatically define the `PrivateRelation`, `PrivateAssociationRelation`, and `PrivateCollectionProxy` constants on each model that inherits from `ActiveRecord::Base`. These are defined as their corresponding private `ActiveRecord` classes, so runtime type checking works as expected. They can then be used in typing, like so:
+
 ```ruby
 class Post < ::ActiveRecord::Base
   scope :recent -> { where('created_at > ?', Date.current) }
@@ -49,10 +50,19 @@ sig { params(author: Author).returns(Post::PrivateRelation) }
 def posts_from_author(author); end
 ```
 
-and the following should not raise an error:
+and the following should not raise a Sorbet error:
 
 ```ruby
 sig { params(author: Author).returns(Post::PrivateRelation) }
+def recent_posts_from_author(author)
+  posts_from_author(author).recent
+end
+```
+
+Boba also defines a type alias `RelationType` on each such class, which is defined as the union of the three relation types. This is useful because the relation types are often used interchangeably and so you may expect to return or pass any of the three classes as an argument. To use this, you will also need to use the `ActiveRecordRelationTypes` compiler to generate the type alias in the signatures as well (or define them manually in shims).
+
+```ruby
+sig { params(author: Author).returns(Post::RelationType) }
 def recent_posts_from_author(author)
   posts_from_author(author).recent
 end
