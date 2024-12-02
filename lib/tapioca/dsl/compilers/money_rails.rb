@@ -37,7 +37,14 @@ module Tapioca
         extend T::Sig
         include RBIHelper
 
-        ConstantType = type_member { { fixed: T.class_of(::MoneyRails::ActiveRecord::Monetizable) } }
+        ConstantType = type_member do
+          {
+            fixed: T.all(
+              T.class_of(::MoneyRails::ActiveRecord::Monetizable),
+              ::MoneyRails::ActiveRecord::Monetizable::ClassMethods,
+            ),
+          }
+        end
 
         class << self
           extend T::Sig

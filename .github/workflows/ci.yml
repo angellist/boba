@@ -1,0 +1,26 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Linters
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - name: Run type check
+        run: bundle exec srb tc
+      - name: Lint Ruby files
+        run: bundle exec rubocop
+      - name: Verify documentation
+        run: bin/docs
+      - name: Run tests
+        run: bin/test
+      - name: Verify gem RBIs are up-to-date
+        run: bin/tapioca gem --verify
+      - name: Verify duplicates in shims
+        run: bin/tapioca check-shims
