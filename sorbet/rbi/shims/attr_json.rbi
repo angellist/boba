@@ -2,13 +2,13 @@
 # frozen_string_literal: true
 
 module AttrJson
-  class Record
+  module Record
     class << self
       def attr_json_registry(*args, **kwargs); end
     end
   end
 
-  class Model
+  module Model
     class << self
       def attr_json_registry(*args, **kwargs); end
     end

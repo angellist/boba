@@ -4,7 +4,9 @@
 module Tapioca
   module Dsl
     module Compilers
-      class ActiveRecordRelations < Compiler; end
+      class ActiveRecordRelations < Compiler
+        ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
+      end
     end
 
     module Helpers
