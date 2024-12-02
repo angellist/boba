@@ -11,10 +11,10 @@ return unless defined?(Tapioca::Dsl::Compilers::ActiveRecordRelations)
 module Tapioca
   module Dsl
     module Compilers
-      # `Tapioca::Dsl::Compilers::ActiveRecordRelationTypes` extends `Tapioca::Dsl::Compilers::ActiveRecordRelationTypes`
-      # to generate a `RelationType` type alias for each class. This type alias is defined a runtime through the Boba
-      # railtie, and is useful for typing signatures to accept or return relations. For instance, with the following
-      # `ActiveRecord::Base` subclass:
+      # `Tapioca::Dsl::Compilers::ActiveRecordRelationTypes` extends
+      # `Tapioca::Dsl::Compilers::ActiveRecordRelationTypes` to generate a `RelationType` type alias for each class.
+      # This type alias is defined a runtime through the Boba railtie, and is useful for typing signatures to accept or
+      # return relations. For instance, with the following `ActiveRecord::Base` subclass:
       # ~~~rb
       # class Post < ApplicationRecord
       # end

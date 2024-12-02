@@ -15,7 +15,7 @@ jobs:
       - name: Run type check
         run: bundle exec srb tc
       - name: Lint Ruby files
-        run: bundle exec rubocop
+        run: bundle exec rubocop --fail-level error
       - name: Verify documentation
         run: bin/docs
       - name: Run tests
