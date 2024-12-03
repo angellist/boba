@@ -6,6 +6,7 @@ require "tapioca/dsl/compilers/active_record_associations"
 return unless defined?(Tapioca::Dsl::Compilers::ActiveRecordAssociations)
 
 require "boba/active_record/reflection_service"
+require "boba/options/association_type_option"
 
 module Tapioca
   module Dsl
@@ -53,62 +54,18 @@ module Tapioca
       class ActiveRecordAssociationsPersisted < ::Tapioca::Dsl::Compilers::ActiveRecordAssociations
         extend T::Sig
 
-        class AssociationTypeOption < T::Enum
-          extend T::Sig
-
-          enums do
-            Nilable = new("nilable")
-            Persisted = new("persisted")
-          end
-
-          class << self
-            extend T::Sig
-
-            sig do
-              params(
-                options: T::Hash[String, T.untyped],
-                block: T.proc.params(value: String, default_association_type_option: AssociationTypeOption).void,
-              ).returns(AssociationTypeOption)
-            end
-            def from_options(options, &block)
-              association_type_option = Nilable
-              value = options["ActiveRecordAssociationTypes"]
-
-              if value
-                if has_serialized?(value)
-                  association_type_option = from_serialized(value)
-                else
-                  block.call(value, association_type_option)
-                end
-              end
-
-              association_type_option
-            end
-          end
-
-          sig { returns(T::Boolean) }
-          def persisted?
-            self == AssociationTypeOption::Persisted
-          end
-
-          sig { returns(T::Boolean) }
-          def nilable?
-            self == AssociationTypeOption::Nilable
-          end
-        end
-
         private
 
-        sig { returns(AssociationTypeOption) }
+        sig { returns(Boba::Options::AssociationTypeOption) }
         def association_type_option
           @association_type_option ||= T.let(
-            AssociationTypeOption.from_options(options) do |value, default_association_type_option|
+            Boba::Options::AssociationTypeOption.from_options(options) do |value, default_association_type_option|
               add_error(<<~MSG.strip)
                 Unknown value for compiler option `ActiveRecordAssociationTypes` given: `#{value}`.
                 Proceeding with the default value: `#{default_association_type_option.serialize}`.
               MSG
             end,
-            T.nilable(AssociationTypeOption),
+            T.nilable(Boba::Options::AssociationTypeOption),
           )
         end
 
@@ -190,9 +147,7 @@ module Tapioca
           association_class = type_for(reflection)
           return as_nilable_type(association_class) unless association_type_option.persisted?
 
-          if Boba::ActiveRecord::ReflectionService.has_one_and_required_reflection?(reflection)
-            association_class
-          elsif Boba::ActiveRecord::ReflectionService.belongs_to_and_non_optional_reflection?(reflection)
+          if Boba::ActiveRecord::ReflectionService.required_reflection?(reflection)
             association_class
           else
             as_nilable_type(association_class)

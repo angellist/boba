@@ -18,4 +18,5 @@ group :development do
   gem "rubocop-shopify"
   gem "rubocop-sorbet"
   gem "state_machines"
+  gem "sqlite3"
 end

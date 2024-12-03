@@ -153,14 +153,7 @@ module Tapioca
         def column_type_for(column_name)
           return ["T.untyped", "T.untyped"] if column_type_option.untyped?
 
-          nilable_column = !Boba::ActiveRecord::AttributeService.has_non_null_database_constraint?(
-            @constant,
-            column_name,
-          )
-          nilable_column &&= !Boba::ActiveRecord::AttributeService.has_unconditional_presence_validator?(
-            @constant,
-            column_name,
-          )
+          nilable_column = Boba::ActiveRecord::AttributeService.nilable_attribute?(@constant, column_name)
 
           column_type = @constant.attribute_types[column_name]
           getter_type = column_type_helper.send(

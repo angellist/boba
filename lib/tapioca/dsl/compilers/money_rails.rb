@@ -4,6 +4,8 @@
 return unless defined?(MoneyRails)
 
 require "tapioca/helpers/rbi_helper"
+require "tapioca/dsl/helpers/active_record_column_type_helper"
+require "boba/active_record/attribute_service"
 
 module Tapioca
   module Dsl
@@ -55,6 +57,21 @@ module Tapioca
           end
         end
 
+        ColumnTypeOption = Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption
+
+        sig { returns(ColumnTypeOption) }
+        def column_type_option
+          @column_type_option ||= T.let(
+            ColumnTypeOption.from_options(options) do |value, default_column_type_option|
+              add_error(<<~MSG.strip)
+                Unknown value for compiler option `ActiveRecordColumnTypes` given: `#{value}`.
+                Proceeding with the default value: `#{default_column_type_option.serialize}`.
+              MSG
+            end,
+            T.nilable(ColumnTypeOption),
+          )
+        end
+
         sig { override.void }
         def decorate
           return if constant.monetized_attributes.empty?
@@ -64,10 +81,23 @@ module Tapioca
             instance_module = RBI::Module.new(instance_module_name)
 
             constant.monetized_attributes.each do |attribute_name, column_name|
-              column = T.unsafe(constant).columns_hash[column_name]
+              if column_type_option.untyped?
+                type_name = "T.untyped"
+              else
+                type_name = "::Money"
 
-              type_name = "::Money"
-              type_name = as_nilable_type(type_name) if column.nil? || !!column.null
+                nilable_attribute = if constant < ::ActiveRecord::Base && column_type_option.persisted?
+                  Boba::ActiveRecord::AttributeService.nilable_attribute?(
+                    T.cast(constant, T.class_of(::ActiveRecord::Base)),
+                    attribute_name,
+                    column_name: column_name,
+                  )
+                else
+                  true
+                end
+
+                type_name = as_nilable_type(type_name) if nilable_attribute
+              end
 
               # Model: monetize :amount_cents
               # => amount
