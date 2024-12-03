@@ -7,6 +7,8 @@ require "minitest/reporters"
 require "minitest/spec"
 require "rails/test_unit/line_filtering"
 require "tapioca/internal"
+require "tapioca/helpers/test/content"
+require "tapioca/helpers/test/isolation"
 
 require_relative "dsl_spec_helper"
 
