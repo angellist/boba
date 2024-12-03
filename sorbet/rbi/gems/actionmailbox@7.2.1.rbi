@@ -695,6 +695,9 @@ end
 class ActionMailbox::Record < ::ActiveRecord::Base
   include ::ActionMailbox::Record::GeneratedAttributeMethods
   include ::ActionMailbox::Record::GeneratedAssociationMethods
+  include ::Kaminari::ActiveRecordModelExtension
+  include ::Kaminari::ConfigurationMethods
+  extend ::Kaminari::ConfigurationMethods::ClassMethods
 
   class << self
     # source://activemodel/7.2.1/lib/active_model/validations.rb#71
@@ -702,6 +705,9 @@ class ActionMailbox::Record < ::ActiveRecord::Base
 
     # source://activerecord/7.2.1/lib/active_record/enum.rb#167
     def defined_enums; end
+
+    # source://kaminari-activerecord/1.2.2/lib/kaminari/activerecord/active_record_model_extension.rb#15
+    def page(num = T.unsafe(nil)); end
   end
 end
 

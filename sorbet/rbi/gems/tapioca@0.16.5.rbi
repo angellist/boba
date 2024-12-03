@@ -1316,6 +1316,311 @@ end
 # source://tapioca//lib/tapioca/dsl/compilers.rb#6
 module Tapioca::Dsl::Compilers; end
 
+# `Tapioca::Dsl::Compilers::ActiveRecordRelations` decorates RBI files for subclasses of
+# `ActiveRecord::Base` and adds
+# [relation](http://api.rubyonrails.org/classes/ActiveRecord/Relation.html),
+# [collection proxy](https://api.rubyonrails.org/classes/ActiveRecord/Associations/CollectionProxy.html),
+# [query](http://api.rubyonrails.org/classes/ActiveRecord/QueryMethods.html),
+# [spawn](http://api.rubyonrails.org/classes/ActiveRecord/SpawnMethods.html),
+# [finder](http://api.rubyonrails.org/classes/ActiveRecord/FinderMethods.html), and
+# [calculation](http://api.rubyonrails.org/classes/ActiveRecord/Calculations.html) methods.
+#
+# The compiler defines 3 (synthetic) modules and 3 (synthetic) classes to represent relations properly.
+#
+# For a given model `Model`, we generate the following classes:
+#
+# 1. A `Model::PrivateRelation` that subclasses `ActiveRecord::Relation`. This synthetic class represents
+# a relation on `Model` whose methods which return a relation always return a `Model::PrivateRelation` instance.
+#
+# 2. `Model::PrivateAssociationRelation` that subclasses `ActiveRecord::AssociationRelation`. This synthetic
+# class represents a relation on a singular association of type `Model` (e.g. `foo.model`) whose methods which
+# return a relation will always return a `Model::PrivateAssociationRelation` instance. The difference between this
+# class and the previous one is mainly that an association relation also keeps track of the resource association
+# for this relation.
+#
+# 3. `Model::PrivateCollectionProxy` that subclasses from `ActiveRecord::Associations::CollectionProxy`.
+# This synthetic class represents a relation on a plural association of type `Model` (e.g. `foo.models`)
+# whose methods which return a relation will always return a `Model::PrivateAssociationRelation` instance.
+# This class represents a collection of `Model` instances with some extra methods to `build`, `create`,
+# etc new `Model` instances in the collection.
+#
+# and the following modules:
+#
+# 1. `Model::GeneratedRelationMethods` holds all the relation methods with the return type of
+# `Model::PrivateRelation`. For example, calling `all` on the `Model` class or an instance of
+# `Model::PrivateRelation` class will always return a `Model::PrivateRelation` instance, thus the
+# signature of `all` is defined with that return type in this module.
+#
+# 2. `Model::GeneratedAssociationRelationMethods` holds all the relation methods with the return type
+# of `Model::PrivateAssociationRelation`. For example, calling `all` on an instance of
+# `Model::PrivateAssociationRelation` or an instance of `Model::PrivateCollectionProxy` class will
+# always return a `Model::PrivateAssociationRelation` instance, thus the signature of `all` is defined
+# with that return type in this module.
+#
+# 3. `Model::CommonRelationMethods` holds all the relation methods that do not depend on the type of
+# relation in their return type. For example, `find_by!` will always return the same type (a `Model`
+# instance), regardless of what kind of relation it is called on, and so belongs in this module.
+# This module is used to reduce the replication of methods between the previous two modules.
+#
+# Additionally, the actual `Model` class extends both `Model::CommonRelationMethods` and
+# `Model::PrivateRelation` modules, so that, for example, `find_by` and `all` can be chained off of the
+# `Model` class.
+#
+# **CAUTION**: The generated relation classes are named `PrivateXXX` intentionally to reflect the fact
+# that they represent private subconstants of the Active Record model. As such, these types do not
+# exist at runtime, and their counterparts that do exist at runtime are marked `private_constant` anyway.
+# For that reason, these types cannot be used in user code or in `sig`s inside Ruby files, since that will
+# make the runtime checks fail.
+#
+# For example, with the following `ActiveRecord::Base` subclass:
+#
+# ~~~rb
+# class Post < ApplicationRecord
+# end
+# ~~~
+#
+# this compiler will produce the RBI file `post.rbi` with the following content:
+# ~~~rbi
+# # post.rbi
+#
+# class Post
+#   extend CommonRelationMethods
+#   extend GeneratedRelationMethods
+#
+#   module CommonRelationMethods
+#     sig { params(block: T.nilable(T.proc.params(record: ::Post).returns(T.untyped))).returns(T::Boolean) }
+#     def any?(&block); end
+#
+#     # ...
+#   end
+#
+#   module GeneratedAssociationRelationMethods
+#     sig { returns(PrivateAssociationRelation) }
+#     def all; end
+#
+#     # ...
+#
+#     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateAssociationRelation) }
+#     def where(*args, &blk); end
+#   end
+#
+#   module GeneratedRelationMethods
+#     sig { returns(PrivateRelation) }
+#     def all; end
+#
+#     # ...
+#
+#     sig { params(args: T.untyped, blk: T.untyped).returns(PrivateRelation) }
+#     def where(*args, &blk); end
+#   end
+#
+#   class PrivateAssociationRelation < ::ActiveRecord::AssociationRelation
+#     include CommonRelationMethods
+#     include GeneratedAssociationRelationMethods
+#
+#     sig { returns(T::Array[::Post]) }
+#     def to_a; end
+#
+#     sig { returns(T::Array[::Post]) }
+#     def to_ary; end
+#
+#     Elem = type_member { { fixed: ::Post } }
+#   end
+#
+#   class PrivateCollectionProxy < ::ActiveRecord::Associations::CollectionProxy
+#     include CommonRelationMethods
+#     include GeneratedAssociationRelationMethods
+#
+#     sig do
+#       params(records: T.any(::Post, T::Array[::Post], T::Array[PrivateCollectionProxy]))
+#         .returns(PrivateCollectionProxy)
+#     end
+#     def <<(*records); end
+#
+#     # ...
+#   end
+#
+#   class PrivateRelation < ::ActiveRecord::Relation
+#     include CommonRelationMethods
+#     include GeneratedRelationMethods
+#
+#     sig { returns(T::Array[::Post]) }
+#     def to_a; end
+#
+#     sig { returns(T::Array[::Post]) }
+#     def to_ary; end
+#
+#     Elem = type_member { { fixed: ::Post } }
+#   end
+# end
+# ~~~
+#
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#151
+class Tapioca::Dsl::Compilers::ActiveRecordRelations < ::Tapioca::Dsl::Compiler
+  extend T::Generic
+  include ::Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper
+
+  ConstantType = type_member { { fixed: T.class_of(ActiveRecord::Base) } }
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#178
+  sig { override.void }
+  def decorate; end
+
+  private
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#260
+  sig { returns(::RBI::Scope) }
+  def association_relation_methods_module; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#281
+  sig { params(method_name: ::Symbol).returns(T::Boolean) }
+  def bang_method?(method_name); end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#268
+  sig { returns(::RBI::Scope) }
+  def common_relation_methods_module; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#276
+  sig { returns(::String) }
+  def constant_name; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#320
+  sig { void }
+  def create_association_relation_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#347
+  sig { void }
+  def create_association_relation_group_chain_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#602
+  sig { void }
+  def create_association_relation_methods; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#425
+  sig { void }
+  def create_association_relation_where_chain_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#286
+  sig { void }
+  def create_classes_and_includes; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#458
+  sig { void }
+  def create_collection_proxy_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#475
+  sig { params(klass: ::RBI::Scope).void }
+  def create_collection_proxy_methods(klass); end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#1038
+  sig do
+    params(
+      name: T.any(::String, ::Symbol),
+      parameters: T::Array[::RBI::TypedParam],
+      return_type: T.nilable(::String)
+    ).void
+  end
+  def create_common_method(name, parameters: T.unsafe(nil), return_type: T.unsafe(nil)); end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#647
+  sig { void }
+  def create_common_methods; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#358
+  sig { params(klass: ::RBI::Scope).void }
+  def create_group_chain_methods(klass); end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#301
+  sig { void }
+  def create_relation_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#339
+  sig { void }
+  def create_relation_group_chain_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#1083
+  sig do
+    params(
+      name: T.any(::String, ::Symbol),
+      parameters: T::Array[::RBI::TypedParam],
+      relation_return_type: ::String,
+      association_return_type: ::String
+    ).void
+  end
+  def create_relation_method(name, parameters: T.unsafe(nil), relation_return_type: T.unsafe(nil), association_return_type: T.unsafe(nil)); end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#554
+  sig { void }
+  def create_relation_methods; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#417
+  sig { void }
+  def create_relation_where_chain_class; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#433
+  sig { params(klass: ::RBI::Scope, return_type: ::String).void }
+  def create_where_chain_methods(klass, return_type); end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#1047
+  sig { void }
+  def create_where_relation_method; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#244
+  sig { returns(::RBI::Scope) }
+  def model; end
+
+  # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#252
+  sig { returns(::RBI::Scope) }
+  def relation_methods_module; end
+
+  class << self
+    # source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#189
+    sig { override.returns(T::Enumerable[::Module]) }
+    def gather_constants; end
+  end
+end
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#194
+Tapioca::Dsl::Compilers::ActiveRecordRelations::ASSOCIATION_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#231
+Tapioca::Dsl::Compilers::ActiveRecordRelations::BATCHES_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#238
+Tapioca::Dsl::Compilers::ActiveRecordRelations::BUILDER_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#232
+Tapioca::Dsl::Compilers::ActiveRecordRelations::CALCULATION_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#199
+Tapioca::Dsl::Compilers::ActiveRecordRelations::COLLECTION_PROXY_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#233
+Tapioca::Dsl::Compilers::ActiveRecordRelations::ENUMERABLE_QUERY_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#226
+Tapioca::Dsl::Compilers::ActiveRecordRelations::FINDER_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#234
+Tapioca::Dsl::Compilers::ActiveRecordRelations::FIND_OR_CREATE_METHODS = T.let(T.unsafe(nil), Array)
+
+# From ActiveRecord::ConnectionAdapter::Quoting#quote, minus nil
+#
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#159
+Tapioca::Dsl::Compilers::ActiveRecordRelations::ID_TYPES = T.let(T.unsafe(nil), Set)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#205
+Tapioca::Dsl::Compilers::ActiveRecordRelations::QUERY_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#227
+Tapioca::Dsl::Compilers::ActiveRecordRelations::SIGNED_FINDER_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#239
+Tapioca::Dsl::Compilers::ActiveRecordRelations::TO_ARRAY_METHODS = T.let(T.unsafe(nil), Array)
+
+# source://tapioca//lib/tapioca/dsl/compilers/active_record_relations.rb#222
+Tapioca::Dsl::Compilers::ActiveRecordRelations::WHERE_CHAIN_QUERY_METHODS = T.let(T.unsafe(nil), Array)
+
 # DSL compilers are either built-in to Tapioca and live under the
 # `Tapioca::Dsl::Compilers` namespace (i.e. this namespace), and
 # can be referred to by just using the class name, or they live in
@@ -1326,8 +1631,119 @@ module Tapioca::Dsl::Compilers; end
 # source://tapioca//lib/tapioca/dsl/compilers.rb#13
 Tapioca::Dsl::Compilers::NAMESPACES = T.let(T.unsafe(nil), Array)
 
-# source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#6
+# source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#6
 module Tapioca::Dsl::Helpers; end
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#7
+module Tapioca::Dsl::Helpers::ActiveModelTypeHelper
+  class << self
+    # Returns the type indicated by the custom ActiveModel::Type::Value.
+    # Accepts subclasses of ActiveModel::Type::Value as well as classes that implement similar methods.
+    #
+    # source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#14
+    sig { params(type_value: T.untyped).returns(::String) }
+    def type_for(type_value); end
+
+    private
+
+    # source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#51
+    sig { params(obj: T.untyped, method: ::Symbol).returns(T.nilable(::T::Types::Base)) }
+    def lookup_arg_type_of_method(obj, method); end
+
+    # source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#43
+    sig { params(obj: T.untyped, method: ::Symbol).returns(T.nilable(::T::Types::Base)) }
+    def lookup_return_type_of_method(obj, method); end
+
+    # source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#61
+    sig { params(obj: T.untyped, method: ::Symbol).returns(T.untyped) }
+    def lookup_signature_of_method(obj, method); end
+
+    # source://tapioca//lib/tapioca/dsl/helpers/active_model_type_helper.rb#38
+    sig { params(type: T.untyped).returns(T::Boolean) }
+    def meaningful_type?(type); end
+  end
+end
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#9
+class Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper
+  include ::Tapioca::SorbetHelper
+  include ::Tapioca::RBIHelper
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#69
+  sig do
+    params(
+      constant: T.class_of(ActiveRecord::Base),
+      column_type_option: ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption
+    ).void
+  end
+  def initialize(constant, column_type_option: T.unsafe(nil)); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#80
+  sig { params(attribute_name: ::String, column_name: ::String).returns([::String, ::String]) }
+  def type_for(attribute_name, column_name = T.unsafe(nil)); end
+
+  private
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#223
+  sig { params(base_type: ::String, column_nullability: T::Boolean).returns(::String) }
+  def as_non_nilable_if_persisted_and_not_nullable(base_type, column_nullability:); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#109
+  sig { params(column_name: T.nilable(::String)).returns([::String, ::String]) }
+  def column_type_for(column_name); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#233
+  sig { params(column_type: ::ActiveRecord::Enum::EnumType).returns(::String) }
+  def enum_setter_type(column_type); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#89
+  sig { returns([::String, ::String]) }
+  def id_type; end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#261
+  sig { params(column_type: T.untyped).returns(T::Boolean) }
+  def not_nilable_serialized_column?(column_type); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#244
+  sig { params(column_type: ::ActiveRecord::Type::Serialized).returns(::String) }
+  def serialized_column_type(column_type); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#132
+  sig { params(column_type: T.untyped, column_nullability: T::Boolean).returns(::String) }
+  def type_for_activerecord_value(column_type, column_nullability:); end
+end
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#13
+class Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption < ::T::Enum
+  enums do
+    Nilable = new
+    Persisted = new
+    Untyped = new
+  end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#53
+  sig { returns(T::Boolean) }
+  def nilable?; end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#48
+  sig { returns(T::Boolean) }
+  def persisted?; end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#58
+  sig { returns(T::Boolean) }
+  def untyped?; end
+
+  class << self
+    # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#31
+    sig do
+      params(
+        options: T::Hash[::String, T.untyped],
+        block: T.proc.params(value: ::String, default_column_type_option: ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption).void
+      ).returns(::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption)
+    end
+    def from_options(options, &block); end
+  end
+end
 
 # source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#7
 module Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper; end

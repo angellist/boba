@@ -10,6 +10,7 @@ module Boba
     class AttributeServiceSpec < ::Minitest::Spec
       extend T::Sig
       include Tapioca::Helpers::Test::Content
+      include Tapioca::Helpers::Test::Isolation
 
       before do
         ::ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
