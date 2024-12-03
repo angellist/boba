@@ -1,5 +1,11 @@
 # Boba History
 
+## 0.0.14
+
+- Add test harness, CI, and a bunch of specs. Thanks @rzane!
+- Add `Kaminari` compiler. (@rzane)
+- Update `MoneyRails` to respect `ActiveRecordColumnTypes` setting, so it generates non-nilable types only in persisted mode.
+
 ## 0.0.13
 
 - Add `RelationType` alias to railtie as well as `ActiveRecordRelationTypes` compiler to generate it into RBI files. Fix railtie constants.
