@@ -23,6 +23,12 @@ module Tapioca
         end
 
         describe "Tapioca::Dsl::Compilers::MoneyRails" do
+          describe "initialize" do
+            it "gathers no constants if there are no ActiveRecord classes" do
+              assert_equal(gathered_constants, ["ActiveRecord::Base"])
+            end
+          end
+
           describe "decorate" do
             describe "when compiled with the persisted option" do
               it "generates RBI files for classes that use the `monetize` method provided by the `money-rails` gem" do

@@ -15,20 +15,18 @@ module Boba
       before do
         ::ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
 
-        add_ruby_file("schema.rb", <<~RUBY)
-          ::ActiveRecord::Migration.suppress_messages do
-            ::ActiveRecord::Schema.define do
-              create_table(:posts) do |t|
-                t.integer(:author_id)
-              end
-              create_table(:comments) do |t|
-                t.integer(:author_id, null: false)
-              end
-              create_table(:author) do |t|
-              end
+        ::ActiveRecord::Migration.suppress_messages do
+          ::ActiveRecord::Schema.define do
+            create_table(:posts) do |t|
+              t.integer(:author_id)
+            end
+            create_table(:comments) do |t|
+              t.integer(:author_id, null: false)
+            end
+            create_table(:author) do |t|
             end
           end
-        RUBY
+        end
       end
 
       after do
@@ -39,15 +37,11 @@ module Boba
         describe "required_reflection?" do
           describe "with has_one associations" do
             it "returns false if it is not a has_one association" do
-              add_ruby_file("author.rb", <<~RUBY)
-                class AuthorWithManyPosts < ::ActiveRecord::Base
-                  self.table_name = "authors"
+              class Author < ::ActiveRecord::Base
+                has_many :posts
+              end
 
-                  has_many :posts
-                end
-              RUBY
-
-              reflection = "AuthorWithManyPosts".constantize.reflect_on_association(:posts)
+              reflection = Author.reflect_on_association(:posts)
               assert_equal(
                 false,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -55,15 +49,11 @@ module Boba
             end
 
             it "returns false if the association is not required" do
-              add_ruby_file("author.rb", <<~RUBY)
-                class AuthorWithOneOptionalPost < ::ActiveRecord::Base
-                  self.table_name = "authors"
+              class Author < ::ActiveRecord::Base
+                has_one :post
+              end
 
-                  has_one :post
-                end
-              RUBY
-
-              reflection = "AuthorWithOneOptionalPost".constantize.reflect_on_association(:post)
+              reflection = Author.reflect_on_association(:post)
               assert_equal(
                 false,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -71,15 +61,11 @@ module Boba
             end
 
             it "returns true if the association is required" do
-              add_ruby_file("author.rb", <<~RUBY)
-                class AuthorWithRequiredPost < ::ActiveRecord::Base
-                  self.table_name = "authors"
+              class Author < ::ActiveRecord::Base
+                has_one :post, required: true
+              end
 
-                  has_one :post, required: true
-                end
-              RUBY
-
-              reflection = "AuthorWithRequiredPost".constantize.reflect_on_association(:post)
+              reflection = Author.reflect_on_association(:post)
               assert_equal(
                 true,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -87,17 +73,13 @@ module Boba
             end
 
             it "returns true if the attribute has a presence validation" do
-              add_ruby_file("author.rb", <<~RUBY)
-                class AuthorWithPresenceValidatedPost < ::ActiveRecord::Base
-                  self.table_name = "authors"
+              class Author < ::ActiveRecord::Base
+                has_one :post, foreign_key: :author_id
 
-                  has_one :post, foreign_key: :author_id
+                validates :post, presence: true
+              end
 
-                  validates :post, presence: true
-                end
-              RUBY
-
-              reflection = "AuthorWithPresenceValidatedPost".constantize.reflect_on_association(:post)
+              reflection = Author.reflect_on_association(:post)
               assert_equal(
                 true,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -107,15 +89,11 @@ module Boba
 
           describe "with belongs_to associations" do
             it "returns false if it is not a belongs_to association" do
-              add_ruby_file("post.rb", <<~RUBY)
-                class PostWithComment < ::ActiveRecord::Base
-                  self.table_name = "posts"
+              class Post < ::ActiveRecord::Base
+                has_one :comment
+              end
 
-                  has_one :comment
-                end
-              RUBY
-
-              reflection = "PostWithComment".constantize.reflect_on_association(:comment)
+              reflection = Post.reflect_on_association(:comment)
               assert_equal(
                 false,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -123,15 +101,11 @@ module Boba
             end
 
             it "returns false if the association is optional" do
-              add_ruby_file("post.rb", <<~RUBY)
-                class PostWithNonRequiredAuthor < ::ActiveRecord::Base
-                  self.table_name = "posts"
+              class Post < ::ActiveRecord::Base
+                has_one :comment, required: false
+              end
 
-                  has_one :comment, required: false
-                end
-              RUBY
-
-              reflection = "PostWithNonRequiredAuthor".constantize.reflect_on_association(:comment)
+              reflection = Post.reflect_on_association(:comment)
               assert_equal(
                 false,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -139,15 +113,11 @@ module Boba
             end
 
             it "returns true if the association is not optional" do
-              add_ruby_file("post.rb", <<~RUBY)
-                class PostWithRequiredAuthor < ::ActiveRecord::Base
-                  self.table_name = "posts"
+              class Post < ::ActiveRecord::Base
+                has_one :comment, required: true
+              end
 
-                  has_one :comment, required: true
-                end
-              RUBY
-
-              reflection = "PostWithRequiredAuthor".constantize.reflect_on_association(:comment)
+              reflection = Post.reflect_on_association(:comment)
               assert_equal(
                 true,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -155,15 +125,11 @@ module Boba
             end
 
             it "returns true if there is a non-null constraint on the fk" do
-              add_ruby_file("comment.rb", <<~RUBY)
-                class CommentWithNonNullAuthorFK < ::ActiveRecord::Base
-                  self.table_name = "comments"
+              class Comment < ::ActiveRecord::Base
+                belongs_to :author
+              end
 
-                  belongs_to :author
-                end
-              RUBY
-
-              reflection = "CommentWithNonNullAuthorFK".constantize.reflect_on_association(:author)
+              reflection = Comment.reflect_on_association(:author)
               assert_equal(
                 true,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -171,17 +137,13 @@ module Boba
             end
 
             it "returns true if there is a presence validation on the attribute" do
-              add_ruby_file("post.rb", <<~RUBY)
-                class PostWithValidatedAuthor < ::ActiveRecord::Base
-                  self.table_name = "posts"
+              class Post < ::ActiveRecord::Base
+                belongs_to :author
 
-                  belongs_to :author
+                validates :author, presence: true
+              end
 
-                  validates :author, presence: true
-                end
-              RUBY
-
-              reflection = "PostWithValidatedAuthor".constantize.reflect_on_association(:author)
+              reflection = Post.reflect_on_association(:author)
               assert_equal(
                 true,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
@@ -189,41 +151,33 @@ module Boba
             end
 
             it "falls back to the default active record config if nothing is defined" do
-              add_ruby_file("post.rb", <<~RUBY)
-                  class PostWithOptionalDefault < ::ActiveRecord::Base
-                    class << self
-                      extend T::Sig
+              class Post < ::ActiveRecord::Base
+                class << self
+                  extend T::Sig
 
-                      sig { returns(T::Boolean) }
-                      def belongs_to_required_by_default = false
-                    end
-
-                    self.table_name = "posts"
-
-                    belongs_to :author
-                  end
-
-                  class PostWithRequiredDefault < ::ActiveRecord::Base
-                  class << self
-                    extend T::Sig
-
-                    sig { returns(T::Boolean) }
-                    def belongs_to_required_by_default = true
-                  end
-
-                  self.table_name = "posts"
-
-                  belongs_to :author
+                  sig { returns(T::Boolean) }
+                  def belongs_to_required_by_default = false
                 end
-              RUBY
 
-              reflection = "PostWithOptionalDefault".constantize.reflect_on_association(:author)
+                belongs_to :author
+              end
+
+              reflection = Post.reflect_on_association(:author)
               assert_equal(
                 false,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
               )
 
-              reflection = "PostWithRequiredDefault".constantize.reflect_on_association(:author)
+              class Post < ::ActiveRecord::Base
+                class << self
+                  extend T::Sig
+
+                  sig { returns(T::Boolean) }
+                  def belongs_to_required_by_default = true
+                end
+              end
+
+              reflection = Post.reflect_on_association(:author)
               assert_equal(
                 true,
                 Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
