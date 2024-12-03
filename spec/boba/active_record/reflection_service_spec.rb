@@ -150,6 +150,20 @@ module Boba
               )
             end
 
+            it "returns true if there is a presence validation on the foreign key" do
+              class Post < ::ActiveRecord::Base
+                belongs_to :author
+
+                validates :author_id, presence: true
+              end
+
+              reflection = Post.reflect_on_association(:author)
+              assert_equal(
+                true,
+                Boba::ActiveRecord::ReflectionService.required_reflection?(reflection),
+              )
+            end
+
             it "falls back to the default active record config if nothing is defined" do
               class Post < ::ActiveRecord::Base
                 class << self

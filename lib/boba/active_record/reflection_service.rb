@@ -49,6 +49,10 @@ module Boba
           )
           return true if Boba::ActiveRecord::AttributeService.has_unconditional_presence_validator?(
             reflection.active_record,
+            reflection.foreign_key.to_s,
+          )
+          return true if Boba::ActiveRecord::AttributeService.has_unconditional_presence_validator?(
+            reflection.active_record,
             reflection.name.to_s,
           )
 
