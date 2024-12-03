@@ -1664,6 +1664,87 @@ module Tapioca::Dsl::Helpers::ActiveModelTypeHelper
   end
 end
 
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#9
+class Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper
+  include ::Tapioca::SorbetHelper
+  include ::Tapioca::RBIHelper
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#69
+  sig do
+    params(
+      constant: T.class_of(ActiveRecord::Base),
+      column_type_option: ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption
+    ).void
+  end
+  def initialize(constant, column_type_option: T.unsafe(nil)); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#80
+  sig { params(attribute_name: ::String, column_name: ::String).returns([::String, ::String]) }
+  def type_for(attribute_name, column_name = T.unsafe(nil)); end
+
+  private
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#223
+  sig { params(base_type: ::String, column_nullability: T::Boolean).returns(::String) }
+  def as_non_nilable_if_persisted_and_not_nullable(base_type, column_nullability:); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#109
+  sig { params(column_name: T.nilable(::String)).returns([::String, ::String]) }
+  def column_type_for(column_name); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#233
+  sig { params(column_type: ::ActiveRecord::Enum::EnumType).returns(::String) }
+  def enum_setter_type(column_type); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#89
+  sig { returns([::String, ::String]) }
+  def id_type; end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#261
+  sig { params(column_type: T.untyped).returns(T::Boolean) }
+  def not_nilable_serialized_column?(column_type); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#244
+  sig { params(column_type: ::ActiveRecord::Type::Serialized).returns(::String) }
+  def serialized_column_type(column_type); end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#132
+  sig { params(column_type: T.untyped, column_nullability: T::Boolean).returns(::String) }
+  def type_for_activerecord_value(column_type, column_nullability:); end
+end
+
+# source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#13
+class Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption < ::T::Enum
+  enums do
+    Nilable = new
+    Persisted = new
+    Untyped = new
+  end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#53
+  sig { returns(T::Boolean) }
+  def nilable?; end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#48
+  sig { returns(T::Boolean) }
+  def persisted?; end
+
+  # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#58
+  sig { returns(T::Boolean) }
+  def untyped?; end
+
+  class << self
+    # source://tapioca//lib/tapioca/dsl/helpers/active_record_column_type_helper.rb#31
+    sig do
+      params(
+        options: T::Hash[::String, T.untyped],
+        block: T.proc.params(value: ::String, default_column_type_option: ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption).void
+      ).returns(::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption)
+    end
+    def from_options(options, &block); end
+  end
+end
+
 # source://tapioca//lib/tapioca/dsl/helpers/active_record_constants_helper.rb#7
 module Tapioca::Dsl::Helpers::ActiveRecordConstantsHelper; end
 
