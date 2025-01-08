@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.15
+
+- Bump Tapioca & Ruby Versions
+
 ## 0.0.14
 
 - Add test harness, CI, and a bunch of specs. Thanks @rzane!
