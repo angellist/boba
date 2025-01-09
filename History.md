@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.16
+
+- Bump Tapioca
+
 ## 0.0.15
 
 - Bump Tapioca & Ruby Versions
