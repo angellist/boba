@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.0.17
+
+- Bump Tapioca
+
 ## 0.0.16
 
 - Bump Tapioca
