@@ -11,6 +11,7 @@ AllCops:
   NewCops: disable
   Exclude:
   - "vendor/**/*"
+  - "sorbet/rbi/**/*"
   Include:
   - "sorbet/rbi/shims/**/*.rbi"
 

@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: strict
 # frozen_string_literal: true
 
 require "tapioca/dsl/compilers/active_record_columns"
@@ -128,8 +128,11 @@ module Tapioca
       class ActiveRecordColumnsPersisted < ::Tapioca::Dsl::Compilers::ActiveRecordColumns
         extend T::Sig
 
+        ConstantType = type_member { { fixed: T.class_of(ActiveRecord::Base) } }
+
         private
 
+        sig { returns(::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper) }
         def column_type_helper
           ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper.new(
             constant,
@@ -153,9 +156,9 @@ module Tapioca
         def column_type_for(column_name)
           return ["T.untyped", "T.untyped"] if column_type_option.untyped?
 
-          nilable_column = Boba::ActiveRecord::AttributeService.nilable_attribute?(@constant, column_name)
+          nilable_column = Boba::ActiveRecord::AttributeService.nilable_attribute?(constant, column_name)
 
-          column_type = @constant.attribute_types[column_name]
+          column_type = constant.attribute_types[column_name]
           getter_type = column_type_helper.send(
             :type_for_activerecord_value,
             column_type,
@@ -169,7 +172,7 @@ module Tapioca
               getter_type
             end
 
-          virtual_attribute = Boba::ActiveRecord::AttributeService.virtual_attribute?(@constant, column_name)
+          virtual_attribute = Boba::ActiveRecord::AttributeService.virtual_attribute?(constant, column_name)
           if column_type_option.persisted? && (virtual_attribute || !nilable_column)
             [getter_type, setter_type]
           else
