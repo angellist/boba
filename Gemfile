@@ -11,6 +11,7 @@ group :development do
   gem "minitest-reporters"
 
   gem "attr_json"
+  gem "graphql"
   gem "kaminari-activerecord"
   gem "money-rails"
   gem "paperclip"

@@ -1,4 +1,4 @@
-# typed: ignore
+# typed: strict
 # frozen_string_literal: true
 
 require "tapioca/dsl/compilers/active_record_associations"
@@ -53,6 +53,8 @@ module Tapioca
       # ~~~
       class ActiveRecordAssociationsPersisted < ::Tapioca::Dsl::Compilers::ActiveRecordAssociations
         extend T::Sig
+
+        ConstantType = type_member { { fixed: T.class_of(ActiveRecord::Base) } }
 
         private
 

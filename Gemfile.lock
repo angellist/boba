@@ -3,7 +3,7 @@ PATH
   specs:
     boba (0.0.17)
       sorbet-static-and-runtime (~> 0.5)
-      tapioca (<= 0.16.9)
+      tapioca (<= 0.16.11)
 
 GEM
   remote: https://rubygems.org/
@@ -93,8 +93,13 @@ GEM
     date (3.3.4)
     drb (2.2.1)
     erubi (1.13.1)
+    fiber-storage (1.0.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    graphql (2.4.10)
+      base64
+      fiber-storage
+      logger
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
     io-console (0.7.2)
@@ -210,7 +215,7 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.2.1)
-    rbi (0.2.2)
+    rbi (0.2.4)
       prism (~> 1.0)
       sorbet-runtime (>= 0.5.9204)
     rdoc (6.7.0)
@@ -240,24 +245,25 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
-    sorbet (0.5.11742)
-      sorbet-static (= 0.5.11742)
-    sorbet-runtime (0.5.11742)
-    sorbet-static (0.5.11742-universal-darwin)
-    sorbet-static (0.5.11742-x86_64-linux)
-    sorbet-static-and-runtime (0.5.11742)
-      sorbet (= 0.5.11742)
-      sorbet-runtime (= 0.5.11742)
-    spoom (1.5.0)
+    sorbet (0.5.11851)
+      sorbet-static (= 0.5.11851)
+    sorbet-runtime (0.5.11851)
+    sorbet-static (0.5.11851-universal-darwin)
+    sorbet-static (0.5.11851-x86_64-linux)
+    sorbet-static-and-runtime (0.5.11851)
+      sorbet (= 0.5.11851)
+      sorbet-runtime (= 0.5.11851)
+    spoom (1.5.4)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
+      rbi (>= 0.2.3)
       sorbet-static-and-runtime (>= 0.5.10187)
       thor (>= 0.19.2)
     sqlite3 (2.3.1)
       mini_portile2 (~> 2.8.0)
     state_machines (0.6.0)
     stringio (3.1.1)
-    tapioca (0.16.9)
+    tapioca (0.16.11)
       benchmark
       bundler (>= 2.2.25)
       netrc (>= 0.11.0)
@@ -292,6 +298,7 @@ PLATFORMS
 DEPENDENCIES
   attr_json
   boba!
+  graphql
   kaminari-activerecord
   minitest
   minitest-hooks

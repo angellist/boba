@@ -8,9 +8,15 @@ require "money-rails/active_record/monetizable"
 require "rails/all"
 require "rails/generators"
 require "rails/generators/app_base"
-require "tapioca/dsl/compilers"
-require "tapioca/dsl/compilers/active_record_relations"
-require "tapioca/dsl/helpers/active_record_column_type_helper"
-require "tapioca/dsl/helpers/active_record_constants_helper"
+
+tapioca_gem_folder = File.join(
+  Gem::Specification.find_by_name("tapioca").gem_dir,
+  "lib",
+  "tapioca",
+  "dsl",
+  "**",
+  "*.rb",
+)
+Dir[tapioca_gem_folder].each { |file| require file }
 require "tapioca/helpers/test/dsl_compiler"
 require "zeitwerk"
