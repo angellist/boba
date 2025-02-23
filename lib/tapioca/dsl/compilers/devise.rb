@@ -6,7 +6,7 @@ return unless defined?(Devise)
 module Tapioca
   module Dsl
     module Compilers
-      # `Tapioca::Dsl::Compilers::Devise` generates RBI files for `ApplicationController``
+      # `Tapioca::Dsl::Compilers::Devise` generates RBI files for `ApplicationController`
       #
       # For example, with the following routes configuration:
       #
