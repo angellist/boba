@@ -45,8 +45,6 @@ module Tapioca
 
           sig { override.returns(T::Enumerable[Module]) }
           def gather_constants
-            return [] unless defined?(::Devise)
-
             ::Devise.mappings.values.map(&:class_name).map(&:constantize)
           end
         end

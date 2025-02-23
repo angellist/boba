@@ -3,6 +3,8 @@
 
 require "spec_helper"
 
+require "devise"
+
 module Tapioca
   module Dsl
     module Compilers
