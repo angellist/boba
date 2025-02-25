@@ -35,7 +35,9 @@ module Tapioca
         extend T::Sig
         include RBIHelper
 
-        InstanceModuleName = "PaperclipGeneratedMethods"
+        ClassMethodsModuleName = "::Paperclip::Glue"
+        InstanceMethodModuleName = "PaperclipGeneratedMethods"
+
         ConstantType = type_member { { fixed: T.class_of(::Paperclip::Glue) } }
 
         class << self
@@ -55,7 +57,7 @@ module Tapioca
           return if attachments.empty?
 
           root.create_path(constant) do |klass|
-            instance_module = RBI::Module.new(InstanceModuleName)
+            instance_module = RBI::Module.new(InstanceMethodModuleName)
 
             attachments.each do |attachment_name|
               # Model: has_attached_file(:marketing_image)
@@ -70,7 +72,8 @@ module Tapioca
             end
 
             klass << instance_module
-            klass.create_include(InstanceModuleName)
+            klass.create_include(InstanceMethodModuleName)
+            klass.create_include(ClassMethodsModuleName)
           end
         end
       end
