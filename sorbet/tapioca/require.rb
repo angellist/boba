@@ -5,6 +5,7 @@
 
 require "minitest/spec"
 require "money-rails/active_record/monetizable"
+require "paperclip/railtie"
 require "rails/all"
 require "rails/generators"
 require "rails/generators/app_base"

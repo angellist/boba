@@ -72,8 +72,8 @@ module Tapioca
             end
 
             klass << instance_module
-            klass.create_include(InstanceMethodModuleName)
             klass.create_include(ClassMethodsModuleName)
+            klass.create_include(InstanceMethodModuleName)
           end
         end
       end
