@@ -12,6 +12,7 @@ group :development do
 
   gem "attr_json"
   gem "graphql"
+  gem "flag_shih_tzu"
   gem "kaminari-activerecord"
   gem "money-rails"
   gem "paperclip"
