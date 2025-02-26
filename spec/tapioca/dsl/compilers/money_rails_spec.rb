@@ -54,6 +54,7 @@ module Tapioca
 
                   class Product
                     include MoneyRailsGeneratedMethods
+                    extend MoneyRails::ActiveRecord::Monetizable::ClassMethods
 
                     module MoneyRailsGeneratedMethods
                       sig { returns(T.nilable(::Money)) }
@@ -154,6 +155,7 @@ module Tapioca
 
                   class Product
                     include MoneyRailsGeneratedMethods
+                    extend MoneyRails::ActiveRecord::Monetizable::ClassMethods
 
                     module MoneyRailsGeneratedMethods
                       sig { returns(T.nilable(::Money)) }
