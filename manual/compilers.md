@@ -8,6 +8,7 @@ This list is an evergeen list of currently available compilers.
 * [ActiveRecordAssociationsPersisted](compiler_activerecordassociationspersisted.md)
 * [ActiveRecordColumnsPersisted](compiler_activerecordcolumnspersisted.md)
 * [AttrJson](compiler_attrjson.md)
+* [FlagShihTzu](compiler_flagshihtzu.md)
 * [Kaminari](compiler_kaminari.md)
 * [MoneyRails](compiler_moneyrails.md)
 * [Paperclip](compiler_paperclip.md)
