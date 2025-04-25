@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    boba (0.0.17)
+    boba (0.1.1)
       sorbet-static-and-runtime (~> 0.5)
       tapioca (<= 0.16.11)
 

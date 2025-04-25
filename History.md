@@ -1,6 +1,6 @@
 # Boba History
 
-## 0.1.0
+## 0.1.1
 
 - Add a compiler for `FlagShihTsu`.
 - Bump Tapioca to v0.16.11.
