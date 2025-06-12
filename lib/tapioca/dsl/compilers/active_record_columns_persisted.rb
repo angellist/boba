@@ -254,12 +254,20 @@ module Tapioca
             "saved_change_to_#{attribute_name}?",
             methods_to_add,
             return_type: "T::Boolean",
+            parameters: [
+              create_kw_opt_param("from", type: "T.untyped", default: "T.unsafe(nil)"),
+              create_kw_opt_param("to", type: "T.untyped", default: "T.unsafe(nil)"),
+            ],
           )
           add_method(
             klass,
             "will_save_change_to_#{attribute_name}?",
             methods_to_add,
             return_type: "T::Boolean",
+            parameters: [
+              create_kw_opt_param("from", type: "T.untyped", default: "T.unsafe(nil)"),
+              create_kw_opt_param("to", type: "T.untyped", default: "T.unsafe(nil)"),
+            ],
           )
 
           # Added by ActiveModel::Dirty
@@ -276,8 +284,8 @@ module Tapioca
             methods_to_add,
             return_type: "T::Boolean",
             parameters: [
-              create_kw_opt_param("from", type: setter_type, default: "T.unsafe(nil)"),
-              create_kw_opt_param("to", type: setter_type, default: "T.unsafe(nil)"),
+              create_kw_opt_param("from", type: "T.untyped", default: "T.unsafe(nil)"),
+              create_kw_opt_param("to", type: "T.untyped", default: "T.unsafe(nil)"),
             ],
           )
           add_method(
@@ -303,8 +311,8 @@ module Tapioca
             methods_to_add,
             return_type: "T::Boolean",
             parameters: [
-              create_kw_opt_param("from", type: setter_type, default: "T.unsafe(nil)"),
-              create_kw_opt_param("to", type: setter_type, default: "T.unsafe(nil)"),
+              create_kw_opt_param("from", type: "T.untyped", default: "T.unsafe(nil)"),
+              create_kw_opt_param("to", type: "T.untyped", default: "T.unsafe(nil)"),
             ],
           )
           add_method(
