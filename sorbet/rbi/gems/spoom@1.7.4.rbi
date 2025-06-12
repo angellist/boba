@@ -13,11 +13,8 @@
 
 module Spoom
   class << self
-    sig { params(ruby: ::String, file: ::String).returns(::Prism::Node) }
-    def parse_ruby(ruby, file:); end
-
-    sig { params(ruby: ::String, file: ::String).returns([::Prism::Node, T::Array[::Prism::Comment]]) }
-    def parse_ruby_with_comments(ruby, file:); end
+    sig { params(ruby: ::String, file: ::String, comments: T::Boolean).returns(::Prism::Node) }
+    def parse_ruby(ruby, file:, comments: T.unsafe(nil)); end
   end
 end
 
@@ -175,8 +172,17 @@ class Spoom::Cli::Srb::Main < ::Thor
   def coverage(*args); end
   def help(command = T.unsafe(nil), subcommand = T.unsafe(nil)); end
   def lsp(*args); end
+  def metrics(*args); end
   def sigs(*args); end
   def tc(*args); end
+end
+
+class Spoom::Cli::Srb::Metrics < ::Thor
+  include ::Spoom::Colorize
+  include ::Spoom::Cli::Helper
+
+  def help(command = T.unsafe(nil), subcommand = T.unsafe(nil)); end
+  def show(*paths); end
 end
 
 class Spoom::Cli::Srb::Sigs < ::Thor
@@ -432,6 +438,23 @@ module Spoom::Context::Sorbet
   def write_sorbet_config!(contents, append: T.unsafe(nil)); end
 end
 
+class Spoom::Counters < ::Hash
+  extend T::Generic
+
+  K = type_member { { fixed: String } }
+  V = type_member { { fixed: Integer } }
+  Elem = type_member { { fixed: [String, Integer] } }
+
+  sig { void }
+  def initialize; end
+
+  sig { params(key: ::String).returns(::Integer) }
+  def [](key); end
+
+  sig { params(key: ::String).void }
+  def increment(key); end
+end
+
 module Spoom::Coverage
   class << self
     sig { params(context: ::Spoom::Context).returns(::Spoom::FileTree) }
@@ -635,10 +658,6 @@ class Spoom::Coverage::D3::ColorPalette < ::T::Struct
   prop :true, ::String
   prop :strict, ::String
   prop :strong, ::String
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 class Spoom::Coverage::D3::Pie < ::Spoom::Coverage::D3::Base
@@ -889,8 +908,6 @@ class Spoom::Coverage::Snapshot < ::T::Struct
 
     sig { params(obj: T::Hash[::String, T.untyped]).returns(::Spoom::Coverage::Snapshot) }
     def from_obj(obj); end
-
-    def inherited(s); end
   end
 end
 
@@ -980,10 +997,6 @@ class Spoom::Deadcode::Definition < ::T::Struct
 
   sig { params(args: T.untyped).returns(::String) }
   def to_json(*args); end
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 class Spoom::Deadcode::Definition::Kind < ::T::Enum
@@ -1126,7 +1139,13 @@ class Spoom::Deadcode::Plugins::ActionPack < ::Spoom::Deadcode::Plugins::Base
 end
 
 Spoom::Deadcode::Plugins::ActionPack::CALLBACKS = T.let(T.unsafe(nil), Array)
-class Spoom::Deadcode::Plugins::ActiveJob < ::Spoom::Deadcode::Plugins::Base; end
+
+class Spoom::Deadcode::Plugins::ActiveJob < ::Spoom::Deadcode::Plugins::Base
+  sig { override.params(send: ::Spoom::Deadcode::Send).void }
+  def on_send(send); end
+end
+
+Spoom::Deadcode::Plugins::ActiveJob::CALLBACKS = T.let(T.unsafe(nil), Array)
 
 class Spoom::Deadcode::Plugins::ActiveModel < ::Spoom::Deadcode::Plugins::Base
   sig { override.params(send: ::Spoom::Deadcode::Send).void }
@@ -1140,6 +1159,7 @@ end
 
 Spoom::Deadcode::Plugins::ActiveRecord::ARRAY_METHODS = T.let(T.unsafe(nil), Array)
 Spoom::Deadcode::Plugins::ActiveRecord::CALLBACKS = T.let(T.unsafe(nil), Array)
+Spoom::Deadcode::Plugins::ActiveRecord::CALLBACK_CONDITIONS = T.let(T.unsafe(nil), Array)
 Spoom::Deadcode::Plugins::ActiveRecord::CRUD_METHODS = T.let(T.unsafe(nil), Array)
 
 class Spoom::Deadcode::Plugins::ActiveSupport < ::Spoom::Deadcode::Plugins::Base
@@ -1510,10 +1530,6 @@ class Spoom::Deadcode::Send < ::T::Struct
 
   sig { params(block: T.proc.params(key: ::Prism::Node, value: T.nilable(::Prism::Node)).void).void }
   def each_arg_assoc(&block); end
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 class Spoom::Error < ::StandardError; end
@@ -1526,10 +1542,6 @@ class Spoom::ExecResult < ::T::Struct
 
   sig { returns(::String) }
   def to_s; end
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 class Spoom::FileCollector
@@ -1649,10 +1661,6 @@ class Spoom::FileTree::Node < ::T::Struct
 
   sig { returns(::String) }
   def path; end
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 class Spoom::FileTree::Printer < ::Spoom::FileTree::Visitor
@@ -1697,8 +1705,6 @@ class Spoom::Git::Commit < ::T::Struct
   def timestamp; end
 
   class << self
-    def inherited(s); end
-
     sig { params(string: ::String).returns(T.nilable(::Spoom::Git::Commit)) }
     def parse_line(string); end
   end
@@ -1777,8 +1783,6 @@ class Spoom::LSP::Diagnostic < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::Diagnostic) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -1804,8 +1808,6 @@ class Spoom::LSP::DocumentSymbol < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::DocumentSymbol) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -1845,8 +1847,6 @@ class Spoom::LSP::Hover < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::Hover) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -1865,8 +1865,6 @@ class Spoom::LSP::Location < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::Location) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -1907,8 +1905,6 @@ class Spoom::LSP::Position < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::Position) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -1934,8 +1930,6 @@ class Spoom::LSP::Range < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::Range) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -1982,8 +1976,6 @@ class Spoom::LSP::SignatureHelp < ::T::Struct
   class << self
     sig { params(json: T::Hash[T.untyped, T.untyped]).returns(::Spoom::LSP::SignatureHelp) }
     def from_json(json); end
-
-    def inherited(s); end
   end
 end
 
@@ -2107,8 +2099,8 @@ class Spoom::Model::AttrReader < ::Spoom::Model::Attr; end
 class Spoom::Model::AttrWriter < ::Spoom::Model::Attr; end
 
 class Spoom::Model::Builder < ::Spoom::Model::NamespaceVisitor
-  sig { params(model: ::Spoom::Model, file: ::String, comments: T::Array[::Prism::Comment]).void }
-  def initialize(model, file, comments:); end
+  sig { params(model: ::Spoom::Model, file: ::String).void }
+  def initialize(model, file); end
 
   sig { override.params(node: ::Prism::CallNode).void }
   def visit_call_node(node); end
@@ -2279,8 +2271,6 @@ class Spoom::Model::Reference < ::T::Struct
   class << self
     sig { params(name: ::String, location: ::Spoom::Location).returns(::Spoom::Model::Reference) }
     def constant(name, location); end
-
-    def inherited(s); end
 
     sig { params(name: ::String, location: ::Spoom::Location).returns(::Spoom::Model::Reference) }
     def method(name, location); end
@@ -2487,8 +2477,8 @@ class Spoom::Poset
 end
 
 class Spoom::Poset::Element
-  extend T::Generic
   include ::Comparable
+  extend T::Generic
 
   E = type_member { { upper: Object } }
 
@@ -2561,117 +2551,48 @@ class Spoom::Printer
   def printt; end
 end
 
-Spoom::SPOOM_PATH = T.let(T.unsafe(nil), String)
-module Spoom::Sorbet; end
+module Spoom::RBS; end
+class Spoom::RBS::Annotation < ::Spoom::RBS::Comment; end
 
-class Spoom::Sorbet::Assertions
-  class << self
-    sig { params(ruby_contents: ::String, file: ::String).returns(::String) }
-    def rbi_to_rbs(ruby_contents, file:); end
-
-    private
-
-    sig { params(ruby_contents: ::String, file: ::String).returns(T::Array[::Spoom::Sorbet::Assertions::AssignNode]) }
-    def collect_assigns(ruby_contents, file:); end
-
-    sig { params(assign: ::Spoom::Sorbet::Assertions::AssignNode).returns(::String) }
-    def dedent_value(assign); end
-  end
-end
-
-class Spoom::Sorbet::Assertions::AssignNode
-  sig do
-    params(
-      node: T.any(::Prism::ClassVariableAndWriteNode, ::Prism::ClassVariableOperatorWriteNode, ::Prism::ClassVariableOrWriteNode, ::Prism::ClassVariableWriteNode, ::Prism::ConstantAndWriteNode, ::Prism::ConstantOperatorWriteNode, ::Prism::ConstantOrWriteNode, ::Prism::ConstantPathAndWriteNode, ::Prism::ConstantPathOperatorWriteNode, ::Prism::ConstantPathOrWriteNode, ::Prism::ConstantPathWriteNode, ::Prism::ConstantWriteNode, ::Prism::GlobalVariableAndWriteNode, ::Prism::GlobalVariableOperatorWriteNode, ::Prism::GlobalVariableOrWriteNode, ::Prism::GlobalVariableWriteNode, ::Prism::InstanceVariableAndWriteNode, ::Prism::InstanceVariableOperatorWriteNode, ::Prism::InstanceVariableOrWriteNode, ::Prism::InstanceVariableWriteNode, ::Prism::LocalVariableAndWriteNode, ::Prism::LocalVariableOperatorWriteNode, ::Prism::LocalVariableOrWriteNode, ::Prism::LocalVariableWriteNode),
-      operator_loc: ::Prism::Location,
-      value: ::Prism::Node,
-      type: ::Prism::Node
-    ).void
-  end
-  def initialize(node, operator_loc, value, type); end
-
-  sig do
-    returns(T.any(::Prism::ClassVariableAndWriteNode, ::Prism::ClassVariableOperatorWriteNode, ::Prism::ClassVariableOrWriteNode, ::Prism::ClassVariableWriteNode, ::Prism::ConstantAndWriteNode, ::Prism::ConstantOperatorWriteNode, ::Prism::ConstantOrWriteNode, ::Prism::ConstantPathAndWriteNode, ::Prism::ConstantPathOperatorWriteNode, ::Prism::ConstantPathOrWriteNode, ::Prism::ConstantPathWriteNode, ::Prism::ConstantWriteNode, ::Prism::GlobalVariableAndWriteNode, ::Prism::GlobalVariableOperatorWriteNode, ::Prism::GlobalVariableOrWriteNode, ::Prism::GlobalVariableWriteNode, ::Prism::InstanceVariableAndWriteNode, ::Prism::InstanceVariableOperatorWriteNode, ::Prism::InstanceVariableOrWriteNode, ::Prism::InstanceVariableWriteNode, ::Prism::LocalVariableAndWriteNode, ::Prism::LocalVariableOperatorWriteNode, ::Prism::LocalVariableOrWriteNode, ::Prism::LocalVariableWriteNode))
-  end
-  def node; end
+class Spoom::RBS::Comment
+  sig { params(string: ::String, location: ::Prism::Location).void }
+  def initialize(string, location); end
 
   sig { returns(::Prism::Location) }
-  def operator_loc; end
+  def location; end
 
   sig { returns(::String) }
-  def rbs_type; end
-
-  def type; end
-
-  sig { returns(::Prism::Node) }
-  def value; end
+  def string; end
 end
 
-Spoom::Sorbet::Assertions::AssignType = T.type_alias { T.any(::Prism::ClassVariableAndWriteNode, ::Prism::ClassVariableOperatorWriteNode, ::Prism::ClassVariableOrWriteNode, ::Prism::ClassVariableWriteNode, ::Prism::ConstantAndWriteNode, ::Prism::ConstantOperatorWriteNode, ::Prism::ConstantOrWriteNode, ::Prism::ConstantPathAndWriteNode, ::Prism::ConstantPathOperatorWriteNode, ::Prism::ConstantPathOrWriteNode, ::Prism::ConstantPathWriteNode, ::Prism::ConstantWriteNode, ::Prism::GlobalVariableAndWriteNode, ::Prism::GlobalVariableOperatorWriteNode, ::Prism::GlobalVariableOrWriteNode, ::Prism::GlobalVariableWriteNode, ::Prism::InstanceVariableAndWriteNode, ::Prism::InstanceVariableOperatorWriteNode, ::Prism::InstanceVariableOrWriteNode, ::Prism::InstanceVariableWriteNode, ::Prism::LocalVariableAndWriteNode, ::Prism::LocalVariableOperatorWriteNode, ::Prism::LocalVariableOrWriteNode, ::Prism::LocalVariableWriteNode) }
-
-class Spoom::Sorbet::Assertions::Locator < ::Spoom::Visitor
+class Spoom::RBS::Comments
   sig { void }
   def initialize; end
 
-  sig { returns(T::Array[::Spoom::Sorbet::Assertions::AssignNode]) }
-  def assigns; end
+  sig { returns(T::Array[::Spoom::RBS::Annotation]) }
+  def annotations; end
 
-  sig { params(node: ::Prism::Node).returns(T::Boolean) }
-  def contains_heredoc?(node); end
-
-  sig { params(node: T.nilable(::Prism::Node)).returns(T::Boolean) }
-  def t?(node); end
-
-  sig { params(node: ::Prism::CallNode).returns(T::Boolean) }
-  def t_annotation?(node); end
-
-  sig do
-    params(
-      node: T.any(::Prism::ClassVariableAndWriteNode, ::Prism::ClassVariableOperatorWriteNode, ::Prism::ClassVariableOrWriteNode, ::Prism::ClassVariableWriteNode, ::Prism::ConstantAndWriteNode, ::Prism::ConstantOperatorWriteNode, ::Prism::ConstantOrWriteNode, ::Prism::ConstantPathAndWriteNode, ::Prism::ConstantPathOperatorWriteNode, ::Prism::ConstantPathOrWriteNode, ::Prism::ConstantPathWriteNode, ::Prism::ConstantWriteNode, ::Prism::GlobalVariableAndWriteNode, ::Prism::GlobalVariableOperatorWriteNode, ::Prism::GlobalVariableOrWriteNode, ::Prism::GlobalVariableWriteNode, ::Prism::InstanceVariableAndWriteNode, ::Prism::InstanceVariableOperatorWriteNode, ::Prism::InstanceVariableOrWriteNode, ::Prism::InstanceVariableWriteNode, ::Prism::LocalVariableAndWriteNode, ::Prism::LocalVariableOperatorWriteNode, ::Prism::LocalVariableOrWriteNode, ::Prism::LocalVariableWriteNode)
-    ).void
-  end
-  def visit_assign(node); end
-
-  def visit_class_variable_and_write_node(node); end
-  def visit_class_variable_operator_write_node(node); end
-  def visit_class_variable_or_write_node(node); end
-  def visit_class_variable_write_node(node); end
-  def visit_constant_and_write_node(node); end
-  def visit_constant_operator_write_node(node); end
-  def visit_constant_or_write_node(node); end
-  def visit_constant_path_and_write_node(node); end
-  def visit_constant_path_operator_write_node(node); end
-  def visit_constant_path_or_write_node(node); end
-  def visit_constant_path_write_node(node); end
-  def visit_constant_write_node(node); end
-  def visit_global_variable_and_write_node(node); end
-  def visit_global_variable_operator_write_node(node); end
-  def visit_global_variable_or_write_node(node); end
-  def visit_global_variable_write_node(node); end
-  def visit_instance_variable_and_write_node(node); end
-  def visit_instance_variable_operator_write_node(node); end
-  def visit_instance_variable_or_write_node(node); end
-  def visit_instance_variable_write_node(node); end
-  def visit_local_variable_and_write_node(node); end
-  def visit_local_variable_operator_write_node(node); end
-  def visit_local_variable_or_write_node(node); end
-  def visit_local_variable_write_node(node); end
-  def visit_multi_write_node(node); end
-end
-
-Spoom::Sorbet::Assertions::Locator::ANNOTATION_METHODS = T.let(T.unsafe(nil), Array)
-
-class Spoom::Sorbet::Assertions::Locator::HeredocVisitor < ::Spoom::Visitor
-  sig { void }
-  def initialize; end
+  sig { returns(T::Array[::Spoom::RBS::Annotation]) }
+  def class_annotations; end
 
   sig { returns(T::Boolean) }
-  def contains_heredoc; end
+  def empty?; end
 
-  sig { override.params(node: T.nilable(::Prism::Node)).void }
-  def visit(node); end
+  sig { returns(T::Array[::Spoom::RBS::Annotation]) }
+  def method_annotations; end
+
+  sig { returns(T::Array[::Spoom::RBS::Signature]) }
+  def signatures; end
 end
 
+module Spoom::RBS::ExtractRBSComments
+  sig { params(node: ::Prism::Node).returns(::Spoom::RBS::Comments) }
+  def node_rbs_comments(node); end
+end
+
+class Spoom::RBS::Signature < ::Spoom::RBS::Comment; end
+Spoom::SPOOM_PATH = T.let(T.unsafe(nil), String)
+module Spoom::Sorbet; end
 Spoom::Sorbet::BIN_PATH = T.let(T.unsafe(nil), String)
 Spoom::Sorbet::CONFIG_PATH = T.let(T.unsafe(nil), String)
 
@@ -2816,12 +2737,69 @@ Spoom::Sorbet::GEM_PATH = T.let(T.unsafe(nil), String)
 Spoom::Sorbet::GEM_VERSION = T.let(T.unsafe(nil), String)
 Spoom::Sorbet::KILLED_CODE = T.let(T.unsafe(nil), Integer)
 
-module Spoom::Sorbet::MetricsParser
+module Spoom::Sorbet::Metrics
+  class << self
+    sig { params(files: T::Array[::String]).returns(Spoom::Counters) }
+    def collect_code_metrics(files); end
+  end
+end
+
+class Spoom::Sorbet::Metrics::CodeMetricsVisitor < ::Spoom::Visitor
+  include ::Spoom::RBS::ExtractRBSComments
+
+  sig { params(counters: Spoom::Counters).void }
+  def initialize(counters); end
+
+  sig { override.params(node: T.nilable(::Prism::Node)).void }
+  def visit(node); end
+
+  sig { override.params(node: ::Prism::CallNode).void }
+  def visit_call_node(node); end
+
+  sig { override.params(node: ::Prism::ClassNode).void }
+  def visit_class_node(node); end
+
+  sig { override.params(node: ::Prism::DefNode).void }
+  def visit_def_node(node); end
+
+  sig { override.params(node: ::Prism::ModuleNode).void }
+  def visit_module_node(node); end
+
+  sig { override.params(node: ::Prism::SingletonClassNode).void }
+  def visit_singleton_class_node(node); end
+
+  private
+
+  sig { returns(T::Array[::Prism::CallNode]) }
+  def collect_last_srb_sigs; end
+
+  sig { params(node: T.any(::Prism::ClassNode, ::Prism::ModuleNode, ::Prism::SingletonClassNode)).returns(::String) }
+  def node_key(node); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_attr_accessor(node); end
+
+  sig do
+    params(
+      node: T.any(::Prism::ClassNode, ::Prism::ModuleNode, ::Prism::SingletonClassNode),
+      block: T.proc.void
+    ).void
+  end
+  def visit_scope(node, &block); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_sig(node); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_type_member(node); end
+end
+
+module Spoom::Sorbet::Metrics::MetricsFileParser
   class << self
     sig { params(path: ::String, prefix: ::String).returns(T::Hash[::String, ::Integer]) }
     def parse_file(path, prefix = T.unsafe(nil)); end
 
-    sig { params(obj: T::Hash[::String, T.untyped], prefix: ::String).returns(T::Hash[::String, ::Integer]) }
+    sig { params(obj: T::Hash[::String, T.untyped], prefix: ::String).returns(Spoom::Counters) }
     def parse_hash(obj, prefix = T.unsafe(nil)); end
 
     sig { params(string: ::String, prefix: ::String).returns(T::Hash[::String, ::Integer]) }
@@ -2829,7 +2807,7 @@ module Spoom::Sorbet::MetricsParser
   end
 end
 
-Spoom::Sorbet::MetricsParser::DEFAULT_PREFIX = T.let(T.unsafe(nil), String)
+Spoom::Sorbet::Metrics::MetricsFileParser::DEFAULT_PREFIX = T.let(T.unsafe(nil), String)
 Spoom::Sorbet::SEGFAULT_CODE = T.let(T.unsafe(nil), Integer)
 
 module Spoom::Sorbet::Sigils
@@ -2866,87 +2844,290 @@ Spoom::Sorbet::Sigils::STRICTNESS_STRONG = T.let(T.unsafe(nil), String)
 Spoom::Sorbet::Sigils::STRICTNESS_TRUE = T.let(T.unsafe(nil), String)
 Spoom::Sorbet::Sigils::VALID_STRICTNESS = T.let(T.unsafe(nil), Array)
 
-class Spoom::Sorbet::Sigs
+module Spoom::Sorbet::Translate
   class << self
-    sig { params(ruby_contents: ::String, positional_names: T::Boolean).returns(::String) }
-    def rbi_to_rbs(ruby_contents, positional_names: T.unsafe(nil)); end
+    sig { params(ruby_contents: ::String, file: ::String, max_line_length: T.nilable(::Integer)).returns(::String) }
+    def rbs_comments_to_sorbet_sigs(ruby_contents, file:, max_line_length: T.unsafe(nil)); end
 
-    sig { params(ruby_contents: ::String).returns(::String) }
-    def rbs_to_rbi(ruby_contents); end
+    sig { params(ruby_contents: ::String, file: ::String).returns(::String) }
+    def sorbet_assertions_to_rbs_comments(ruby_contents, file:); end
 
-    sig { params(ruby_contents: ::String).returns(::String) }
-    def strip(ruby_contents); end
-
-    private
-
-    sig { params(ruby_contents: ::String).returns(T::Array[[::RBI::RBSComment, T.any(::RBI::Attr, ::RBI::Method)]]) }
-    def collect_rbs_comments(ruby_contents); end
-
-    sig { params(ruby_contents: ::String).returns(T::Array[[::RBI::Sig, T.any(::RBI::Attr, ::RBI::Method)]]) }
-    def collect_sorbet_sigs(ruby_contents); end
-  end
-end
-
-class Spoom::Sorbet::Sigs::Error < ::Spoom::Error; end
-
-class Spoom::Sorbet::Sigs::RBIToRBSTranslator
-  class << self
     sig do
       params(
-        sig: ::RBI::Sig,
-        node: T.any(::RBI::Attr, ::RBI::Method),
-        positional_names: T::Boolean
+        ruby_contents: ::String,
+        file: ::String,
+        positional_names: T::Boolean,
+        max_line_length: T.nilable(::Integer)
       ).returns(::String)
     end
-    def translate(sig, node, positional_names: T.unsafe(nil)); end
+    def sorbet_sigs_to_rbs_comments(ruby_contents, file:, positional_names: T.unsafe(nil), max_line_length: T.unsafe(nil)); end
 
-    private
-
-    sig { params(sig: ::RBI::Sig, node: ::RBI::Attr, positional_names: T::Boolean).returns(::String) }
-    def translate_attr_sig(sig, node, positional_names: T.unsafe(nil)); end
-
-    sig { params(sig: ::RBI::Sig, node: ::RBI::Method, positional_names: T::Boolean).returns(::String) }
-    def translate_method_sig(sig, node, positional_names: T.unsafe(nil)); end
+    sig { params(ruby_contents: ::String, file: ::String).returns(::String) }
+    def strip_sorbet_sigs(ruby_contents, file:); end
   end
 end
 
-class Spoom::Sorbet::Sigs::RBSToRBITranslator
-  class << self
-    sig { params(comment: ::RBI::RBSComment, node: T.any(::RBI::Attr, ::RBI::Method)).returns(T.nilable(::String)) }
-    def translate(comment, node); end
+class Spoom::Sorbet::Translate::Error < ::Spoom::Error; end
 
-    private
+class Spoom::Sorbet::Translate::RBSCommentsToSorbetSigs < ::Spoom::Sorbet::Translate::Translator
+  include ::Spoom::RBS::ExtractRBSComments
 
-    sig { params(comment: ::RBI::RBSComment, node: ::RBI::Attr).returns(::String) }
-    def translate_attr_sig(comment, node); end
+  sig { params(ruby_contents: ::String, file: ::String, max_line_length: T.nilable(::Integer)).void }
+  def initialize(ruby_contents, file:, max_line_length: T.unsafe(nil)); end
 
-    sig { params(rbs_comment: ::RBI::RBSComment, node: ::RBI::Method).returns(::String) }
-    def translate_method_sig(rbs_comment, node); end
+  sig { override.params(node: ::Prism::CallNode).void }
+  def visit_call_node(node); end
+
+  sig { override.params(node: ::Prism::ClassNode).void }
+  def visit_class_node(node); end
+
+  sig { override.params(node: ::Prism::DefNode).void }
+  def visit_def_node(node); end
+
+  sig { override.params(node: ::Prism::ModuleNode).void }
+  def visit_module_node(node); end
+
+  sig { override.params(node: ::Prism::SingletonClassNode).void }
+  def visit_singleton_class_node(node); end
+
+  private
+
+  sig do
+    params(
+      node: T.any(::Prism::ClassNode, ::Prism::ModuleNode, ::Prism::SingletonClassNode),
+      constant_regex: ::Regexp
+    ).returns(T::Boolean)
   end
+  def already_extends?(node, constant_regex); end
+
+  sig { params(node: T.any(::Prism::ClassNode, ::Prism::ModuleNode, ::Prism::SingletonClassNode)).void }
+  def apply_class_annotations(node); end
+
+  sig { params(annotations: T::Array[::Spoom::RBS::Annotation], sig: ::RBI::Sig).void }
+  def apply_member_annotations(annotations, sig); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_attr(node); end
 end
 
-class Spoom::Sorbet::Sigs::Scanner
-  sig { params(source: ::String).void }
-  def initialize(source); end
+class Spoom::Sorbet::Translate::SorbetAssertionsToRBSComments < ::Spoom::Sorbet::Translate::Translator
+  sig { override.params(node: ::Prism::IfNode).void }
+  def visit_if_node(node); end
 
-  sig { params(line: ::Integer, character: ::Integer).returns(::Integer) }
-  def find_char_position(line, character); end
+  sig { override.params(node: ::Prism::StatementsNode).void }
+  def visit_statements_node(node); end
+
+  private
+
+  sig { params(node: ::Prism::Node).returns(T::Boolean) }
+  def at_end_of_line?(node); end
+
+  sig { params(call: ::Prism::CallNode).returns(::String) }
+  def build_rbs_annotation(call); end
+
+  sig { params(assign: ::Prism::Node, value: ::Prism::Node).returns(::String) }
+  def dedent_value(assign, value); end
+
+  sig { params(node: ::Prism::Node).returns(T::Boolean) }
+  def maybe_translate_assertion(node); end
+
+  sig { params(node: T.nilable(::Prism::Node)).returns(T::Boolean) }
+  def t?(node); end
+
+  sig { params(node: ::Prism::CallNode).returns(T::Boolean) }
+  def t_annotation?(node); end
 end
 
-Spoom::Sorbet::Sigs::Scanner::LINE_BREAK = T.let(T.unsafe(nil), Integer)
+Spoom::Sorbet::Translate::SorbetAssertionsToRBSComments::LINE_BREAK = T.let(T.unsafe(nil), Integer)
 
-class Spoom::Sorbet::Sigs::SigsLocator < ::RBI::Visitor
+class Spoom::Sorbet::Translate::SorbetSigsToRBSComments < ::Spoom::Sorbet::Translate::Translator
+  sig do
+    params(
+      ruby_contents: ::String,
+      file: ::String,
+      positional_names: T::Boolean,
+      max_line_length: T.nilable(::Integer)
+    ).void
+  end
+  def initialize(ruby_contents, file:, positional_names:, max_line_length: T.unsafe(nil)); end
+
+  sig { override.params(node: ::Prism::CallNode).void }
+  def visit_call_node(node); end
+
+  sig { override.params(node: ::Prism::ClassNode).void }
+  def visit_class_node(node); end
+
+  sig { override.params(node: ::Prism::ConstantWriteNode).void }
+  def visit_constant_write_node(node); end
+
+  sig { override.params(node: ::Prism::DefNode).void }
+  def visit_def_node(node); end
+
+  sig { override.params(node: ::Prism::ModuleNode).void }
+  def visit_module_node(node); end
+
+  sig { override.params(node: ::Prism::SingletonClassNode).void }
+  def visit_singleton_class_node(node); end
+
+  private
+
+  sig do
+    params(
+      parent: T.any(::Prism::ClassNode, ::Prism::ModuleNode, ::Prism::SingletonClassNode),
+      node: ::Prism::CallNode
+    ).void
+  end
+  def apply_class_annotation(parent, node); end
+
+  sig { params(sigs: T::Array[[::Prism::CallNode, ::RBI::Sig]]).void }
+  def apply_member_annotations(sigs); end
+
+  sig { params(node: ::Prism::ConstantWriteNode).returns(::String) }
+  def build_type_member_string(node); end
+
+  sig { returns(T::Array[[::Prism::CallNode, ::RBI::Sig]]) }
+  def collect_last_sigs; end
+
+  sig { void }
+  def delete_extend_t_generics; end
+
+  sig { void }
+  def delete_extend_t_helpers; end
+
+  sig { params(indent: ::Integer, block: T.proc.params(arg0: ::RBI::RBSPrinter).void).returns(::String) }
+  def rbs_print(indent, &block); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_attr(node); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_extend(node); end
+
+  sig do
+    params(
+      node: T.any(::Prism::ClassNode, ::Prism::ModuleNode, ::Prism::SingletonClassNode),
+      block: T.proc.void
+    ).void
+  end
+  def visit_scope(node, &block); end
+
+  sig { params(node: ::Prism::CallNode).void }
+  def visit_sig(node); end
+end
+
+class Spoom::Sorbet::Translate::StripSorbetSigs < ::Spoom::Sorbet::Translate::Translator
+  sig { override.params(node: ::Prism::CallNode).void }
+  def visit_call_node(node); end
+end
+
+class Spoom::Sorbet::Translate::Translator < ::Spoom::Visitor
+  abstract!
+
+  sig { params(ruby_contents: ::String, file: ::String).void }
+  def initialize(ruby_contents, file:); end
+
+  sig { returns(::String) }
+  def rewrite; end
+
+  private
+
+  sig { params(offset: ::Integer).returns(::Integer) }
+  def adjust_to_line_end(offset); end
+
+  sig { params(offset: ::Integer).returns(::Integer) }
+  def adjust_to_line_start(offset); end
+
+  sig { params(offset: ::Integer).returns(::Integer) }
+  def adjust_to_new_line(offset); end
+
+  sig { params(node: ::Prism::CallNode).returns(T::Boolean) }
+  def sorbet_sig?(node); end
+end
+
+module Spoom::Source; end
+
+class Spoom::Source::Delete < ::Spoom::Source::Edit
+  sig { params(from: ::Integer, to: ::Integer).void }
+  def initialize(from, to); end
+
+  sig { override.params(bytes: T::Array[T.untyped]).void }
+  def apply(bytes); end
+
+  sig { returns(::Integer) }
+  def from; end
+
+  sig { override.returns([::Integer, ::Integer]) }
+  def range; end
+
+  def to; end
+
+  sig { override.returns(::String) }
+  def to_s; end
+end
+
+class Spoom::Source::Edit
+  abstract!
+
+  sig { abstract.params(bytes: T::Array[::Integer]).void }
+  def apply(bytes); end
+
+  sig { abstract.returns([::Integer, ::Integer]) }
+  def range; end
+end
+
+class Spoom::Source::Insert < ::Spoom::Source::Edit
+  sig { params(position: ::Integer, text: ::String).void }
+  def initialize(position, text); end
+
+  sig { override.params(bytes: T::Array[::Integer]).void }
+  def apply(bytes); end
+
+  sig { returns(::Integer) }
+  def position; end
+
+  sig { override.returns([::Integer, ::Integer]) }
+  def range; end
+
+  sig { returns(::String) }
+  def text; end
+
+  sig { override.returns(::String) }
+  def to_s; end
+end
+
+class Spoom::Source::PositionError < ::Spoom::Error; end
+
+class Spoom::Source::Replace < ::Spoom::Source::Edit
+  sig { params(from: ::Integer, to: ::Integer, text: ::String).void }
+  def initialize(from, to, text); end
+
+  sig { override.params(bytes: T::Array[::Integer]).void }
+  def apply(bytes); end
+
+  sig { returns(::Integer) }
+  def from; end
+
+  sig { override.returns([::Integer, ::Integer]) }
+  def range; end
+
+  sig { returns(::String) }
+  def text; end
+
+  def to; end
+
+  sig { override.returns(::String) }
+  def to_s; end
+end
+
+class Spoom::Source::Rewriter
   sig { void }
   def initialize; end
 
-  sig { returns(T::Array[[::RBI::RBSComment, T.any(::RBI::Attr, ::RBI::Method)]]) }
-  def rbs_comments; end
+  sig { params(other: ::Spoom::Source::Edit).void }
+  def <<(other); end
 
-  sig { returns(T::Array[[::RBI::Sig, T.any(::RBI::Attr, ::RBI::Method)]]) }
-  def sigs; end
-
-  sig { override.params(node: T.nilable(::RBI::Node)).void }
-  def visit(node); end
+  sig { params(bytes: T::Array[::Integer]).void }
+  def rewrite!(bytes); end
 end
 
 class Spoom::Timeline
