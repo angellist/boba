@@ -28,30 +28,13 @@ class Module
   def append_features(constant); end
   def autoload(const_name, path); end
   def extend_object(obj); end
+  def method_added(method_name); end
   def prepend_features(constant); end
 end
 
 module RBI; end
 
 class RBI::Tree < ::RBI::NodeWithComments
-  sig do
-    params(
-      loc: T.nilable(::RBI::Loc),
-      comments: T::Array[::RBI::Comment],
-      block: T.nilable(T.proc.params(node: ::RBI::Tree).void)
-    ).void
-  end
-  def initialize(loc: T.unsafe(nil), comments: T.unsafe(nil), &block); end
-
-  sig { params(node: ::RBI::Node).void }
-  def <<(node); end
-
-  sig { params(with_todo_comment: T::Boolean).void }
-  def add_sig_templates!(with_todo_comment: T.unsafe(nil)); end
-
-  sig { params(annotation: ::String, annotate_scopes: T::Boolean, annotate_properties: T::Boolean).void }
-  def annotate!(annotation, annotate_scopes: T.unsafe(nil), annotate_properties: T.unsafe(nil)); end
-
   sig do
     params(
       name: ::String,
@@ -104,55 +87,6 @@ class RBI::Tree < ::RBI::NodeWithComments
   end
   def create_type_variable(name, type:, variance: T.unsafe(nil), fixed: T.unsafe(nil), upper: T.unsafe(nil), lower: T.unsafe(nil)); end
 
-  sig { params(annotation: ::String).void }
-  def deannotate!(annotation); end
-
-  sig { returns(T::Boolean) }
-  def empty?; end
-
-  sig { params(version: ::Gem::Version).void }
-  def filter_versions!(version); end
-
-  sig { void }
-  def flatten_singleton_methods!; end
-
-  sig { void }
-  def flatten_visibilities!; end
-
-  sig { void }
-  def group_nodes!; end
-
-  sig { returns(::RBI::Index) }
-  def index; end
-
-  sig do
-    params(
-      other: ::RBI::Tree,
-      left_name: ::String,
-      right_name: ::String,
-      keep: ::RBI::Rewriters::Merge::Keep
-    ).returns(::RBI::MergeTree)
-  end
-  def merge(other, left_name: T.unsafe(nil), right_name: T.unsafe(nil), keep: T.unsafe(nil)); end
-
-  sig { void }
-  def nest_non_public_members!; end
-
-  sig { void }
-  def nest_singleton_methods!; end
-
-  sig { void }
-  def nest_top_level_members!; end
-
-  sig { returns(T::Array[::RBI::Node]) }
-  def nodes; end
-
-  sig { void }
-  def replace_attributes_with_methods!; end
-
-  sig { void }
-  def sort_nodes!; end
-
   private
 
   sig { params(node: ::RBI::Node).returns(::RBI::Node) }
@@ -165,10 +99,6 @@ end
 class RBI::TypedParam < ::T::Struct
   const :param, ::RBI::Param
   const :type, ::String
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 module T::Generic
@@ -310,12 +240,6 @@ end
 
 module Tapioca
   class << self
-    sig do
-      type_parameters(:Result)
-        .params(
-          blk: T.proc.returns(T.type_parameter(:Result))
-        ).returns(T.type_parameter(:Result))
-    end
     def silence_warnings(&blk); end
   end
 end
@@ -600,7 +524,7 @@ class Tapioca::Commands::Annotations < ::Tapioca::Commands::CommandWithoutTracke
   sig { override.void }
   def execute; end
 
-  sig { params(repo_uris: T::Array[::String], gem_info: ::Tapioca::GemInfo).void }
+  sig { params(repo_uris: T::Array[::String], gem_info: ::Tapioca::GemInfo).returns(T::Boolean) }
   def fetch_annotation(repo_uris, gem_info); end
 
   sig { params(project_gems: T::Array[::Tapioca::GemInfo]).returns(T::Array[::String]) }
@@ -892,19 +816,11 @@ end
 
 class Tapioca::ConfigHelper::ConfigError < ::T::Struct
   const :message_parts, T::Array[::Tapioca::ConfigHelper::ConfigErrorMessagePart]
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 class Tapioca::ConfigHelper::ConfigErrorMessagePart < ::T::Struct
   const :message, ::String
   const :colors, T::Array[::Symbol]
-
-  class << self
-    def inherited(s); end
-  end
 end
 
 Tapioca::DEFAULT_ANNOTATIONS_DIR = T.let(T.unsafe(nil), String)
@@ -1837,7 +1753,6 @@ class Tapioca::Dsl::Compilers::UrlHelpers < ::Tapioca::Dsl::Compiler
 
     private
 
-    sig { params(mod: ::Module, helper: ::Module).returns(T::Boolean) }
     def includes_helper?(mod, helper); end
   end
 end
@@ -2110,10 +2025,8 @@ class Tapioca::Gem::ConstNodeAdded < ::Tapioca::Gem::NodeAdded
 end
 
 class Tapioca::Gem::ConstantFound < ::Tapioca::Gem::Event
-  sig { params(symbol: ::String, constant: ::BasicObject).void }
   def initialize(symbol, constant); end
 
-  sig { returns(::BasicObject) }
   def constant; end
 
   sig { returns(::String) }
@@ -2223,9 +2136,6 @@ class Tapioca::Gem::Listeners::Methods < ::Tapioca::Gem::Listeners::Base
 
   sig { params(constant: ::Module).returns(T.nilable(::UnboundMethod)) }
   def initialize_method_for(constant); end
-
-  sig { params(method: ::UnboundMethod).returns(T.untyped) }
-  def lookup_signature_of(method); end
 
   sig { params(mod: ::Module).returns(T::Hash[::Symbol, T::Array[::Symbol]]) }
   def method_names_by_visibility(mod); end
@@ -2428,6 +2338,9 @@ class Tapioca::Gem::Listeners::YardDoc < ::Tapioca::Gem::Listeners::Base
 
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
+
+  sig { params(line: ::String).returns(T::Boolean) }
+  def rbs_comment?(line); end
 end
 
 Tapioca::Gem::Listeners::YardDoc::IGNORED_COMMENTS = T.let(T.unsafe(nil), Array)
@@ -2500,8 +2413,13 @@ class Tapioca::Gem::Pipeline
   sig { returns(::Tapioca::Gemfile::GemSpec) }
   def gem; end
 
-  sig { params(method: ::UnboundMethod).returns(T::Boolean) }
-  def method_in_gem?(method); end
+  sig do
+    params(
+      method_name: ::Symbol,
+      owner: ::Module
+    ).returns(::Tapioca::Gem::Pipeline::MethodDefinitionLookupResult)
+  end
+  def method_definition_in_gem(method_name, owner); end
 
   sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def name_of(constant); end
@@ -2509,7 +2427,6 @@ class Tapioca::Gem::Pipeline
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Const).void }
   def push_const(symbol, constant, node); end
 
-  sig { params(symbol: ::String, constant: ::BasicObject).void }
   def push_constant(symbol, constant); end
 
   sig { params(symbol: ::String, constant: ::Module).void }
@@ -2550,7 +2467,6 @@ class Tapioca::Gem::Pipeline
   sig { params(name: ::String, constant: ::Module).void }
   def compile_alias(name, constant); end
 
-  sig { params(symbol: ::String, constant: ::BasicObject).void }
   def compile_constant(symbol, constant); end
 
   sig { params(symbol: ::String, constant: ::Module).void }
@@ -2559,7 +2475,6 @@ class Tapioca::Gem::Pipeline
   sig { params(name: ::String, constant: ::Module).void }
   def compile_module(name, constant); end
 
-  sig { params(name: ::String, value: ::BasicObject).void }
   def compile_object(name, value); end
 
   sig { params(name: ::String, constant: ::Module).returns(::RBI::Scope) }
@@ -2607,7 +2522,6 @@ class Tapioca::Gem::Pipeline
   sig { params(name: ::String, constant: ::Module).returns(T::Boolean) }
   def skip_alias?(name, constant); end
 
-  sig { params(name: ::String, constant: T.anything).returns(T::Boolean) }
   def skip_constant?(name, constant); end
 
   sig { params(name: ::String, constant: ::Module).returns(T::Boolean) }
@@ -2616,15 +2530,29 @@ class Tapioca::Gem::Pipeline
   sig { params(name: ::String, constant: ::Module).returns(T::Boolean) }
   def skip_module?(name, constant); end
 
-  sig { params(name: ::String, constant: ::BasicObject).returns(T::Boolean) }
   def skip_object?(name, constant); end
 
   sig { params(name: ::String).returns(T::Boolean) }
   def skip_symbol?(name); end
 end
 
-Tapioca::Gem::Pipeline::EVAL_SOURCE_FILE_PATTERN = T.let(T.unsafe(nil), Regexp)
 Tapioca::Gem::Pipeline::IGNORED_SYMBOLS = T.let(T.unsafe(nil), Array)
+
+class Tapioca::Gem::Pipeline::MethodDefinitionLookupResult
+  abstract!
+end
+
+class Tapioca::Gem::Pipeline::MethodInGemWithLocation < ::Tapioca::Gem::Pipeline::MethodDefinitionLookupResult
+  sig { params(location: ::Tapioca::Runtime::SourceLocation).void }
+  def initialize(location); end
+
+  sig { returns(::Tapioca::Runtime::SourceLocation) }
+  def location; end
+end
+
+class Tapioca::Gem::Pipeline::MethodInGemWithoutLocation < ::Tapioca::Gem::Pipeline::MethodDefinitionLookupResult; end
+class Tapioca::Gem::Pipeline::MethodNotInGem < ::Tapioca::Gem::Pipeline::MethodDefinitionLookupResult; end
+class Tapioca::Gem::Pipeline::MethodUnknown < ::Tapioca::Gem::Pipeline::MethodDefinitionLookupResult; end
 
 class Tapioca::Gem::ScopeNodeAdded < ::Tapioca::Gem::NodeAdded
   sig { params(symbol: ::String, constant: ::Module, node: ::RBI::Scope).void }
@@ -2668,8 +2596,6 @@ class Tapioca::GemInfo < ::T::Struct
   class << self
     sig { params(spec: ::Bundler::LazySpecification).returns(::Tapioca::GemInfo) }
     def from_spec(spec); end
-
-    def inherited(s); end
   end
 end
 
@@ -2888,6 +2814,7 @@ end
 module Tapioca::Helpers::Test::Isolation
   include ::Tapioca::Helpers::Test::Isolation::Forking
 
+  sig { returns(::Object) }
   def run; end
 
   class << self
@@ -2899,14 +2826,14 @@ end
 module Tapioca::Helpers::Test::Isolation::Forking
   requires_ancestor { Kernel }
 
-  sig { params(_blk: T.untyped).returns(::String) }
+  sig { params(_blk: T.nilable(T.proc.params(arg0: T.untyped).returns(T.untyped))).returns(::String) }
   def run_in_isolation(&_blk); end
 end
 
 module Tapioca::Helpers::Test::Isolation::Subprocess
   requires_ancestor { Kernel }
 
-  sig { params(_blk: T.untyped).returns(::String) }
+  sig { params(_blk: T.nilable(T.proc.params(arg0: T.untyped).returns(T.untyped))).returns(::String) }
   def run_in_isolation(&_blk); end
 end
 
@@ -3121,21 +3048,8 @@ module Tapioca::RBIFilesHelper
 
   private
 
-  sig { params(nodes: T::Array[::RBI::Node]).returns(T::Array[::RBI::Scope]) }
-  def extract_empty_scopes(nodes); end
-
   sig { params(nodes: T::Array[::RBI::Node]).returns(T::Array[T.any(::RBI::Attr, ::RBI::Method)]) }
   def extract_methods_and_attrs(nodes); end
-
-  sig { params(nodes: T::Array[::RBI::Node]).returns(T::Array[T.any(::RBI::Mixin, ::RBI::RequiresAncestor)]) }
-  def extract_mixins(nodes); end
-
-  sig do
-    params(
-      nodes: T::Array[T.any(::RBI::Attr, ::RBI::Method)]
-    ).returns(T::Array[T.any(::RBI::Attr, ::RBI::Method)])
-  end
-  def extract_nodes_with_sigs(nodes); end
 
   sig do
     params(
@@ -3148,6 +3062,15 @@ module Tapioca::RBIFilesHelper
 
   sig { params(path: ::String).returns(::String) }
   def gem_name_from_rbi_path(path); end
+
+  sig { params(nodes: T::Array[::RBI::Node], shims_or_todos: T::Array[::RBI::Node]).returns(T::Boolean) }
+  def has_duplicated_methods_and_attrs?(nodes, shims_or_todos); end
+
+  sig { params(shims_or_todos: T::Array[::RBI::Node]).returns(T::Boolean) }
+  def has_duplicated_mixins?(shims_or_todos); end
+
+  sig { params(all_nodes: T::Array[::RBI::Node], shims_or_todos: T::Array[::RBI::Node]).returns(T::Boolean) }
+  def has_duplicated_scopes?(all_nodes, shims_or_todos); end
 
   sig { params(index: ::RBI::Index, files: T::Array[::String], number_of_workers: T.nilable(::Integer)).void }
   def parse_and_index_files(index, files, number_of_workers:); end
@@ -3250,7 +3173,6 @@ end
 module Tapioca::Runtime; end
 
 module Tapioca::Runtime::AttachedClassOf
-  sig { params(singleton_class: ::Class).returns(T.nilable(::Module)) }
   def attached_class_of(singleton_class); end
 end
 
@@ -3258,76 +3180,41 @@ class Tapioca::Runtime::DynamicMixinCompiler
   include ::Tapioca::Runtime::AttachedClassOf
   include ::Tapioca::Runtime::Reflection
 
-  sig { params(constant: ::Module).void }
   def initialize(constant); end
 
   def class_attribute_predicates; end
-
-  sig { returns(T::Array[::Symbol]) }
   def class_attribute_readers; end
-
   def class_attribute_writers; end
-
-  sig { params(tree: ::RBI::Tree).void }
   def compile_class_attributes(tree); end
-
-  sig { params(tree: ::RBI::Tree).returns([T::Array[::Module], T::Array[::Module]]) }
   def compile_mixes_in_class_methods(tree); end
-
-  sig { returns(T::Array[::Module]) }
   def dynamic_extends; end
-
   def dynamic_includes; end
-
-  sig { returns(T::Boolean) }
   def empty_attributes?; end
-
-  sig { params(qualified_mixin_name: ::String).returns(T::Boolean) }
   def filtered_mixin?(qualified_mixin_name); end
-
   def instance_attribute_predicates; end
-
-  sig { returns(T::Array[::Symbol]) }
   def instance_attribute_readers; end
-
   def instance_attribute_writers; end
-
-  sig { params(mod: ::Module, dynamic_extends: T::Array[::Module]).returns(T::Boolean) }
   def module_included_by_another_dynamic_extend?(mod, dynamic_extends); end
 end
 
 module Tapioca::Runtime::GenericTypeRegistry
   class << self
-    sig { params(instance: ::Object).returns(T::Boolean) }
     def generic_type_instance?(instance); end
-
-    sig { params(constant: ::Module).returns(T.nilable(T::Array[::Tapioca::TypeVariableModule])) }
     def lookup_type_variables(constant); end
-
-    sig { params(constant: T.untyped, types: T.untyped).returns(::Module) }
     def register_type(constant, types); end
-
-    sig { params(constant: T.untyped, type_variable: ::Tapioca::TypeVariableModule).void }
     def register_type_variable(constant, type_variable); end
 
     private
 
-    sig { params(constant: ::Module, name: ::String).returns(::Module) }
     def create_generic_type(constant, name); end
-
-    sig { params(constant: T::Class[T.anything]).returns(T::Class[T.anything]) }
     def create_safe_subclass(constant); end
-
-    sig { params(constant: ::Module).returns(T::Array[::Tapioca::TypeVariableModule]) }
     def lookup_or_initialize_type_variables(constant); end
   end
 end
 
 class Tapioca::Runtime::GenericTypeRegistry::GenericType < ::T::Types::Simple
-  sig { params(raw_type: ::Module, underlying_type: ::Module).void }
   def initialize(raw_type, underlying_type); end
 
-  sig { override.params(obj: T.untyped).returns(T::Boolean) }
   def valid?(obj); end
 end
 
@@ -3336,100 +3223,39 @@ module Tapioca::Runtime::Reflection
   extend ::Tapioca::Runtime::AttachedClassOf
   extend ::Tapioca::Runtime::Reflection
 
-  sig { params(constant: ::Module).returns(T.untyped) }
   def abstract_type_of(constant); end
-
-  sig { params(constant: ::Module).returns(T::Array[::Module]) }
   def ancestors_of(constant); end
-
-  sig { params(object: ::BasicObject, other: ::BasicObject).returns(T::Boolean) }
   def are_equal?(object, other); end
-
-  sig { params(object: ::BasicObject).returns(T::Class[T.anything]) }
   def class_of(object); end
-
+  def const_source_location(constant_name); end
   def constant_defined?(constant); end
-
-  sig { params(symbol: ::String, inherit: T::Boolean, namespace: ::Module).returns(::BasicObject) }
   def constantize(symbol, inherit: T.unsafe(nil), namespace: T.unsafe(nil)); end
-
-  sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def constants_of(constant); end
-
-  sig do
-    type_parameters(:U)
-      .params(
-        klass: T.all(T.type_parameter(:U), T::Class[T.anything])
-      ).returns(T::Array[T.type_parameter(:U)])
-  end
   def descendants_of(klass); end
-
-  sig { params(constant: ::Module).returns(T::Set[::String]) }
   def file_candidates_for(constant); end
-
-  sig { params(constant: ::Module).returns(T::Boolean) }
   def final_module?(constant); end
-
-  sig { params(constant: ::Module).returns(T::Array[::Module]) }
   def inherited_ancestors_of(constant); end
-
-  sig { params(constant: ::Module, method: ::Symbol).returns(::Method) }
   def method_of(constant, method); end
-
-  sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def name_of(constant); end
-
-  sig { params(type: ::T::Types::Base).returns(::String) }
   def name_of_type(type); end
-
-  sig { params(object: ::BasicObject).returns(::Integer) }
   def object_id_of(object); end
-
-  sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def private_instance_methods_of(constant); end
-
-  sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def protected_instance_methods_of(constant); end
-
-  sig { params(constant: ::Module).returns(T::Array[::Symbol]) }
   def public_instance_methods_of(constant); end
-
-  sig { params(constant: ::Module).returns(T.nilable(::String)) }
   def qualified_name_of(constant); end
-
-  sig { params(locations: T.nilable(T::Array[::Thread::Backtrace::Location])).returns(::String) }
   def resolve_loc(locations); end
-
-  sig { params(constant: ::Module).returns(T::Boolean) }
   def sealed_module?(constant); end
-
-  sig { params(method: T.any(::Method, ::UnboundMethod)).returns(T.untyped) }
   def signature_of(method); end
-
-  sig { params(method: T.any(::Method, ::UnboundMethod)).returns(T.untyped) }
   def signature_of!(method); end
-
-  sig { params(constant: ::Module).returns(T::Class[T.anything]) }
   def singleton_class_of(constant); end
-
-  sig { params(constant: T::Class[T.anything]).returns(T.nilable(T::Class[T.anything])) }
   def superclass_of(constant); end
 
   private
 
-  sig { params(parent: ::Module, name: ::String).returns(T.nilable(::Module)) }
   def child_module_for_parent_with_name(parent, name); end
-
-  sig { params(name: ::String).returns(T::Boolean) }
   def has_aliased_namespace?(name); end
-
-  sig { params(method: ::UnboundMethod).returns(T::Boolean) }
   def method_defined_by_forwardable_module?(method); end
-
-  sig { params(constant: ::Module).returns(T::Array[::UnboundMethod]) }
   def methods_for(constant); end
-
-  sig { params(constant: ::Module).returns(T::Array[::UnboundMethod]) }
   def relevant_methods_for(constant); end
 end
 
@@ -3446,21 +3272,29 @@ Tapioca::Runtime::Reflection::PUBLIC_INSTANCE_METHODS_METHOD = T.let(T.unsafe(ni
 Tapioca::Runtime::Reflection::REQUIRED_FROM_LABELS = T.let(T.unsafe(nil), Array)
 Tapioca::Runtime::Reflection::SINGLETON_CLASS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
 Tapioca::Runtime::Reflection::SUPERCLASS_METHOD = T.let(T.unsafe(nil), UnboundMethod)
+class Tapioca::Runtime::Reflection::SignatureBlockError < ::Tapioca::Error; end
+
+class Tapioca::Runtime::SourceLocation
+  def initialize(file:, line:); end
+
+  def file; end
+  def line; end
+
+  class << self
+    def from_loc(loc); end
+
+    private
+
+    def new(*_arg0); end
+  end
+end
+
+Tapioca::Runtime::SourceLocation::EVAL_SOURCE_FILE_PATTERN = T.let(T.unsafe(nil), Regexp)
 
 module Tapioca::Runtime::Trackers
   class << self
-    sig { void }
     def disable_all!; end
-
-    sig { params(tracker: ::Tapioca::Runtime::Trackers::Tracker).void }
     def register_tracker(tracker); end
-
-    sig do
-      type_parameters(:Return)
-        .params(
-          blk: T.proc.returns(T.type_parameter(:Return))
-        ).returns(T.type_parameter(:Return))
-    end
     def with_trackers_enabled(&blk); end
   end
 end
@@ -3469,18 +3303,8 @@ module Tapioca::Runtime::Trackers::Autoload
   extend ::Tapioca::Runtime::Trackers::Tracker
 
   class << self
-    sig { void }
     def eager_load_all!; end
-
-    sig { params(constant_name: ::String).void }
     def register(constant_name); end
-
-    sig do
-      type_parameters(:Result)
-        .params(
-          block: T.proc.returns(T.type_parameter(:Result))
-        ).returns(T.type_parameter(:Result))
-    end
     def with_disabled_exits(&block); end
   end
 end
@@ -3493,10 +3317,23 @@ module Tapioca::Runtime::Trackers::ConstantDefinition
   extend ::Tapioca::Runtime::Reflection
 
   class << self
-    def build_constant_location(tp, locations); end
+    def build_source_location(tp, locations); end
     def disable!; end
     def files_for(klass); end
     def locations_for(klass); end
+  end
+end
+
+module Tapioca::Runtime::Trackers::MethodDefinition
+  extend ::Tapioca::Runtime::Trackers::Tracker
+
+  class << self
+    def method_definitions_for(method_name, owner); end
+    def register(method_name, owner, locations); end
+
+    private
+
+    def registrations_for(method_name, owner); end
   end
 end
 
@@ -3504,52 +3341,15 @@ module Tapioca::Runtime::Trackers::Mixin
   extend ::Tapioca::Runtime::Trackers::Tracker
 
   class << self
-    sig do
-      params(
-        mixin: ::Module
-      ).returns(T::Hash[::Tapioca::Runtime::Trackers::Mixin::Type, T::Hash[::Module, ::String]])
-    end
     def constants_with_mixin(mixin); end
-
-    sig do
-      params(
-        mixin: ::Module,
-        mixin_type: ::Tapioca::Runtime::Trackers::Mixin::Type,
-        constant: ::Module
-      ).returns(T.nilable(::String))
-    end
     def mixin_location(mixin, mixin_type, constant); end
-
-    sig { params(constant: ::Module, mixin: ::Module, mixin_type: ::Tapioca::Runtime::Trackers::Mixin::Type).void }
     def register(constant, mixin, mixin_type); end
-
     def resolve_to_attached_class(constant, mixin, mixin_type); end
-
-    sig do
-      type_parameters(:Result)
-        .params(
-          block: T.proc.returns(T.type_parameter(:Result))
-        ).returns(T.type_parameter(:Result))
-    end
     def with_disabled_registration(&block); end
 
     private
 
-    sig do
-      params(
-        mixin: ::Module
-      ).returns(T::Hash[::Tapioca::Runtime::Trackers::Mixin::Type, T::Hash[::Module, ::String]])
-    end
     def find_or_initialize_mixin_lookup(mixin); end
-
-    sig do
-      params(
-        constant: ::Module,
-        mixin: ::Module,
-        mixin_type: ::Tapioca::Runtime::Trackers::Mixin::Type,
-        location: ::String
-      ).void
-    end
     def register_with_location(constant, mixin, mixin_type, location); end
   end
 end
@@ -3566,13 +3366,8 @@ module Tapioca::Runtime::Trackers::RequiredAncestor
   extend ::Tapioca::Runtime::Trackers::Tracker
 
   class << self
-    sig { params(requiring: ::T::Helpers, block: T.proc.void).void }
     def register(requiring, block); end
-
-    sig { params(mod: ::Module).returns(T::Array[T.proc.void]) }
     def required_ancestors_blocks_by(mod); end
-
-    sig { params(mod: ::Module).returns(T::Array[T.untyped]) }
     def required_ancestors_by(mod); end
   end
 end
@@ -3580,14 +3375,11 @@ end
 module Tapioca::Runtime::Trackers::Tracker
   abstract!
 
-  sig { void }
   def disable!; end
-
   def enabled?; end
   def with_disabled_tracker(&block); end
 
   class << self
-    sig { params(base: T.all(::Module, ::Tapioca::Runtime::Trackers::Tracker)).void }
     def extended(base); end
   end
 end
@@ -3728,34 +3520,16 @@ class Tapioca::TypeVariable < ::T::Types::TypeVariable
 end
 
 class Tapioca::TypeVariableModule < ::Module
-  sig do
-    params(
-      context: ::Module,
-      type: ::Tapioca::TypeVariableModule::Type,
-      variance: ::Symbol,
-      bounds_proc: T.nilable(T.proc.returns(T::Hash[::Symbol, T.untyped]))
-    ).void
-  end
   def initialize(context, type, variance, bounds_proc); end
 
-  sig { returns(::Tapioca::TypeVariable) }
   def coerce_to_type_variable; end
-
-  sig { returns(T::Boolean) }
   def fixed?; end
-
-  sig { returns(T.nilable(::String)) }
   def name; end
-
-  sig { returns(::String) }
   def serialize; end
-
-  sig { returns(::Tapioca::TypeVariableModule::Type) }
   def type; end
 
   private
 
-  sig { returns(T::Hash[::Symbol, T.untyped]) }
   def bounds; end
 end
 
