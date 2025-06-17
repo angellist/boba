@@ -1,5 +1,9 @@
 # Boba History
 
+## 0.1.3
+
+- Bump Tapioca to v0.17.3.
+
 ## 0.1.2
 
 - Bump Tapioca to v0.17.2.
