@@ -536,10 +536,10 @@ class Tapioca::Commands::Annotations < ::Tapioca::Commands::CommandWithoutTracke
   sig { params(repo_uri: ::String, path: ::String).returns(T.nilable(::String)) }
   def fetch_http_file(repo_uri, path); end
 
-  sig { params(repo_uri: ::String, repo_number: T.nilable(::Integer)).returns(T.nilable(Tapioca::RepoIndex)) }
+  sig { params(repo_uri: ::String, repo_number: T.nilable(::Integer)).returns(T.nilable(::Tapioca::RepoIndex)) }
   def fetch_index(repo_uri, repo_number:); end
 
-  sig { returns(T::Hash[::String, Tapioca::RepoIndex]) }
+  sig { returns(T::Hash[::String, ::Tapioca::RepoIndex]) }
   def fetch_indexes; end
 
   sig { params(repo_uri: ::String, path: ::String).returns(T.nilable(::String)) }
@@ -1319,6 +1319,13 @@ class Tapioca::Dsl::Compilers::ActiveRecordRelations < ::Tapioca::Dsl::Compiler
   sig { params(method_name: ::Symbol).returns(T::Boolean) }
   def bang_method?(method_name); end
 
+  sig do
+    params(
+      method_name: ::Symbol
+    ).returns(T.nilable([::String, ::String, T::Hash[::String, [::Symbol, ::String, T.nilable(::String)]]]))
+  end
+  def batch_method_configs(method_name); end
+
   sig { returns(::RBI::Scope) }
   def common_relation_methods_module; end
 
@@ -1403,6 +1410,7 @@ end
 
 Tapioca::Dsl::Compilers::ActiveRecordRelations::ASSOCIATION_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::BATCHES_METHODS = T.let(T.unsafe(nil), Array)
+Tapioca::Dsl::Compilers::ActiveRecordRelations::BATCHES_METHODS_PARAMETERS = T.let(T.unsafe(nil), Hash)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::BUILDER_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::CALCULATION_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::COLLECTION_PROXY_METHODS = T.let(T.unsafe(nil), Array)
@@ -3162,10 +3170,10 @@ class Tapioca::RepoIndex
   def has_gem?(gem_name); end
 
   class << self
-    sig { params(hash: T::Hash[::String, T::Hash[T.untyped, T.untyped]]).returns(Tapioca::RepoIndex) }
+    sig { params(hash: T::Hash[::String, T::Hash[T.untyped, T.untyped]]).returns(::Tapioca::RepoIndex) }
     def from_hash(hash); end
 
-    sig { params(json: ::String).returns(Tapioca::RepoIndex) }
+    sig { params(json: ::String).returns(::Tapioca::RepoIndex) }
     def from_json(json); end
   end
 end
@@ -3373,8 +3381,6 @@ module Tapioca::Runtime::Trackers::RequiredAncestor
 end
 
 module Tapioca::Runtime::Trackers::Tracker
-  abstract!
-
   def disable!; end
   def enabled?; end
   def with_disabled_tracker(&block); end
