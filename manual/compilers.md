@@ -7,6 +7,7 @@ This list is an evergeen list of currently available compilers.
 <!-- START_COMPILER_LIST -->
 * [ActiveRecordAssociationsPersisted](compiler_activerecordassociationspersisted.md)
 * [ActiveRecordColumnsPersisted](compiler_activerecordcolumnspersisted.md)
+* [ActiveRecordTypedEnum](compiler_activerecordtypedenum.md)
 * [AttrJson](compiler_attrjson.md)
 * [FlagShihTzu](compiler_flagshihtzu.md)
 * [Kaminari](compiler_kaminari.md)
