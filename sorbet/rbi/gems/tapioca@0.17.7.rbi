@@ -1761,6 +1761,7 @@ class Tapioca::Dsl::Compilers::UrlHelpers < ::Tapioca::Dsl::Compiler
 
     private
 
+    sig { params(mod: ::Module, helper: ::Module).returns(T::Boolean) }
     def includes_helper?(mod, helper); end
   end
 end
