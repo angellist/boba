@@ -68,6 +68,12 @@ def recent_posts_from_author(author)
 end
 ```
 
+### A Note on Tapioca Dependencies
+
+The core `ActiveRecordAssociationsPersisted` and `ActiveRecordColumnsPersisted` compilers are extensions of Tapioca's corresponding compilers, and depend on monkey patching internal methods. As such, Boba's dependent Tapioca version must be restricted to known good versions and cannot use the more lenient pessimistic version pinning (`~>`), since even minor or patch versions of Tapioca can introduce breaking changes that would be frustrating or difficult for consumers.
+
+We try to stay as up-to-date with Tapioca versions as possible, but can sometimes fall behind. Please submit an issue or pull request (including any needed updates) if we miss a Tapioca version you'd like to upgrade to, and we will address it as soon as possible.
+
 ## Contributing
 
 Bugs and feature requests are welcome and should be [filed as issues on github](https://github.com/angellist/boba/issues).
