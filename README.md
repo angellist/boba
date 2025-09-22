@@ -81,3 +81,9 @@ Since Boba is intended to be used alongside Tapioca and the compilers provided b
 Contributed compilers should be well documented, and named after and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
 
 Compilers for Gems, DSLs, or modules that are not publicly available will not be accepted.
+
+### Releasing
+
+1. Bump the version in `lib/boba/version.rb`, and commit.
+2. Add a new tag: `git tag vX.Y.Z`.
+3. Then push `git push origin head vX.Y.Z`.
