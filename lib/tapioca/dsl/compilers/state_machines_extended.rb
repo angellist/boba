@@ -119,7 +119,7 @@ module Tapioca
           "GeneratedAssociationRelationMethods",
         ].freeze
 
-        ConstantType = type_member { { fixed: T.all(Module, ::StateMachines::ClassMethods) } }
+        ConstantType = type_member { { fixed: T.all(T::Module[T.anything], ::StateMachines::ClassMethods) } }
 
         sig { override.void }
         def decorate
@@ -168,7 +168,7 @@ module Tapioca
         class << self
           extend T::Sig
 
-          sig { override.returns(T::Enumerable[Module]) }
+          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
           def gather_constants
             all_classes.select { |mod| ::StateMachines::InstanceMethods > mod }
           end
@@ -176,7 +176,7 @@ module Tapioca
 
         private
 
-        sig { params(constant: Module).returns(T::Boolean) }
+        sig { params(constant: T::Module[T.anything]).returns(T::Boolean) }
         def uses_active_record_integration?(constant)
           ::StateMachines::Integrations.match(constant)&.integration_name == :active_record
         end

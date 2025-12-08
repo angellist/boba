@@ -1,5 +1,10 @@
 # Boba History
 
+## 0.1.6
+
+- Bump Tapioca to v0.17.9.
+- Fix Sorbet type annotations for `Module` to use `T::Module[T.anything]` for compatibility with Sorbet 0.6.x.
+
 ## 0.1.5
 
 - Bump Tapioca to v0.17.7.

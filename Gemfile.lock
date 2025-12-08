@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    boba (0.1.5)
+    boba (0.1.6)
       sorbet-static-and-runtime (~> 0.5)
-      tapioca (<= 0.17.7)
+      tapioca (<= 0.17.9)
 
 GEM
   remote: https://rubygems.org/
@@ -83,7 +83,7 @@ GEM
     attr_json (2.5.0)
       activerecord (>= 6.0.0, < 8.1)
     base64 (0.2.0)
-    benchmark (0.4.1)
+    benchmark (0.5.0)
     bigdecimal (3.1.8)
     builder (3.3.0)
     climate_control (0.2.0)
@@ -173,7 +173,7 @@ GEM
     parser (3.3.4.2)
       ast (~> 2.4.1)
       racc
-    prism (1.4.0)
+    prism (1.6.0)
     psych (5.1.2)
       stringio
     racc (1.8.1)
@@ -216,7 +216,7 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.2.1)
-    rbi (0.3.6)
+    rbi (0.3.8)
       prism (~> 1.0)
       rbs (>= 3.4.4)
     rbs (4.0.0.dev.4)
@@ -228,7 +228,7 @@ GEM
     reline (0.5.10)
       io-console (~> 0.5)
     require-hooks (0.2.2)
-    rexml (3.4.1)
+    rexml (3.4.4)
     rubocop (1.65.1)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
@@ -250,15 +250,15 @@ GEM
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
     securerandom (0.3.1)
-    sorbet (0.5.12356)
-      sorbet-static (= 0.5.12356)
-    sorbet-runtime (0.5.12356)
-    sorbet-static (0.5.12356-universal-darwin)
-    sorbet-static (0.5.12356-x86_64-linux)
-    sorbet-static-and-runtime (0.5.12356)
-      sorbet (= 0.5.12356)
-      sorbet-runtime (= 0.5.12356)
-    spoom (1.7.5)
+    sorbet (0.6.12825)
+      sorbet-static (= 0.6.12825)
+    sorbet-runtime (0.6.12825)
+    sorbet-static (0.6.12825-universal-darwin)
+    sorbet-static (0.6.12825-x86_64-linux)
+    sorbet-static-and-runtime (0.6.12825)
+      sorbet (= 0.6.12825)
+      sorbet-runtime (= 0.6.12825)
+    spoom (1.7.10)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
       rbi (>= 0.3.3)
@@ -270,15 +270,15 @@ GEM
       mini_portile2 (~> 2.8.0)
     state_machines (0.6.0)
     stringio (3.1.1)
-    tapioca (0.17.7)
+    tapioca (0.17.9)
       benchmark
       bundler (>= 2.2.25)
       netrc (>= 0.11.0)
       parallel (>= 1.21.0)
-      rbi (>= 0.3.1)
+      rbi (>= 0.3.7)
       require-hooks (>= 0.2.2)
       sorbet-static-and-runtime (>= 0.5.11087)
-      spoom (>= 1.7.0)
+      spoom (>= 1.7.9)
       thor (>= 1.2.0)
       yard-sorbet
     terrapin (0.6.0)
@@ -293,7 +293,7 @@ GEM
     websocket-driver (0.7.6)
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
-    yard (0.9.37)
+    yard (0.9.38)
     yard-sorbet (0.9.0)
       sorbet-runtime
       yard
