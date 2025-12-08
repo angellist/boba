@@ -28,6 +28,7 @@ class REXML::Attribute
   def ==(other); end
   def clone; end
   def doctype; end
+  def document; end
   def element; end
   def element=(element); end
   def hash; end
@@ -164,6 +165,9 @@ class REXML::Document < ::REXML::Element
   private
 
   def build(source); end
+  def enable_cache; end
+  def namespaces_cache; end
+  def namespaces_cache=(_arg0); end
 
   class << self
     def entity_expansion_limit; end
@@ -228,6 +232,7 @@ class REXML::Element < ::REXML::Parent
   private
 
   def __to_xpath_helper(node); end
+  def calculate_namespaces; end
   def each_with_something(test, max = T.unsafe(nil), name = T.unsafe(nil)); end
 end
 
@@ -527,16 +532,20 @@ class REXML::Parsers::BaseParser
 
   def add_namespace(prefix, uri); end
   def need_source_encoding_update?(xml_declaration_encoding); end
+  def normalize_xml_declaration_encoding(xml_declaration_encoding); end
+  def parse_attribute_value_with_equal(name); end
   def parse_attributes(prefixes); end
   def parse_id(base_error_message, accept_external_id:, accept_public_id:); end
   def parse_id_invalid_details(accept_external_id:, accept_public_id:); end
   def parse_name(base_error_message); end
   def pop_namespaces_restore; end
+  def process_comment; end
   def process_instruction; end
   def pull_event; end
   def push_namespaces_restore; end
   def record_entity_expansion(delta = T.unsafe(nil)); end
   def scan_quote; end
+  def xml_declaration; end
 end
 
 REXML::Parsers::BaseParser::EXTERNAL_ID_PUBLIC = T.let(T.unsafe(nil), Regexp)
@@ -549,6 +558,7 @@ REXML::Parsers::BaseParser::Private::CHARACTER_REFERENCES = T.let(T.unsafe(nil),
 REXML::Parsers::BaseParser::Private::CLOSE_PATTERN = T.let(T.unsafe(nil), Regexp)
 REXML::Parsers::BaseParser::Private::DEFAULT_ENTITIES_PATTERNS = T.let(T.unsafe(nil), Hash)
 REXML::Parsers::BaseParser::Private::ENTITYDECL_PATTERN = T.let(T.unsafe(nil), Regexp)
+REXML::Parsers::BaseParser::Private::EQUAL_PATTERN = T.let(T.unsafe(nil), Regexp)
 REXML::Parsers::BaseParser::Private::GEDECL_PATTERN = T.let(T.unsafe(nil), String)
 REXML::Parsers::BaseParser::Private::NAME_PATTERN = T.let(T.unsafe(nil), Regexp)
 REXML::Parsers::BaseParser::Private::PEDECL_PATTERN = T.let(T.unsafe(nil), String)
@@ -649,6 +659,7 @@ class REXML::Source
   def read(term = T.unsafe(nil)); end
   def read_until(term); end
   def scan_byte; end
+  def skip_spaces; end
 
   private
 
@@ -659,6 +670,7 @@ end
 module REXML::Source::Private; end
 REXML::Source::Private::PRE_DEFINED_TERM_PATTERNS = T.let(T.unsafe(nil), Hash)
 REXML::Source::Private::SCANNER_RESET_SIZE = T.let(T.unsafe(nil), Integer)
+REXML::Source::Private::SPACES_PATTERN = T.let(T.unsafe(nil), Regexp)
 
 class REXML::SourceFactory
   class << self
@@ -695,7 +707,7 @@ class REXML::Text < ::REXML::Child
   def clear_cache; end
 
   class << self
-    def check(string, pattern, doctype); end
+    def check(string, pattern, doctype = T.unsafe(nil)); end
     def expand(ref, doctype, filter); end
     def normalize(input, doctype = T.unsafe(nil), entity_filter = T.unsafe(nil)); end
     def read_with_substitution(input, illegal = T.unsafe(nil)); end
@@ -768,11 +780,11 @@ class REXML::XPathParser
 
   def []=(variable_name, value); end
   def first(path_stack, node); end
-  def get_first(path, nodeset); end
-  def match(path_stack, nodeset); end
+  def get_first(path, node); end
+  def match(path_stack, node); end
   def namespaces=(namespaces = T.unsafe(nil)); end
-  def parse(path, nodeset); end
-  def predicate(path, nodeset); end
+  def parse(path, node); end
+  def predicate(path, node); end
   def variables=(vars = T.unsafe(nil)); end
 
   private

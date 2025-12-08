@@ -13,8 +13,15 @@
 
 module Spoom
   class << self
-    sig { params(ruby: ::String, file: ::String, comments: T::Boolean).returns(::Prism::Node) }
-    def parse_ruby(ruby, file:, comments: T.unsafe(nil)); end
+    sig { params(ruby: ::String, file: ::String).returns([::Prism::Node, T::Array[::Prism::Comment]]) }
+    def parse_ruby(ruby, file:); end
+  end
+end
+
+module Spoom::BundlerHelper
+  class << self
+    sig { params(gem_name: ::String).returns(::String) }
+    def gem_requirement_from_real_bundle(gem_name); end
   end
 end
 
@@ -2591,6 +2598,7 @@ module Spoom::RBS::ExtractRBSComments
 end
 
 class Spoom::RBS::Signature < ::Spoom::RBS::Comment; end
+class Spoom::RBS::TypeAlias < ::Spoom::RBS::Comment; end
 Spoom::SPOOM_PATH = T.let(T.unsafe(nil), String)
 module Spoom::Sorbet; end
 Spoom::Sorbet::BIN_PATH = T.let(T.unsafe(nil), String)
@@ -2900,6 +2908,9 @@ class Spoom::Sorbet::Translate::RBSCommentsToSorbetSigs < ::Spoom::Sorbet::Trans
   sig { override.params(node: ::Prism::ModuleNode).void }
   def visit_module_node(node); end
 
+  sig { override.params(node: ::Prism::ProgramNode).void }
+  def visit_program_node(node); end
+
   sig { override.params(node: ::Prism::SingletonClassNode).void }
   def visit_singleton_class_node(node); end
 
@@ -2918,6 +2929,12 @@ class Spoom::Sorbet::Translate::RBSCommentsToSorbetSigs < ::Spoom::Sorbet::Trans
 
   sig { params(annotations: T::Array[::Spoom::RBS::Annotation], sig: ::RBI::Sig).void }
   def apply_member_annotations(annotations, sig); end
+
+  sig { params(comments: T::Array[::Prism::Comment]).void }
+  def apply_type_aliases(comments); end
+
+  sig { params(comments: T::Array[::Prism::Comment]).returns(T::Array[::Spoom::RBS::TypeAlias]) }
+  def collect_type_aliases(comments); end
 
   sig { params(def_node: ::Prism::DefNode, comments: ::Spoom::RBS::Comments).void }
   def rewrite_def(def_node, comments); end
@@ -2956,6 +2973,12 @@ class Spoom::Sorbet::Translate::SorbetAssertionsToRBSComments < ::Spoom::Sorbet:
 
   sig { params(assign: ::Prism::Node, value: ::Prism::Node).returns(::String) }
   def dedent_value(assign, value); end
+
+  sig { params(node: ::Prism::Node).returns([T.nilable(::String), T.nilable(::Integer)]) }
+  def extract_trailing_comment(node); end
+
+  sig { params(node: ::Prism::Node).returns(T::Boolean) }
+  def has_rbs_annotation?(node); end
 
   sig { params(node: ::Prism::Node).returns(T::Boolean) }
   def maybe_translate_assertion(node); end

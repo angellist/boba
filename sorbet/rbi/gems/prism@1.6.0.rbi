@@ -562,7 +562,7 @@ class Prism::ArrayPatternNode < ::Prism::Node
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       requireds: T::Array[Prism::Node],
       rest: T.nilable(Prism::Node),
       posts: T::Array[Prism::Node],
@@ -592,7 +592,7 @@ class Prism::ArrayPatternNode < ::Prism::Node
   sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
-  sig { returns(T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode))) }
+  sig { returns(T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode))) }
   def constant; end
 
   sig do
@@ -600,7 +600,7 @@ class Prism::ArrayPatternNode < ::Prism::Node
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       requireds: T::Array[Prism::Node],
       rest: T.nilable(Prism::Node),
       posts: T::Array[Prism::Node],
@@ -3893,6 +3893,10 @@ class Prism::ConstantWriteNode < ::Prism::Node
   end
 end
 
+class Prism::CurrentVersionError < ::ArgumentError
+  def initialize(version); end
+end
+
 module Prism::DSL
   extend ::Prism::DSL
 
@@ -3984,7 +3988,7 @@ module Prism::DSL
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       requireds: T::Array[Prism::Node],
       rest: T.nilable(Prism::Node),
       posts: T::Array[Prism::Node],
@@ -4616,7 +4620,7 @@ module Prism::DSL
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       left: Prism::SplatNode,
       requireds: T::Array[Prism::Node],
       right: T.any(Prism::SplatNode, Prism::MissingNode),
@@ -4796,7 +4800,7 @@ module Prism::DSL
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       elements: T::Array[Prism::AssocNode],
       rest: T.nilable(T.any(Prism::AssocSplatNode, Prism::NoKeywordsParameterNode)),
       opening_loc: T.nilable(Prism::Location),
@@ -6275,6 +6279,7 @@ class Prism::Dispatcher < ::Prism::Visitor
   def dispatch_once(node); end
   def listeners; end
   def register(listener, *events); end
+  def register_public_methods(listener); end
   def visit_alias_global_variable_node(node); end
   def visit_alias_method_node(node); end
   def visit_alternation_pattern_node(node); end
@@ -6426,6 +6431,10 @@ class Prism::Dispatcher < ::Prism::Visitor
   def visit_while_node(node); end
   def visit_x_string_node(node); end
   def visit_yield_node(node); end
+
+  private
+
+  def register_events(listener, events); end
 end
 
 class Prism::Dispatcher::DispatchOnce < ::Prism::Visitor
@@ -7160,7 +7169,7 @@ class Prism::FindPatternNode < ::Prism::Node
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       left: Prism::SplatNode,
       requireds: T::Array[Prism::Node],
       right: T.any(Prism::SplatNode, Prism::MissingNode),
@@ -7190,7 +7199,7 @@ class Prism::FindPatternNode < ::Prism::Node
   sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
-  sig { returns(T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode))) }
+  sig { returns(T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode))) }
   def constant; end
 
   sig do
@@ -7198,7 +7207,7 @@ class Prism::FindPatternNode < ::Prism::Node
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       left: Prism::SplatNode,
       requireds: T::Array[Prism::Node],
       right: T.any(Prism::SplatNode, Prism::MissingNode),
@@ -8133,7 +8142,7 @@ class Prism::HashPatternNode < ::Prism::Node
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       elements: T::Array[Prism::AssocNode],
       rest: T.nilable(T.any(Prism::AssocSplatNode, Prism::NoKeywordsParameterNode)),
       opening_loc: T.nilable(Prism::Location),
@@ -8162,7 +8171,7 @@ class Prism::HashPatternNode < ::Prism::Node
   sig { override.returns(T::Array[Prism::Node]) }
   def compact_child_nodes; end
 
-  sig { returns(T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode))) }
+  sig { returns(T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode))) }
   def constant; end
 
   sig do
@@ -8170,7 +8179,7 @@ class Prism::HashPatternNode < ::Prism::Node
       node_id: Integer,
       location: Prism::Location,
       flags: Integer,
-      constant: T.nilable(T.any(Prism::ConstantReadNode, Prism::ConstantPathNode)),
+      constant: T.nilable(T.any(Prism::ConstantPathNode, Prism::ConstantReadNode)),
       elements: T::Array[Prism::AssocNode],
       rest: T.nilable(T.any(Prism::AssocSplatNode, Prism::NoKeywordsParameterNode)),
       opening_loc: T.nilable(Prism::Location),
@@ -15994,6 +16003,7 @@ class Prism::Translation::Parser::PrismDiagnostic < ::Parser::Diagnostic
 end
 
 Prism::Translation::Parser::Racc_debug_parser = T.let(T.unsafe(nil), FalseClass)
+Prism::Translation::ParserCurrent = Prism::Translation::Parser34
 
 class Prism::Translation::Ripper < ::Prism::Compiler
   def initialize(source, filename = T.unsafe(nil), lineno = T.unsafe(nil)); end

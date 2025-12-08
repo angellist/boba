@@ -12,6 +12,7 @@ module Benchmark
   def bm(label_width = T.unsafe(nil), *labels, &blk); end
   def bmbm(width = T.unsafe(nil)); end
   def measure(label = T.unsafe(nil)); end
+  def ms; end
   def realtime; end
 
   class << self
@@ -19,6 +20,7 @@ module Benchmark
     def bm(label_width = T.unsafe(nil), *labels, &blk); end
     def bmbm(width = T.unsafe(nil)); end
     def measure(label = T.unsafe(nil)); end
+    def ms(&block); end
     def realtime; end
   end
 end

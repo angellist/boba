@@ -102,8 +102,6 @@ class RBI::TypedParam < ::T::Struct
 end
 
 module T::Generic
-  include ::Kernel
-
   def [](*types); end
   def has_attached_class!(variance = T.unsafe(nil), &bounds_proc); end
   def type_member(variance = T.unsafe(nil), &bounds_proc); end
@@ -223,10 +221,7 @@ end
 
 module T::Types::Simple::NamePatch
   def name; end
-  def qualified_name_of(constant); end
 end
-
-T::Types::Simple::NamePatch::NAME_METHOD = T.let(T.unsafe(nil), UnboundMethod)
 
 module T::Utils::Private
   class << self
@@ -238,12 +233,7 @@ module T::Utils::Private::PrivateCoercePatch
   def coerce_and_check_module_types(val, check_val, check_module_type); end
 end
 
-module Tapioca
-  class << self
-    def silence_warnings(&blk); end
-  end
-end
-
+module Tapioca; end
 Tapioca::BINARY_FILE = T.let(T.unsafe(nil), String)
 module Tapioca::BundlerExt; end
 
@@ -448,10 +438,11 @@ class Tapioca::Commands::AbstractGem < ::Tapioca::Commands::Command
       dsl_dir: ::String,
       rbi_formatter: ::Tapioca::RBIFormatter,
       halt_upon_load_error: T::Boolean,
-      lsp_addon: T.nilable(T::Boolean)
+      lsp_addon: T.nilable(T::Boolean),
+      verbose: T.nilable(T::Boolean)
     ).void
   end
-  def initialize(gem_names:, exclude:, include_dependencies:, prerequire:, postrequire:, typed_overrides:, outpath:, file_header:, include_doc:, include_loc:, include_exported_rbis:, number_of_workers: T.unsafe(nil), auto_strictness: T.unsafe(nil), dsl_dir: T.unsafe(nil), rbi_formatter: T.unsafe(nil), halt_upon_load_error: T.unsafe(nil), lsp_addon: T.unsafe(nil)); end
+  def initialize(gem_names:, exclude:, include_dependencies:, prerequire:, postrequire:, typed_overrides:, outpath:, file_header:, include_doc:, include_loc:, include_exported_rbis:, number_of_workers: T.unsafe(nil), auto_strictness: T.unsafe(nil), dsl_dir: T.unsafe(nil), rbi_formatter: T.unsafe(nil), halt_upon_load_error: T.unsafe(nil), lsp_addon: T.unsafe(nil), verbose: T.unsafe(nil)); end
 
   private
 
@@ -1411,14 +1402,12 @@ end
 Tapioca::Dsl::Compilers::ActiveRecordRelations::ASSOCIATION_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::BATCHES_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::BATCHES_METHODS_PARAMETERS = T.let(T.unsafe(nil), Hash)
-Tapioca::Dsl::Compilers::ActiveRecordRelations::BUILDER_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::CALCULATION_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::COLLECTION_PROXY_METHODS = T.let(T.unsafe(nil), Array)
-Tapioca::Dsl::Compilers::ActiveRecordRelations::ENUMERABLE_QUERY_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::FINDER_METHODS = T.let(T.unsafe(nil), Array)
-Tapioca::Dsl::Compilers::ActiveRecordRelations::FIND_OR_CREATE_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::ID_TYPES = T.let(T.unsafe(nil), Set)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::QUERY_METHODS = T.let(T.unsafe(nil), Array)
+Tapioca::Dsl::Compilers::ActiveRecordRelations::RELATION_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::SIGNED_FINDER_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::TO_ARRAY_METHODS = T.let(T.unsafe(nil), Array)
 Tapioca::Dsl::Compilers::ActiveRecordRelations::WHERE_CHAIN_QUERY_METHODS = T.let(T.unsafe(nil), Array)
@@ -2603,7 +2592,7 @@ class Tapioca::GemInfo < ::T::Struct
   const :version, ::Gem::Version
 
   class << self
-    sig { params(spec: ::Bundler::LazySpecification).returns(::Tapioca::GemInfo) }
+    sig { params(spec: T.any(::Bundler::StubSpecification, ::Gem::Specification)).returns(::Tapioca::GemInfo) }
     def from_spec(spec); end
   end
 end
@@ -3179,7 +3168,12 @@ class Tapioca::RepoIndex
   end
 end
 
-module Tapioca::Runtime; end
+module Tapioca::Runtime
+  class << self
+    def silence_warnings(&blk); end
+    def with_disabled_exits(&block); end
+  end
+end
 
 module Tapioca::Runtime::AttachedClassOf
   def attached_class_of(singleton_class); end
@@ -3226,6 +3220,8 @@ class Tapioca::Runtime::GenericTypeRegistry::GenericType < ::T::Types::Simple
 
   def valid?(obj); end
 end
+
+Tapioca::Runtime::NOOP_METHOD = T.let(T.unsafe(nil), Proc)
 
 module Tapioca::Runtime::Reflection
   include ::Tapioca::Runtime::AttachedClassOf
@@ -3314,11 +3310,8 @@ module Tapioca::Runtime::Trackers::Autoload
   class << self
     def eager_load_all!; end
     def register(constant_name); end
-    def with_disabled_exits(&block); end
   end
 end
-
-Tapioca::Runtime::Trackers::Autoload::NOOP_METHOD = T.let(T.unsafe(nil), Proc)
 
 module Tapioca::Runtime::Trackers::ConstantDefinition
   extend ::Tapioca::Runtime::Trackers::Tracker
