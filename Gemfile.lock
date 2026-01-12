@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     boba (0.1.6)
-      sorbet-static-and-runtime (~> 0.5)
+      sorbet-runtime (>= 0.6.12698)
       tapioca (<= 0.17.9)
 
 GEM
@@ -318,6 +318,7 @@ DEPENDENCIES
   rubocop-rspec
   rubocop-shopify
   rubocop-sorbet
+  sorbet (>= 0.6.12698)
   sqlite3
   state_machines
 
