@@ -58,33 +58,34 @@ module Tapioca
         sig { override.void }
         def decorate
           root.create_path(constant) do |klass|
-            klass.create_class("<<", superclass_name: "self") do |singleton|
-              singleton.create_method(
-                "with",
-                parameters: [create_param("params", type: "T::Hash[Symbol, T.untyped]")],
-                return_type: "T.class_of(::#{constant})",
-              )
+            singleton = RBI::SingletonClass.new
+            klass << singleton
 
-              singleton.create_method(
-                "deliver",
-                parameters: [
-                  create_opt_param("recipients", type: "T.untyped", default: "T.unsafe(nil)"),
-                  create_kw_opt_param("enqueue_job", type: "T.nilable(T::Boolean)", default: "T.unsafe(nil)"),
-                  create_rest_param("options", type: "T.untyped"),
-                ],
-                return_type: "void",
-              )
+            singleton.create_method(
+              "with",
+              parameters: [create_param("params", type: "T::Hash[Symbol, T.untyped]")],
+              return_type: "T.class_of(::#{constant})",
+            )
 
-              singleton.create_method(
-                "deliver_later",
-                parameters: [
-                  create_opt_param("recipients", type: "T.untyped", default: "T.unsafe(nil)"),
-                  create_kw_opt_param("enqueue_job", type: "T.nilable(T::Boolean)", default: "T.unsafe(nil)"),
-                  create_rest_param("options", type: "T.untyped"),
-                ],
-                return_type: "void",
-              )
-            end
+            singleton.create_method(
+              "deliver",
+              parameters: [
+                create_opt_param("recipients", type: "T.untyped", default: "T.unsafe(nil)"),
+                create_kw_opt_param("enqueue_job", type: "T.nilable(T::Boolean)", default: "T.unsafe(nil)"),
+                create_kw_rest_param("options", type: "T.untyped"),
+              ],
+              return_type: "void",
+            )
+
+            singleton.create_method(
+              "deliver_later",
+              parameters: [
+                create_opt_param("recipients", type: "T.untyped", default: "T.unsafe(nil)"),
+                create_kw_opt_param("enqueue_job", type: "T.nilable(T::Boolean)", default: "T.unsafe(nil)"),
+                create_kw_rest_param("options", type: "T.untyped"),
+              ],
+              return_type: "void",
+            )
           end
         end
       end
