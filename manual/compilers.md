@@ -11,5 +11,6 @@ This list is an evergeen list of currently available compilers.
 * [FlagShihTzu](compiler_flagshihtzu.md)
 * [Kaminari](compiler_kaminari.md)
 * [MoneyRails](compiler_moneyrails.md)
+* [Noticed](compiler_noticed.md)
 * [Paperclip](compiler_paperclip.md)
 <!-- END_COMPILER_LIST -->
