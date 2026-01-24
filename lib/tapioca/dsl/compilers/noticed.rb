@@ -39,18 +39,17 @@ module Tapioca
       class Noticed < Tapioca::Dsl::Compiler
         extend T::Sig
 
-        ConstantType = type_member { { fixed: T.class_of(::Noticed::Event) } }
+        ConstantType = type_member do
+          { fixed: T.any(T.class_of(::Noticed::Event), T.class_of(::Noticed::Ephemeral)) }
+        end
 
         class << self
           extend T::Sig
 
           sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
           def gather_constants
-            markers = [::Noticed::Event]
-            markers << ::Noticed::Ephemeral if defined?(::Noticed::Ephemeral)
-
             all_classes.select do |klass|
-              markers.any? { |marker| klass < marker }
+              klass < ::Noticed::Event || klass < ::Noticed::Ephemeral
             end
           end
         end
