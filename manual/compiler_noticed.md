@@ -19,13 +19,13 @@ This compiler will produce the RBI file `new_comment_notifier.rbi` with the foll
 # typed: true
 class NewCommentNotifier
   class << self
-    sig { params(params: T::Hash[Symbol, T.untyped]).returns(T.class_of(NewCommentNotifier)) }
+    sig { params(params: T::Hash[Symbol, T.untyped]).returns(NewCommentNotifier) }
     def with(params); end
 
-    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(NewCommentNotifier) }
     def deliver(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(NewCommentNotifier) }
     def deliver_later(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
   end
 end
