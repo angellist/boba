@@ -1,7 +1,7 @@
 # typed: strict
 # frozen_string_literal: true
 
-return unless defined?(Noticed)
+return unless defined?(Noticed::Event) && defined?(Noticed::Ephemeral)
 
 module Tapioca
   module Dsl
