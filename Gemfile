@@ -15,7 +15,7 @@ group :development do
   gem "flag_shih_tzu"
   gem "kaminari-activerecord"
   gem "money-rails"
-  gem "noticed"
+  gem "noticed", require: false
   gem "paperclip"
   gem "rails", "~> 7.2"
   gem "rubocop-rspec"
