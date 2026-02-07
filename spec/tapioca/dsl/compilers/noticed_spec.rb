@@ -3,15 +3,21 @@
 
 require "spec_helper"
 
-# Define stub classes for Noticed before requiring the compiler.
-# The real Noticed::Event and Noticed::Ephemeral require a full Rails boot,
-# but for testing the compiler we just need classes that can be inherited from.
+# Stub classes for the Noticed gem.
+#
+# Unlike gems like FlagShihTzu or MoneyRails which just extend ActiveRecord,
+# Noticed is a Rails Engine that requires a full Rails boot. The real
+# Noticed::Event and Noticed::Ephemeral classes:
+#   - Are in `app/models/` (Rails autoloading)
+#   - Include `Rails.application.routes.url_helpers`
+#   - Require `ApplicationRecord` to exist
+#
+# For testing the compiler, we define stub base classes that notifiers can
+# inherit from. Test notifier classes are created using `add_ruby_file` for
+# proper isolation (same pattern as the AR service specs).
 module Noticed
-  class Event
-  end
-
-  class Ephemeral
-  end
+  class Event; end
+  class Ephemeral; end
 end
 
 module Tapioca
