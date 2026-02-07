@@ -25,13 +25,13 @@ module Tapioca
       # # typed: true
       # class NewCommentNotifier
       #   class << self
-      #     sig { params(params: T::Hash[Symbol, T.untyped]).returns(T.class_of(NewCommentNotifier)) }
+      #     sig { params(params: T::Hash[Symbol, T.untyped]).returns(NewCommentNotifier) }
       #     def with(params); end
       #
-      #     sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+      #     sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(NewCommentNotifier) }
       #     def deliver(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
       #
-      #     sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+      #     sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(NewCommentNotifier) }
       #     def deliver_later(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
       #   end
       # end
@@ -63,7 +63,7 @@ module Tapioca
             singleton.create_method(
               "with",
               parameters: [create_param("params", type: "T::Hash[Symbol, T.untyped]")],
-              return_type: "T.class_of(::#{constant})",
+              return_type: "::#{constant}",
             )
 
             singleton.create_method(
@@ -73,7 +73,7 @@ module Tapioca
                 create_kw_opt_param("enqueue_job", type: "T.nilable(T::Boolean)", default: "T.unsafe(nil)"),
                 create_kw_rest_param("options", type: "T.untyped"),
               ],
-              return_type: "void",
+              return_type: "::#{constant}",
             )
 
             singleton.create_method(
@@ -83,7 +83,7 @@ module Tapioca
                 create_kw_opt_param("enqueue_job", type: "T.nilable(T::Boolean)", default: "T.unsafe(nil)"),
                 create_kw_rest_param("options", type: "T.untyped"),
               ],
-              return_type: "void",
+              return_type: "::#{constant}",
             )
           end
         end

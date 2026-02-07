@@ -60,13 +60,13 @@ module Tapioca
 
                 class NewCommentNotifier
                   class << self
-                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(::NewCommentNotifier) }
                     def deliver(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(::NewCommentNotifier) }
                     def deliver_later(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-                    sig { params(params: T::Hash[Symbol, T.untyped]).returns(T.class_of(::NewCommentNotifier)) }
+                    sig { params(params: T::Hash[Symbol, T.untyped]).returns(::NewCommentNotifier) }
                     def with(params); end
                   end
                 end
@@ -86,13 +86,13 @@ module Tapioca
 
                 class WelcomeNotifier
                   class << self
-                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(::WelcomeNotifier) }
                     def deliver(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(::WelcomeNotifier) }
                     def deliver_later(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-                    sig { params(params: T::Hash[Symbol, T.untyped]).returns(T.class_of(::WelcomeNotifier)) }
+                    sig { params(params: T::Hash[Symbol, T.untyped]).returns(::WelcomeNotifier) }
                     def with(params); end
                   end
                 end
@@ -114,13 +114,13 @@ module Tapioca
 
                 class Admin::AlertNotifier
                   class << self
-                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(::Admin::AlertNotifier) }
                     def deliver(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).void }
+                    sig { params(recipients: T.untyped, enqueue_job: T.nilable(T::Boolean), options: T.untyped).returns(::Admin::AlertNotifier) }
                     def deliver_later(recipients = T.unsafe(nil), enqueue_job: T.unsafe(nil), **options); end
 
-                    sig { params(params: T::Hash[Symbol, T.untyped]).returns(T.class_of(::Admin::AlertNotifier)) }
+                    sig { params(params: T::Hash[Symbol, T.untyped]).returns(::Admin::AlertNotifier) }
                     def with(params); end
                   end
                 end
