@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-ruby "3.4.1"
+ruby "3.4.5"
 
 source "https://rubygems.org"
 gemspec
@@ -12,8 +12,11 @@ group :development do
 
   gem "attr_json"
   gem "devise"
+  gem "graphql"
+  gem "flag_shih_tzu"
   gem "kaminari-activerecord"
   gem "money-rails"
+  gem "noticed", require: false
   gem "paperclip"
   gem "rails", "~> 7.2"
   gem "rubocop-rspec"

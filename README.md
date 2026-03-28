@@ -19,13 +19,19 @@ group :development do
 end
 ```
 
-We recommend you also use the `only` configuration option in your Tapioca config (typically `sorbet/tapioca/config.yml`) to specify only the Tapioca compilers you wish to use.
+We recommend you also use the `only` configuration option in your Tapioca config (typically `sorbet/tapioca/config.yml`) to specify only the Tapioca compilers you wish to use. For instance, the following is an example `tapioca/config.yml` using the Boba `ActiveRecord` compilers with the `persisted` options:
+
 ```yml
+gem:
 dsl:
+  compiler_options:
+    ActiveRecordColumnTypes: persisted
+    ActiveRecordAssociationTypes: persisted
   only:
-    Compiler1
-    Compiler2
+    - ActiveRecordAssociationsPersisted
+    - ActiveRecordColumnsPersisted
 ```
+
 This makes it easy to selectively enable only the compilers you want to use in your project.
 
 ### Typing Relations
@@ -68,6 +74,12 @@ def recent_posts_from_author(author)
 end
 ```
 
+### A Note on Tapioca Dependencies
+
+The core `ActiveRecordAssociationsPersisted` and `ActiveRecordColumnsPersisted` compilers are extensions of Tapioca's corresponding compilers, and depend on monkey patching internal methods. As such, Boba's dependent Tapioca version must be restricted to known good versions and cannot use the more lenient pessimistic version pinning (`~>`), since even minor or patch versions of Tapioca can introduce breaking changes that would be frustrating or difficult for consumers.
+
+We try to stay as up-to-date with Tapioca versions as possible, but can sometimes fall behind. Please submit an issue or pull request (including any needed updates) if we miss a Tapioca version you'd like to upgrade to, and we will address it as soon as possible.
+
 ## Contributing
 
 Bugs and feature requests are welcome and should be [filed as issues on github](https://github.com/angellist/boba/issues).
@@ -81,3 +93,9 @@ Since Boba is intended to be used alongside Tapioca and the compilers provided b
 Contributed compilers should be well documented, and named after and include a link or reference to the Gem, DSL, or other module they implement RBIs for.
 
 Compilers for Gems, DSLs, or modules that are not publicly available will not be accepted.
+
+### Releasing
+
+1. Bump the version in `lib/boba/version.rb`, and commit.
+2. Add a new tag: `git tag vX.Y.Z`.
+3. Then push `git push origin head vX.Y.Z`.

@@ -1,5 +1,35 @@
 # Boba History
 
+## 0.1.6
+
+- Bump Tapioca to v0.17.9.
+- Fix Sorbet type annotations for `Module` to use `T::Module[T.anything]` for compatibility with Sorbet 0.6.x.
+
+## 0.1.5
+
+- Bump Tapioca to v0.17.7.
+
+## 0.1.4
+
+- Bump Tapioca to v0.17.4.
+
+## 0.1.3
+
+- Bump Tapioca to v0.17.3.
+
+## 0.1.2
+
+- Bump Tapioca to v0.17.2.
+
+## 0.1.1
+
+- Add a compiler for `FlagShihTsu`.
+- Bump Tapioca to v0.16.11.
+
+### Breaking Changes
+
+- `MoneyRails` compiler now creates an extend to `MoneyRails::ActiveRecord::Monetizable::ClassMethods`. By default, this may not be included in your `MoneyRails` gem RBI, and you will need to add a `require` to `tapioca/require.rb` and regenerate the gem RBI in order for it to work.
+
 ## 0.0.17
 
 - Bump Tapioca

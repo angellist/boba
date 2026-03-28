@@ -14,6 +14,12 @@ module Tapioca
       # by the `money-rails` gem.
       # https://github.com/RubyMoney/money-rails
       #
+      # In order to use this compiler, you will need to add
+      #   `require "money-rails/active_record/monetizable"`
+      # to your `sorbet/tapioca/require.rb` file, since it relies on the module
+      # `MoneyRails::ActiveRecord::Monetizable::ClassMethods` having been detected and sigs generated for it in the gem
+      # rbis.
+      #
       # For example, with the following ActiveRecord model:
       # ~~~rb
       # class Product < ActiveRecord::Base
@@ -48,10 +54,13 @@ module Tapioca
           }
         end
 
+        ClassMethodModuleName = "MoneyRails::ActiveRecord::Monetizable::ClassMethods"
+        InstanceModuleName = "MoneyRailsGeneratedMethods"
+
         class << self
           extend T::Sig
 
-          sig { override.returns(T::Enumerable[Module]) }
+          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
           def gather_constants
             all_classes.select { |c| c < ::MoneyRails::ActiveRecord::Monetizable }
           end
@@ -77,8 +86,7 @@ module Tapioca
           return if constant.monetized_attributes.empty?
 
           root.create_path(constant) do |klass|
-            instance_module_name = "MoneyRailsGeneratedMethods"
-            instance_module = RBI::Module.new(instance_module_name)
+            instance_module = RBI::Module.new(InstanceModuleName)
 
             constant.monetized_attributes.each do |attribute_name, column_name|
               if column_type_option.untyped?
@@ -111,7 +119,8 @@ module Tapioca
             end
 
             klass << instance_module
-            klass.create_include(instance_module_name)
+            klass.create_include(InstanceModuleName)
+            klass.create_extend(ClassMethodModuleName)
           end
         end
       end
