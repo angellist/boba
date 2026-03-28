@@ -3,8 +3,6 @@ gem:
   #
   # doc: true
   # workers: 5
-  exclude:
-    - noticed
 dsl:
   # Add your `dsl` command parameters here:
   #

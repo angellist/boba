@@ -24,4 +24,7 @@ end
 require "rubygems"
 require "bundler/setup"
 
+# When running tapioca gems, we need to include Rails to make sure the noticed gem can load.
+require "rails/all"
+
 load Gem.bin_path("tapioca", "tapioca")

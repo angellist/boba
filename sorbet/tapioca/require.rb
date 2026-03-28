@@ -19,5 +19,6 @@ tapioca_gem_folder = File.join(
   "*.rb",
 )
 Dir[tapioca_gem_folder].each { |file| require file }
+
 require "tapioca/helpers/test/dsl_compiler"
 require "zeitwerk"
