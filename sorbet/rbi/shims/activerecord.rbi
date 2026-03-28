@@ -11,6 +11,7 @@ module ActiveRecord
 
   class Migration
     class << self
+      sig { params(block: T.proc.void).void }
       def suppress_messages(&block); end
     end
   end

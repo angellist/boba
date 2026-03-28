@@ -5338,7 +5338,7 @@ class RDoc::Markup::HardBreak
 end
 
 # source://rdoc//lib/rdoc/markup/heading.rb#6
-class RDoc::Markup::Heading < ::Struct
+class RDoc::Markup::Heading < ::RDoc::Markup::Element
   # source://rdoc//lib/rdoc/markup/heading.rb#40
   def accept(visitor); end
 
