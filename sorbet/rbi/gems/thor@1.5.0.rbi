@@ -24,6 +24,11 @@ class Thor
   extend ::Thor::Invocation::ClassMethods
 
   def help(command = T.unsafe(nil), subcommand = T.unsafe(nil)); end
+  def tree; end
+
+  private
+
+  def build_command_tree(klass, indent); end
 
   class << self
     def at_least_one(*args, &block); end
@@ -116,8 +121,10 @@ module Thor::Actions
   def in_root; end
   def inject_into_class(path, klass, *args, &block); end
   def inject_into_file(destination, *args, &block); end
+  def inject_into_file!(destination, *args, &block); end
   def inject_into_module(path, module_name, *args, &block); end
   def insert_into_file(destination, *args, &block); end
+  def insert_into_file!(destination, *args, &block); end
   def inside(dir = T.unsafe(nil), config = T.unsafe(nil), &block); end
   def link_file(source, *args); end
   def prepend_file(path, *args, &block); end
@@ -748,6 +755,7 @@ class Thor::Shell::Basic
   def ask_filtered(statement, color, options); end
   def ask_simply(statement, color, options); end
   def can_display_colors?; end
+  def diff_tool; end
   def file_collision_help(block_given); end
   def is?(value); end
   def lookup_color(color); end
@@ -867,6 +875,7 @@ end
 
 Thor::TEMPLATE_EXTNAME = T.let(T.unsafe(nil), String)
 Thor::THOR_RESERVED_WORDS = T.let(T.unsafe(nil), Array)
+Thor::TREE_MAPPINGS = T.let(T.unsafe(nil), Array)
 Thor::Task = Thor::Command
 
 class Thor::UndefinedCommandError < ::Thor::Error

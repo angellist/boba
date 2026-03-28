@@ -29,5 +29,5 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency("sorbet", ">= 0.6.12698")
   spec.add_dependency("sorbet-runtime", ">= 0.6.12698")
-  spec.add_dependency("tapioca", "<= 0.17.9")
+  spec.add_dependency("tapioca", "<= 0.18.0")
 end
