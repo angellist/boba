@@ -8,7 +8,6 @@ require "boba/active_record/reflection_service"
 module Boba
   module ActiveRecord
     class ReflectionServiceSpec < ::Minitest::Spec
-      extend T::Sig
       include Tapioca::Helpers::Test::Content
       include Tapioca::Helpers::Test::Isolation
 
@@ -167,8 +166,6 @@ module Boba
             it "falls back to the default active record config if nothing is defined" do
               class Post < ::ActiveRecord::Base
                 class << self
-                  extend T::Sig
-
                   #: -> bool
                   def belongs_to_required_by_default = false
                 end
@@ -184,8 +181,6 @@ module Boba
 
               class Post < ::ActiveRecord::Base
                 class << self
-                  extend T::Sig
-
                   #: -> bool
                   def belongs_to_required_by_default = true
                 end

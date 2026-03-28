@@ -126,8 +126,6 @@ module Tapioca
       #     def title; end
       # ~~~
       class ActiveRecordColumnsPersisted < ::Tapioca::Dsl::Compilers::ActiveRecordColumns
-        extend T::Sig
-
         ConstantType = type_member { { fixed: T.class_of(ActiveRecord::Base) } }
 
         private

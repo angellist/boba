@@ -37,8 +37,6 @@ module Tapioca
       # end
       # ~~~
       class ActiveRecordRelationTypes < Compiler
-        extend T::Sig
-
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
 
         # @override
@@ -55,8 +53,6 @@ module Tapioca
         end
 
         class << self
-          extend T::Sig
-
           # @override
           #: -> Enumerable[Module[top]]
           def gather_constants

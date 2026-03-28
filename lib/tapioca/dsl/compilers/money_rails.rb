@@ -42,7 +42,6 @@ module Tapioca
       # end
       # ~~~
       class MoneyRails < Tapioca::Dsl::Compiler
-        extend T::Sig
         include RBIHelper
 
         ConstantType = type_member do
@@ -58,8 +57,6 @@ module Tapioca
         InstanceModuleName = "MoneyRailsGeneratedMethods"
 
         class << self
-          extend T::Sig
-
           # @override
           #: -> Enumerable[Module[top]]
           def gather_constants

@@ -4,16 +4,12 @@
 module Boba
   module Options
     class AssociationTypeOption < T::Enum
-      extend T::Sig
-
       enums do
         Nilable = new("nilable")
         Persisted = new("persisted")
       end
 
       class << self
-        extend T::Sig
-
         #: (
         #|   Hash[String, untyped] options
         #| ) { (String value, AssociationTypeOption default_association_type_option) -> void } -> AssociationTypeOption

@@ -32,7 +32,6 @@ module Tapioca
       # end
       # ~~~
       class Paperclip < Tapioca::Dsl::Compiler
-        extend T::Sig
         include RBIHelper
 
         ClassMethodsModuleName = "::Paperclip::Glue"
@@ -41,8 +40,6 @@ module Tapioca
         ConstantType = type_member { { fixed: T.class_of(::Paperclip::Glue) } }
 
         class << self
-          extend T::Sig
-
           # @override
           #: -> Enumerable[Module[top]]
           def gather_constants

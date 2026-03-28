@@ -34,25 +34,21 @@ module Tapioca
       # end
       # ~~~
       class AttrJson < Tapioca::Dsl::Compiler
-        extend T::Sig
-
         # Class methods module is already defined in the gem rbi, so just reference it here.
         ClassMethodsModuleName = "AttrJson::Record::ClassMethods"
         InstanceMethodModuleName = "AttrJsonGeneratedMethods"
         ConstantType = type_member { { fixed: T.any(T.class_of(::AttrJson::Record), T.class_of(::AttrJson::Model)) } }
 
         class << self
-          extend T::Sig
-
           # @override
-          # : -> Enumerable[Module]
+          #: -> Enumerable[Module]
           def gather_constants
             all_classes.select { |constant| constant < ::AttrJson::Record || constant < ::AttrJson::Model }
           end
         end
 
         # @override
-        # : -> void
+        #: -> void
         def decorate
           rbi_class = root.create_path(constant)
           instance_module = RBI::Module.new(InstanceMethodModuleName)

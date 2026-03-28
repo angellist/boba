@@ -7,12 +7,9 @@ require "tapioca/helpers/test/dsl_compiler"
 
 # See: https://github.com/Shopify/tapioca/blob/ebb0cc2a202066d0f2aa9ecc26c11c4af341e6f0/spec/dsl_spec_helper.rb
 class DslSpec < Minitest::Spec
-  extend T::Sig
   include Tapioca::Helpers::Test::DslCompiler
 
   class << self
-    extend T::Sig
-
     #: -> singleton(DslSpec)
     def spec_test_class
       # It should be the one that directly inherits from DslSpec

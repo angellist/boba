@@ -7,8 +7,6 @@ module Boba
   module ActiveRecord
     module ReflectionService
       class << self
-        extend T::Sig
-
         ReflectionType = T.type_alias do
           T.any(::ActiveRecord::Reflection::ThroughReflection, ::ActiveRecord::Reflection::AssociationReflection)
         end

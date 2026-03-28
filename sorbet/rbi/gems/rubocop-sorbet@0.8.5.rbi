@@ -563,14 +563,14 @@ RuboCop::Cop::Sorbet::ForbidComparableTEnum::MSG = T.let(T.unsafe(nil), String)
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/t_enum/forbid_comparable_t_enum.rb#29
 RuboCop::Cop::Sorbet::ForbidComparableTEnum::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Array)
 
-# Ensures RBI shims do not include a call to extend T::Sig
+# Ensures RBI shims do not include a call to
 # or to extend T::Helpers
 #
 # @example
 #
 #   # bad
 #   module SomeModule
-#   extend T::Sig
+#
 #   extend T::Helpers
 #
 #   sig { returns(String) }
@@ -727,7 +727,7 @@ RuboCop::Cop::Sorbet::ForbidSuperclassConstLiteral::MSG = T.let(T.unsafe(nil), S
 #
 #   # good
 #   class MyStruct
-#   extend T::Sig
+#
 #
 #   sig { returns(String) }
 #   attr_reader :foo
@@ -933,7 +933,7 @@ RuboCop::Cop::Sorbet::ForbidTUntyped::RESTRICT_ON_SEND = T.let(T.unsafe(nil), Ar
 #
 #   # good
 #   class Foo
-#   extend T::Sig
+#
 #
 #   sig { params(foo: Integer).void }
 #   def initialize(foo)
@@ -1218,14 +1218,14 @@ end
 # source://rubocop-sorbet//lib/rubocop/cop/sorbet/obsolete_strict_memoization.rb#47
 RuboCop::Cop::Sorbet::ObsoleteStrictMemoization::MSG = T.let(T.unsafe(nil), String)
 
-# Forbids the use of redundant `extend T::Sig`. Only for use in
+# Forbids the use of redundant ``. Only for use in
 # applications that monkey patch `Module.include(T::Sig)` globally,
 # which would make it redundant.
 #
 # @example
 #   # bad
 #   class Example
-#   extend T::Sig
+#
 #   sig { void }
 #   def no_op; end
 #   end

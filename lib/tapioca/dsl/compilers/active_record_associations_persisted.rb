@@ -52,8 +52,6 @@ module Tapioca
       #     def author; end
       # ~~~
       class ActiveRecordAssociationsPersisted < ::Tapioca::Dsl::Compilers::ActiveRecordAssociations
-        extend T::Sig
-
         ConstantType = type_member { { fixed: T.class_of(ActiveRecord::Base) } }
 
         private

@@ -37,7 +37,6 @@ module Tapioca
       # end
       # ~~~
       class Kaminari < Tapioca::Dsl::Compiler
-        extend T::Sig
         include Helpers::ActiveRecordConstantsHelper
 
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
@@ -59,8 +58,6 @@ module Tapioca
         end
 
         class << self
-          extend T::Sig
-
           # @override
           #: -> Enumerable[Module[top]]
           def gather_constants

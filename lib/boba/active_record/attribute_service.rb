@@ -5,8 +5,6 @@ module Boba
   module ActiveRecord
     module AttributeService
       class << self
-        extend T::Sig
-
         #: (singleton(::ActiveRecord::Base) constant, String attribute, ?column_name: String) -> bool
         def nilable_attribute?(constant, attribute, column_name: attribute)
           return false if has_non_null_database_constraint?(constant, column_name)

@@ -112,8 +112,6 @@ module Tapioca
       # end
       # ~~~
       class StateMachinesExtended < Compiler
-        extend T::Sig
-
         ACTIVE_RECORD_RELATION_MODULE_NAMES = [
           "GeneratedRelationMethods",
           "GeneratedAssociationRelationMethods",
@@ -167,8 +165,6 @@ module Tapioca
         end
 
         class << self
-          extend T::Sig
-
           # @override
           #: -> Enumerable[Module[top]]
           def gather_constants
