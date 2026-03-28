@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    boba (0.1.6)
+    boba (0.1.7)
       sorbet-runtime (>= 0.6.12698)
       tapioca (<= 0.18.0)
 
