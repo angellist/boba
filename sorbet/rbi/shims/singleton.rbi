@@ -1,0 +1,1 @@
+module Singleton::SingletonClassProperties; end
