@@ -5,27 +5,19 @@ module Boba
   module ActiveRecord
     module AttributeService
       class << self
-        extend T::Sig
-
-        sig do
-          params(
-            constant: T.class_of(::ActiveRecord::Base),
-            attribute: String,
-            column_name: String,
-          ).returns(T::Boolean)
-        end
+        #: (singleton(::ActiveRecord::Base) constant, String attribute, ?column_name: String) -> bool
         def nilable_attribute?(constant, attribute, column_name: attribute)
           return false if has_non_null_database_constraint?(constant, column_name)
 
           !has_unconditional_presence_validator?(constant, attribute)
         end
 
-        sig { params(constant: T.class_of(::ActiveRecord::Base), column_name: String).returns(T::Boolean) }
+        #: (singleton(::ActiveRecord::Base) constant, String column_name) -> bool
         def virtual_attribute?(constant, column_name)
           constant.columns_hash[column_name].nil?
         end
 
-        sig { params(constant: T.class_of(::ActiveRecord::Base), column_name: String).returns(T::Boolean) }
+        #: (singleton(::ActiveRecord::Base) constant, String column_name) -> bool
         def has_non_null_database_constraint?(constant, column_name)
           column = constant.columns_hash[column_name]
           return false if column.nil?
@@ -35,7 +27,7 @@ module Boba
           false
         end
 
-        sig { params(constant: T.class_of(::ActiveRecord::Base), attribute: String).returns(T::Boolean) }
+        #: (singleton(::ActiveRecord::Base) constant, String attribute) -> bool
         def has_unconditional_presence_validator?(constant, attribute)
           return false unless constant.respond_to?(:validators_on)
 
@@ -46,14 +38,14 @@ module Boba
 
         private
 
-        sig { params(validator: ActiveModel::Validator).returns(T::Boolean) }
+        #: (ActiveModel::Validator validator) -> bool
         def unconditional_presence_validator?(validator)
           return false unless validator.is_a?(::ActiveRecord::Validations::PresenceValidator)
 
           unconditional_validator?(validator)
         end
 
-        sig { params(validator: ActiveModel::Validator).returns(T::Boolean) }
+        #: (ActiveModel::Validator validator) -> bool
         def unconditional_validator?(validator)
           !validator.options.key?(:if) && !validator.options.key?(:unless) && !validator.options.key?(:on)
         end

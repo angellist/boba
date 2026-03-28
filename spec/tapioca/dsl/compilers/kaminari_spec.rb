@@ -8,7 +8,7 @@ module Tapioca
     module Compilers
       class KaminariSpec < ::DslSpec
         describe "Tapioca::Dsl::Compilers::Kaminari" do
-          sig { void }
+          #: -> void
           def before_setup
             require "active_record"
             require "kaminari/activerecord"

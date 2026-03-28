@@ -126,13 +126,11 @@ module Tapioca
       #     def title; end
       # ~~~
       class ActiveRecordColumnsPersisted < ::Tapioca::Dsl::Compilers::ActiveRecordColumns
-        extend T::Sig
-
         ConstantType = type_member { { fixed: T.class_of(ActiveRecord::Base) } }
 
         private
 
-        sig { returns(::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper) }
+        #: -> ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper
         def column_type_helper
           ::Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper.new(
             constant,
@@ -140,19 +138,14 @@ module Tapioca
           )
         end
 
-        sig do
-          params(
-            attribute_name: String,
-            column_name: String,
-          ).returns([String, String])
-        end
+        #: (String attribute_name, ?String column_name) -> [String, String]
         def type_for(attribute_name, column_name = attribute_name)
           return column_type_helper.send(:id_type) if attribute_name == "id"
 
           column_type_for(column_name)
         end
 
-        sig { params(column_name: String).returns([String, String]) }
+        #: (String column_name) -> [String, String]
         def column_type_for(column_name)
           return ["T.untyped", "T.untyped"] if column_type_option.untyped?
 
@@ -184,14 +177,7 @@ module Tapioca
           end
         end
 
-        sig do
-          params(
-            klass: RBI::Scope,
-            attribute_name: String,
-            column_name: String,
-            methods_to_add: T.nilable(T::Array[String]),
-          ).void
-        end
+        #: (RBI::Scope klass, String attribute_name, ?String column_name, ?Array[String]? methods_to_add) -> void
         def add_methods_for_attribute(klass, attribute_name, column_name = attribute_name, methods_to_add = nil)
           getter_type, setter_type = type_for(attribute_name, column_name)
 

@@ -37,11 +37,10 @@ module Tapioca
       # end
       # ~~~
       class ActiveRecordRelationTypes < Compiler
-        extend T::Sig
-
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
 
-        sig { override.void }
+        # @override
+        #: -> void
         def decorate
           root.create_path(constant) do |rbi_class|
             relation_type_alias = "T.any(" \
@@ -54,9 +53,8 @@ module Tapioca
         end
 
         class << self
-          extend T::Sig
-
-          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
+          # @override
+          #: -> Enumerable[Module[top]]
           def gather_constants
             Tapioca::Dsl::Compilers::ActiveRecordRelations.gather_constants
           end

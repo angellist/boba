@@ -21,7 +21,6 @@ Minitest::Reporters.use!(Minitest::Reporters::SpecReporter.new(color: true), ENV
 
 module Minitest
   class Test
-    extend T::Sig
     extend Rails::LineFiltering
   end
 end

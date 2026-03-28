@@ -47,23 +47,21 @@ module Tapioca
       # end
       # ~~~
       class FlagShihTzu < Tapioca::Dsl::Compiler
-        extend T::Sig
-
         ConstantType = type_member { { fixed: T.all(T.class_of(::FlagShihTzu), ::FlagShihTzu::GeneratedClassMethods) } }
 
         InstanceMethodsModuleName = "FlagShihTzuGeneratedMethods"
         ClassMethodsModuleName = "::FlagShihTzu"
 
         class << self
-          extend T::Sig
-
-          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
+          # @override
+          #: -> Enumerable[Module[top]]
           def gather_constants
             all_classes.select { |c| c < ::FlagShihTzu }
           end
         end
 
-        sig { override.void }
+        # @override
+        #: -> void
         def decorate
           return if constant.flag_mapping.blank?
 

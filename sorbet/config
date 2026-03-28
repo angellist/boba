@@ -2,3 +2,6 @@
 .
 --ignore=tmp/
 --ignore=vendor/
+
+--enable-experimental-requires-ancestor
+--enable-experimental-rbs-comments

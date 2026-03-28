@@ -37,12 +37,12 @@ module Tapioca
       # end
       # ~~~
       class Kaminari < Tapioca::Dsl::Compiler
-        extend T::Sig
         include Helpers::ActiveRecordConstantsHelper
 
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
 
-        sig { override.void }
+        # @override
+        #: -> void
         def decorate
           root.create_path(constant) do |model|
             target_modules.each do |module_name, return_type|
@@ -58,9 +58,8 @@ module Tapioca
         end
 
         class << self
-          extend T::Sig
-
-          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
+          # @override
+          #: -> Enumerable[Module[top]]
           def gather_constants
             descendants_of(::ActiveRecord::Base).reject(&:abstract_class?)
           end
@@ -68,7 +67,7 @@ module Tapioca
 
         private
 
-        sig { returns(T::Array[[String, String]]) }
+        #: -> Array[[String, String]]
         def target_modules
           if compiler_enabled?("ActiveRecordRelations")
             [

@@ -8,7 +8,6 @@ require "boba/active_record/attribute_service"
 module Boba
   module ActiveRecord
     class AttributeServiceSpec < ::Minitest::Spec
-      extend T::Sig
       include Tapioca::Helpers::Test::Content
       include Tapioca::Helpers::Test::Isolation
 

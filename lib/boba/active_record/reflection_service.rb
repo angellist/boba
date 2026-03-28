@@ -7,13 +7,11 @@ module Boba
   module ActiveRecord
     module ReflectionService
       class << self
-        extend T::Sig
-
         ReflectionType = T.type_alias do
           T.any(::ActiveRecord::Reflection::ThroughReflection, ::ActiveRecord::Reflection::AssociationReflection)
         end
 
-        sig { params(reflection: ReflectionType).returns(T::Boolean) }
+        #: (ReflectionType reflection) -> bool
         def required_reflection?(reflection)
           return true if has_one_and_required_reflection?(reflection)
 
@@ -22,7 +20,7 @@ module Boba
 
         private
 
-        sig { params(reflection: ReflectionType).returns(T::Boolean) }
+        #: (ReflectionType reflection) -> bool
         def has_one_and_required_reflection?(reflection)
           return false unless reflection.has_one?
           return true if !!reflection.options[:required]
@@ -33,7 +31,7 @@ module Boba
           )
         end
 
-        sig { params(reflection: ReflectionType).returns(T::Boolean) }
+        #: (ReflectionType reflection) -> bool
         def belongs_to_and_non_optional_reflection?(reflection)
           return false unless reflection.belongs_to?
 
