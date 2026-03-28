@@ -60,7 +60,8 @@ module Tapioca
         class << self
           extend T::Sig
 
-          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
+          # @override
+          #: -> Enumerable[Module[top]]
           def gather_constants
             all_classes.select { |c| c < ::MoneyRails::ActiveRecord::Monetizable }
           end
@@ -68,7 +69,7 @@ module Tapioca
 
         ColumnTypeOption = Tapioca::Dsl::Helpers::ActiveRecordColumnTypeHelper::ColumnTypeOption
 
-        sig { returns(ColumnTypeOption) }
+        #: -> ColumnTypeOption
         def column_type_option
           @column_type_option ||= T.let(
             ColumnTypeOption.from_options(options) do |value, default_column_type_option|
@@ -81,7 +82,8 @@ module Tapioca
           )
         end
 
-        sig { override.void }
+        # @override
+        #: -> void
         def decorate
           return if constant.monetized_attributes.empty?
 

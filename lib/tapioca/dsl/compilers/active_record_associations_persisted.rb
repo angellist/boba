@@ -58,7 +58,7 @@ module Tapioca
 
         private
 
-        sig { returns(Boba::Options::AssociationTypeOption) }
+        #: -> Boba::Options::AssociationTypeOption
         def association_type_option
           @association_type_option ||= T.let(
             Boba::Options::AssociationTypeOption.from_options(options) do |value, default_association_type_option|
@@ -71,13 +71,7 @@ module Tapioca
           )
         end
 
-        sig do
-          params(
-            klass: RBI::Scope,
-            association_name: T.any(String, Symbol),
-            reflection: ReflectionType,
-          ).void
-        end
+        #: (RBI::Scope klass, (String | Symbol) association_name, ReflectionType reflection) -> void
         def populate_single_assoc_getter_setter(klass, association_name, reflection)
           association_class = type_for(reflection)
           association_type = single_association_type_for(reflection)
@@ -140,11 +134,7 @@ module Tapioca
           end
         end
 
-        sig do
-          params(
-            reflection: ReflectionType,
-          ).returns(String)
-        end
+        #: (ReflectionType reflection) -> String
         def single_association_type_for(reflection)
           association_class = type_for(reflection)
           return as_nilable_type(association_class) unless association_type_option.persisted?

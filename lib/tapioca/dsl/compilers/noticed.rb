@@ -46,7 +46,8 @@ module Tapioca
         class << self
           extend T::Sig
 
-          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
+          # @override
+          #: -> Enumerable[Module[top]]
           def gather_constants
             all_classes.select do |klass|
               klass < ::Noticed::Event || klass < ::Noticed::Ephemeral
@@ -54,7 +55,8 @@ module Tapioca
           end
         end
 
-        sig { override.void }
+        # @override
+        #: -> void
         def decorate
           root.create_path(constant) do |klass|
             singleton = RBI::SingletonClass.new

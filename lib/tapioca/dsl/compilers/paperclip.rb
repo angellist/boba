@@ -43,13 +43,15 @@ module Tapioca
         class << self
           extend T::Sig
 
-          sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
+          # @override
+          #: -> Enumerable[Module[top]]
           def gather_constants
             all_classes.select { |c| c < ::Paperclip::Glue }
           end
         end
 
-        sig { override.void }
+        # @override
+        #: -> void
         def decorate
           # this is a bit awkward, but load order determines the return order here, so sort to ensure consistency across
           # all environments.

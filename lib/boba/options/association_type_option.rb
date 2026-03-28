@@ -14,12 +14,9 @@ module Boba
       class << self
         extend T::Sig
 
-        sig do
-          params(
-            options: T::Hash[String, T.untyped],
-            block: T.proc.params(value: String, default_association_type_option: AssociationTypeOption).void,
-          ).returns(AssociationTypeOption)
-        end
+        #: (
+        #|   Hash[String, untyped] options
+        #| ) { (String value, AssociationTypeOption default_association_type_option) -> void } -> AssociationTypeOption
         def from_options(options, &block)
           association_type_option = Nilable
           value = options["ActiveRecordAssociationTypes"]
@@ -36,12 +33,12 @@ module Boba
         end
       end
 
-      sig { returns(T::Boolean) }
+      #: -> bool
       def persisted?
         self == AssociationTypeOption::Persisted
       end
 
-      sig { returns(T::Boolean) }
+      #: -> bool
       def nilable?
         self == AssociationTypeOption::Nilable
       end

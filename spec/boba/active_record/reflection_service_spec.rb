@@ -169,7 +169,7 @@ module Boba
                 class << self
                   extend T::Sig
 
-                  sig { returns(T::Boolean) }
+                  #: -> bool
                   def belongs_to_required_by_default = false
                 end
 
@@ -186,7 +186,7 @@ module Boba
                 class << self
                   extend T::Sig
 
-                  sig { returns(T::Boolean) }
+                  #: -> bool
                   def belongs_to_required_by_default = true
                 end
               end

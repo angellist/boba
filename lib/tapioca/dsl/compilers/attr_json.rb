@@ -44,13 +44,15 @@ module Tapioca
         class << self
           extend T::Sig
 
-          sig { override.returns(T::Enumerable[Module]) }
+          # @override
+          # : -> Enumerable[Module]
           def gather_constants
             all_classes.select { |constant| constant < ::AttrJson::Record || constant < ::AttrJson::Model }
           end
         end
 
-        sig { override.void }
+        # @override
+        # : -> void
         def decorate
           rbi_class = root.create_path(constant)
           instance_module = RBI::Module.new(InstanceMethodModuleName)
