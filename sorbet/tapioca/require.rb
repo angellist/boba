@@ -3,6 +3,8 @@
 
 # Add your extra requires here (`bin/tapioca require` can be used to bootstrap this list)
 
+require "active_storage"
+require "active_storage/reflection"
 require "minitest/spec"
 require "money-rails/active_record/monetizable"
 require "paperclip/railtie"

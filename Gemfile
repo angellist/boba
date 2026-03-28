@@ -6,7 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
-  gem "minitest"
+  gem "minitest", '~> 6'
   gem "minitest-hooks"
   gem "minitest-reporters"
 
@@ -17,7 +17,7 @@ group :development do
   gem "money-rails"
   gem "noticed", require: false
   gem "paperclip"
-  gem "rails", "~> 7.2"
+  gem "rails", "~> 8"
   gem "rubocop-rspec"
   gem "rubocop-shopify"
   gem "rubocop-sorbet"
