@@ -133,7 +133,9 @@ GEM
       rake
     mini_mime (1.1.5)
     mini_portile2 (2.8.8)
-    minitest (5.25.1)
+    minitest (6.0.2)
+      drb (~> 2.0)
+      prism (~> 1.5)
     minitest-hooks (1.5.2)
       minitest (> 5.3)
     minitest-reporters (1.7.1)
@@ -333,7 +335,7 @@ DEPENDENCIES
   state_machines
 
 RUBY VERSION
-   ruby 3.4.5p51
+  ruby 4.0.2p0
 
 BUNDLED WITH
-   2.7.2
+  4.0.9
