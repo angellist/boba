@@ -1,9 +1,8 @@
 PATH
   remote: .
   specs:
-    boba (0.1.7)
-      sorbet-runtime (>= 0.6.12698)
-      tapioca (<= 0.18.0)
+    boba (0.1.8)
+      tapioca (<= 0.19.0)
 
 GEM
   remote: https://rubygems.org/
@@ -226,9 +225,9 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.2.1)
-    rbi (0.3.9)
+    rbi (0.3.10)
       prism (~> 1.0)
-      rbs (>= 3.4.4)
+      rbs (>= 4.0.1)
     rbs (4.0.2)
       logger
       prism (>= 1.6.0)
@@ -261,15 +260,17 @@ GEM
     rubocop-sorbet (0.8.5)
       rubocop (>= 1)
     ruby-progressbar (1.13.0)
+    rubydex (0.1.0.beta11-arm64-darwin)
+    rubydex (0.1.0.beta11-x86_64-linux)
     securerandom (0.3.1)
-    sorbet (0.6.13067)
-      sorbet-static (= 0.6.13067)
-    sorbet-runtime (0.6.13067)
-    sorbet-static (0.6.13067-universal-darwin)
-    sorbet-static (0.6.13067-x86_64-linux)
-    sorbet-static-and-runtime (0.6.13067)
-      sorbet (= 0.6.13067)
-      sorbet-runtime (= 0.6.13067)
+    sorbet (0.6.13073)
+      sorbet-static (= 0.6.13073)
+    sorbet-runtime (0.6.13073)
+    sorbet-static (0.6.13073-universal-darwin)
+    sorbet-static (0.6.13073-x86_64-linux)
+    sorbet-static-and-runtime (0.6.13073)
+      sorbet (= 0.6.13073)
+      sorbet-runtime (= 0.6.13073)
     spoom (1.7.11)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
@@ -282,18 +283,18 @@ GEM
       mini_portile2 (~> 2.8.0)
     state_machines (0.6.0)
     stringio (3.1.1)
-    tapioca (0.18.0)
+    tapioca (0.19.0)
       benchmark
       bundler (>= 2.2.25)
       netrc (>= 0.11.0)
       parallel (>= 1.21.0)
       rbi (>= 0.3.7)
       require-hooks (>= 0.2.2)
+      rubydex (>= 0.1.0.beta10)
       sorbet-static-and-runtime (>= 0.5.11087)
       spoom (>= 1.7.9)
       thor (>= 1.2.0)
       tsort
-      yard-sorbet
     terrapin (0.6.0)
       climate_control (>= 0.0.3, < 1.0)
     thor (1.5.0)
@@ -311,9 +312,6 @@ GEM
       websocket-extensions (>= 0.1.0)
     websocket-extensions (0.1.5)
     yard (0.9.38)
-    yard-sorbet (0.9.0)
-      sorbet-runtime
-      yard
     zeitwerk (2.6.18)
 
 PLATFORMS
@@ -339,6 +337,7 @@ DEPENDENCIES
   sorbet (>= 0.6.12698)
   sqlite3
   state_machines
+  yard
 
 RUBY VERSION
   ruby 4.0.2p0

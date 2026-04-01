@@ -62,10 +62,11 @@ class RBI::Tree < ::RBI::NodeWithComments
       class_method: T::Boolean,
       visibility: ::RBI::Visibility,
       comments: T::Array[::RBI::Comment],
+      type_params: T::Array[::String],
       block: T.nilable(T.proc.params(node: ::RBI::Method).void)
     ).void
   end
-  def create_method(name, parameters: T.unsafe(nil), return_type: T.unsafe(nil), class_method: T.unsafe(nil), visibility: T.unsafe(nil), comments: T.unsafe(nil), &block); end
+  def create_method(name, parameters: T.unsafe(nil), return_type: T.unsafe(nil), class_method: T.unsafe(nil), visibility: T.unsafe(nil), comments: T.unsafe(nil), type_params: T.unsafe(nil), &block); end
 
   sig { params(name: ::String).void }
   def create_mixes_in_class_methods(name); end
@@ -125,85 +126,15 @@ module T::Helpers
   def requires_ancestor(&block); end
 end
 
-class T::InexactStruct
-  include ::T::Props
-  include ::T::Props::Plugin
-  include ::T::Props::Optional
-  include ::T::Props::PrettyPrintable
-  include ::T::Props::Serializable
-  include ::T::Props::WeakConstructor
-  include ::T::Props::Constructor
-  extend ::T::Props::ClassMethods
-  extend ::T::Props::Plugin::ClassMethods
-  extend ::T::Props::Serializable::ClassMethods
-end
-
 module T::Private::Methods
   class << self
     def finalize_proc(decl); end
   end
 end
 
-class T::Private::Methods::Declaration < ::Struct
-  def bind; end
-  def bind=(_); end
-  def checked; end
-  def checked=(_); end
-  def finalized; end
-  def finalized=(_); end
-  def mod; end
-  def mod=(_); end
-  def mode; end
-  def mode=(_); end
-  def on_failure; end
-  def on_failure=(_); end
-  def override_allow_incompatible; end
-  def override_allow_incompatible=(_); end
-  def params; end
-  def params=(_); end
-  def raw; end
-  def raw=(_); end
-  def returns; end
-  def returns=(_); end
-  def type_parameters; end
-  def type_parameters=(_); end
-
-  class << self
-    def [](*_arg0); end
-    def inspect; end
-    def keyword_init?; end
-    def members; end
-    def new(*_arg0); end
-  end
-end
-
-class T::Private::Methods::DeclarationBlock < ::Struct
-  def blk; end
-  def blk=(_); end
-  def final; end
-  def final=(_); end
-  def loc; end
-  def loc=(_); end
-  def mod; end
-  def mod=(_); end
-  def raw; end
-  def raw=(_); end
-
-  class << self
-    def [](*_arg0); end
-    def inspect; end
-    def keyword_init?; end
-    def members; end
-    def new(*_arg0); end
-  end
-end
-
 module T::Private::Methods::ProcBindPatch
   def finalize_proc(decl); end
 end
-
-module T::Private::Retry; end
-module T::Private::Retry::RETRY; end
 
 class T::Types::Proc < ::T::Types::Base
   def initialize(arg_types, returns, bind = T.unsafe(nil)); end
@@ -927,31 +858,6 @@ end
 
 module Tapioca::Dsl::Compilers; end
 
-class Tapioca::Dsl::Compilers::ActionControllerHelpers < ::Tapioca::Dsl::Compiler
-  extend T::Generic
-
-  ConstantType = type_member { { fixed: T.class_of(ActionController::Base) } }
-
-  sig { override.void }
-  def decorate; end
-
-  private
-
-  sig { params(helper_methods: ::RBI::Scope, method_name: ::Symbol).void }
-  def create_unknown_proxy_method(helper_methods, method_name); end
-
-  sig { params(mod: T::Module[T.anything]).returns(T::Array[::String]) }
-  def gather_includes(mod); end
-
-  sig { params(method_name: ::Symbol).returns(T.nilable(::UnboundMethod)) }
-  def helper_method_proxy_target(method_name); end
-
-  class << self
-    sig { override.returns(T::Enumerable[T::Module[T.anything]]) }
-    def gather_constants; end
-  end
-end
-
 class Tapioca::Dsl::Compilers::ActionMailer < ::Tapioca::Dsl::Compiler
   extend T::Generic
 
@@ -1283,7 +1189,8 @@ class Tapioca::Dsl::Compilers::ActiveRecordFixtures < ::Tapioca::Dsl::Compiler
   sig { returns(T::Hash[::String, ::String]) }
   def fixture_class_mapping_from_fixture_files; end
 
-  def fixture_loader(*args, **_arg1, &blk); end
+  sig { returns(T::Class[::ActiveRecord::TestFixtures]) }
+  def fixture_loader; end
 
   sig { returns(T::Array[::String]) }
   def method_names_from_eager_fixture_loader; end
@@ -2093,6 +2000,33 @@ class Tapioca::Gem::Listeners::Base
   def on_scope(event); end
 end
 
+class Tapioca::Gem::Listeners::Documentation < ::Tapioca::Gem::Listeners::Base
+  sig { params(pipeline: ::Tapioca::Gem::Pipeline, gem_graph: ::Rubydex::Graph).void }
+  def initialize(pipeline, gem_graph); end
+
+  private
+
+  sig { params(name: ::String, sigs: T::Array[::RBI::Sig]).returns(T::Array[::RBI::Comment]) }
+  def documentation_comments(name, sigs: T.unsafe(nil)); end
+
+  sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
+  def ignore?(event); end
+
+  sig { override.params(event: ::Tapioca::Gem::ConstNodeAdded).void }
+  def on_const(event); end
+
+  sig { override.params(event: ::Tapioca::Gem::MethodNodeAdded).void }
+  def on_method(event); end
+
+  sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
+  def on_scope(event); end
+
+  sig { params(line: ::String).returns(T::Boolean) }
+  def rbs_comment?(line); end
+end
+
+Tapioca::Gem::Listeners::Documentation::IGNORED_COMMENTS = T.let(T.unsafe(nil), Array)
+
 class Tapioca::Gem::Listeners::DynamicMixins < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
@@ -2287,8 +2221,6 @@ class Tapioca::Gem::Listeners::SorbetSignatures < ::Tapioca::Gem::Listeners::Bas
   def signature_final?(signature); end
 end
 
-Tapioca::Gem::Listeners::SorbetSignatures::TYPE_PARAMETER_MATCHER = T.let(T.unsafe(nil), Regexp)
-
 class Tapioca::Gem::Listeners::SorbetTypeVariables < ::Tapioca::Gem::Listeners::Base
   include ::Tapioca::Runtime::Reflection
 
@@ -2334,34 +2266,6 @@ class Tapioca::Gem::Listeners::Subconstants < ::Tapioca::Gem::Listeners::Base
   sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
   def on_scope(event); end
 end
-
-class Tapioca::Gem::Listeners::YardDoc < ::Tapioca::Gem::Listeners::Base
-  sig { params(pipeline: ::Tapioca::Gem::Pipeline).void }
-  def initialize(pipeline); end
-
-  private
-
-  sig { params(name: ::String, sigs: T::Array[::RBI::Sig]).returns(T::Array[::RBI::Comment]) }
-  def documentation_comments(name, sigs: T.unsafe(nil)); end
-
-  sig { override.params(event: ::Tapioca::Gem::NodeAdded).returns(T::Boolean) }
-  def ignore?(event); end
-
-  sig { override.params(event: ::Tapioca::Gem::ConstNodeAdded).void }
-  def on_const(event); end
-
-  sig { override.params(event: ::Tapioca::Gem::MethodNodeAdded).void }
-  def on_method(event); end
-
-  sig { override.params(event: ::Tapioca::Gem::ScopeNodeAdded).void }
-  def on_scope(event); end
-
-  sig { params(line: ::String).returns(T::Boolean) }
-  def rbs_comment?(line); end
-end
-
-Tapioca::Gem::Listeners::YardDoc::IGNORED_COMMENTS = T.let(T.unsafe(nil), Array)
-Tapioca::Gem::Listeners::YardDoc::IGNORED_SIG_TAGS = T.let(T.unsafe(nil), Array)
 
 class Tapioca::Gem::MethodNodeAdded < ::Tapioca::Gem::NodeAdded
   sig do
@@ -2692,9 +2596,6 @@ class Tapioca::Gemfile::GemSpec
 
   sig { returns(::String) }
   def name; end
-
-  sig { void }
-  def parse_yard_docs; end
 
   sig { returns(::String) }
   def rbi_file_name; end
@@ -3162,6 +3063,9 @@ module Tapioca::RBIHelper
   sig { params(param: ::RBI::Param, type: ::String).returns(::RBI::TypedParam) }
   def create_typed_param(param, type); end
 
+  sig { params(type_strings: T::Array[::String]).returns(T::Array[::String]) }
+  def extract_type_parameters(type_strings); end
+
   sig { params(sig_string: ::String).returns(::String) }
   def sanitize_signature_types(sig_string); end
 
@@ -3184,6 +3088,8 @@ module Tapioca::RBIHelper
     def serialize_type_variable(type, variance, fixed, upper, lower); end
   end
 end
+
+Tapioca::RBIHelper::TYPE_PARAMETER_MATCHER = T.let(T.unsafe(nil), Regexp)
 
 class Tapioca::RepoIndex
   sig { void }
@@ -3472,6 +3378,9 @@ module Tapioca::Static::SymbolLoader
 
     sig { params(gem: ::Tapioca::Gemfile::GemSpec).returns(T::Set[::String]) }
     def gem_symbols(gem); end
+
+    sig { params(paths: T::Array[::Pathname]).returns(::Rubydex::Graph) }
+    def graph_from_paths(paths); end
 
     sig { returns(T::Set[::String]) }
     def payload_symbols; end

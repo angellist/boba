@@ -28,6 +28,5 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 3.0.0"
 
   spec.add_development_dependency("sorbet", ">= 0.6.12698")
-  spec.add_dependency("sorbet-runtime", ">= 0.6.12698")
-  spec.add_dependency("tapioca", "<= 0.18.0")
+  spec.add_dependency("tapioca", "<= 0.19.0")
 end

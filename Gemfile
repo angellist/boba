@@ -6,7 +6,7 @@ source "https://rubygems.org"
 gemspec
 
 group :development do
-  gem "minitest", '~> 6'
+  gem "minitest", "~> 6"
   gem "minitest-hooks"
   gem "minitest-reporters"
 
@@ -23,4 +23,5 @@ group :development do
   gem "rubocop-sorbet"
   gem "state_machines"
   gem "sqlite3"
+  gem "yard"
 end

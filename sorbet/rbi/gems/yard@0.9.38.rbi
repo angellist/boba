@@ -123,6 +123,9 @@ end
 
 class Object < ::BasicObject
   include ::Kernel
+  include ::ActiveSupport::Tryable
+  include ::JSON::GeneratorMethods
+  include ::ActiveSupport::ToJsonWithActiveSupportEncoder
   include ::PP::ObjectMixin
 
   private
@@ -135,6 +138,9 @@ RUBY18 = T.let(T.unsafe(nil), FalseClass)
 RUBY19 = T.let(T.unsafe(nil), TrueClass)
 
 class Rack::Request
+  include ::Rack::Request::Env
+  include ::Rack::Request::Helpers
+
   def query; end
   def version_supplied; end
   def version_supplied=(_arg0); end
