@@ -74,7 +74,11 @@ module Tapioca
             attachments.each do |attachment|
               name = attachment.attachment_name
 
-              attachment.instance_methods(false).sort.each do |method_name|
+              # Filter to methods that follow shrine's naming convention (<name> or <name>= or <name>_*).
+              # This excludes method overrides like `reload` from the ActiveRecord plugin.
+              attachment.instance_methods(false).sort
+                .filter { |m| m == name || m == :"#{name}=" || m.start_with?("#{name}_") }
+                .each do |method_name|
                 method_obj = attachment.instance_method(method_name)
                 instance_module.create_method(
                   method_name.to_s,
