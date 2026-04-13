@@ -29,14 +29,14 @@ module Tapioca
       #     sig { params(value: T.untyped).returns(T.untyped) }
       #     def image=(value); end
       #
-      #     sig { returns(T.nilable(::Shrine::Attacher)) }
-      #     def image_attacher; end
+      #     sig { params(options: T.untyped).returns(T.nilable(::Shrine::Attacher)) }
+      #     def image_attacher(**options); end
       #
       #     sig { returns(T::Boolean) }
       #     def image_changed?; end
       #
-      #     sig { returns(T.nilable(String)) }
-      #     def image_url; end
+      #     sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(String)) }
+      #     def image_url(*args, **options); end
       #   end
       #
       #   class << self
@@ -74,46 +74,22 @@ module Tapioca
             attachments.each do |attachment|
               name = attachment.attachment_name
 
-              # Instance methods from entity plugin:
-              #   #<name>       - returns the attached file
-              #   #<name>_url   - returns the URL to the attached file
-              #   #<name>_attacher - returns the attacher instance
-              instance_module.create_method(
-                name.to_s,
-                return_type: "T.nilable(::Shrine::UploadedFile)",
-              )
+              attachment.instance_methods(false).sort.each do |method_name|
+                method_obj = attachment.instance_method(method_name)
+                instance_module.create_method(
+                  method_name.to_s,
+                  parameters: compile_parameters(method_obj),
+                  return_type: return_type_for(name, method_name),
+                )
+              end
 
-              instance_module.create_method(
-                "#{name}_url",
-                return_type: "T.nilable(::String)",
-              )
-
-              instance_module.create_method(
-                "#{name}_attacher",
-                return_type: "T.nilable(::Shrine::Attacher)",
-              )
-
-              # Instance methods from model plugin:
-              #   #<name>=        - assigns a file
-              #   #<name>_changed? - returns whether the attachment has changed
-              instance_module.create_method(
-                "#{name}=",
-                parameters: [create_param("value", type: "T.untyped")],
-                return_type: nil,
-              )
-
-              instance_module.create_method(
-                "#{name}_changed?",
-                return_type: "T::Boolean",
-              )
-
-              # Class method from entity plugin:
-              #   .<name>_attacher - returns a class-level attacher instance
-              klass.create_method(
-                "#{name}_attacher",
-                return_type: "::Shrine::Attacher",
-                class_method: true,
-              )
+              if constant.respond_to?(:"#{name}_attacher")
+                klass.create_method(
+                  "#{name}_attacher",
+                  return_type: "::Shrine::Attacher",
+                  class_method: true,
+                )
+              end
             end
 
             klass << instance_module
@@ -128,6 +104,60 @@ module Tapioca
           constant.ancestors
             .select { |ancestor| ancestor.is_a?(::Shrine::Attachment) }
             .sort_by(&:attachment_name)
+        end
+
+        # Maps a dynamically discovered method name to its return type.
+        #
+        # Known method patterns (from shrine's entity/model plugins) are given
+        # specific return types. Methods that don't match any known pattern
+        # (e.g. those added by third-party shrine plugins) fall back to
+        # T.untyped so they still appear in the generated RBI.
+        #
+        #   #<name>           -> entity plugin: returns the attached file
+        #   #<name>_url       -> entity plugin: returns the URL to the file
+        #   #<name>_attacher  -> entity plugin: returns the Attacher instance
+        #   #<name>=          -> model plugin:  assigns a file (setter)
+        #   #<name>_changed?  -> model plugin:  checks if attachment changed
+        #
+        #: (Symbol attachment_name, Symbol method_name) -> String?
+        def return_type_for(attachment_name, method_name)
+          case method_name
+          when attachment_name
+            "T.nilable(::Shrine::UploadedFile)"
+          when :"#{attachment_name}_url"
+            "T.nilable(::String)"
+          when :"#{attachment_name}_attacher"
+            "T.nilable(::Shrine::Attacher)"
+          when /=$/
+            nil
+          when /\?$/
+            "T::Boolean"
+          else
+            "T.untyped"
+          end
+        end
+
+        #: (UnboundMethod method_obj) -> Array[RBI::TypedParam]
+        def compile_parameters(method_obj)
+          method_obj.parameters.filter_map do |(type, name)|
+            name_str = (name || "arg").to_s
+            case type
+            when :req
+              create_param(name_str, type: "T.untyped")
+            when :opt
+              create_opt_param(name_str, type: "T.untyped", default: "T.unsafe(nil)")
+            when :rest
+              create_rest_param(name_str, type: "T.untyped")
+            when :keyreq
+              create_kw_param(name_str, type: "T.untyped")
+            when :key
+              create_kw_opt_param(name_str, type: "T.untyped", default: "T.unsafe(nil)")
+            when :keyrest
+              create_kw_rest_param(name_str, type: "T.untyped")
+            when :block
+              create_block_param(name_str, type: "T.untyped")
+            end
+          end
         end
       end
     end

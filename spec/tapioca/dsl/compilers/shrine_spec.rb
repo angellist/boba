@@ -34,6 +34,7 @@ module Tapioca
 
               add_ruby_file("image_uploader.rb", <<~RUBY)
                 class ImageUploader < Shrine
+                  plugin :model
                 end
               RUBY
 
@@ -79,6 +80,7 @@ module Tapioca
 
               add_ruby_file("image_uploader.rb", <<~RUBY)
                 class ImageUploader < Shrine
+                  plugin :model
                 end
               RUBY
 
@@ -106,14 +108,14 @@ module Tapioca
                     sig { params(value: T.untyped).returns(T.untyped) }
                     def image=(value); end
 
-                    sig { returns(T.nilable(::Shrine::Attacher)) }
-                    def image_attacher; end
+                    sig { params(options: T.untyped).returns(T.nilable(::Shrine::Attacher)) }
+                    def image_attacher(**options); end
 
                     sig { returns(T::Boolean) }
                     def image_changed?; end
 
-                    sig { returns(T.nilable(::String)) }
-                    def image_url; end
+                    sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(::String)) }
+                    def image_url(*args, **options); end
                   end
                 end
               RBI
@@ -134,11 +136,13 @@ module Tapioca
 
               add_ruby_file("image_uploader.rb", <<~RUBY)
                 class ImageUploader < Shrine
+                  plugin :model
                 end
               RUBY
 
               add_ruby_file("video_uploader.rb", <<~RUBY)
                 class VideoUploader < Shrine
+                  plugin :model
                 end
               RUBY
 
@@ -170,14 +174,14 @@ module Tapioca
                     sig { params(value: T.untyped).returns(T.untyped) }
                     def image=(value); end
 
-                    sig { returns(T.nilable(::Shrine::Attacher)) }
-                    def image_attacher; end
+                    sig { params(options: T.untyped).returns(T.nilable(::Shrine::Attacher)) }
+                    def image_attacher(**options); end
 
                     sig { returns(T::Boolean) }
                     def image_changed?; end
 
-                    sig { returns(T.nilable(::String)) }
-                    def image_url; end
+                    sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(::String)) }
+                    def image_url(*args, **options); end
 
                     sig { returns(T.nilable(::Shrine::UploadedFile)) }
                     def video; end
@@ -185,18 +189,69 @@ module Tapioca
                     sig { params(value: T.untyped).returns(T.untyped) }
                     def video=(value); end
 
-                    sig { returns(T.nilable(::Shrine::Attacher)) }
-                    def video_attacher; end
+                    sig { params(options: T.untyped).returns(T.nilable(::Shrine::Attacher)) }
+                    def video_attacher(**options); end
 
                     sig { returns(T::Boolean) }
                     def video_changed?; end
 
-                    sig { returns(T.nilable(::String)) }
-                    def video_url; end
+                    sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(::String)) }
+                    def video_url(*args, **options); end
                   end
                 end
               RBI
               assert_equal(rbi_for(:Product), expected)
+            end
+
+            it "dynamically picks up methods from shrine plugins" do
+              add_ruby_file("schema.rb", <<~RUBY)
+                ActiveRecord::Migration.suppress_messages do
+                  ActiveRecord::Schema.define do
+                    create_table :documents do |t|
+                      t.text :file_data
+                    end
+                  end
+                end
+              RUBY
+
+              add_ruby_file("custom_plugin.rb", <<~RUBY)
+                class Shrine
+                  module Plugins
+                    module CustomTestPlugin
+                      module AttachmentMethods
+                        private
+
+                        def define_entity_methods(name)
+                          super
+
+                          define_method :"\#{name}_custom_meta" do
+                            "custom"
+                          end
+                        end
+                      end
+                    end
+
+                    register_plugin(:custom_test_plugin, CustomTestPlugin)
+                  end
+                end
+              RUBY
+
+              add_ruby_file("file_uploader.rb", <<~RUBY)
+                class FileUploader < Shrine
+                  plugin :model
+                  plugin :custom_test_plugin
+                end
+              RUBY
+
+              add_ruby_file("document.rb", <<~RUBY)
+                class Document < ActiveRecord::Base
+                  include FileUploader::Attachment(:file)
+                end
+              RUBY
+
+              rbi = rbi_for(:Document)
+              assert_includes(rbi, "def file_custom_meta; end")
+              assert_includes(rbi, "T.untyped")
             end
           end
         end

@@ -23,14 +23,14 @@ class Photo
     sig { params(value: T.untyped).returns(T.untyped) }
     def image=(value); end
 
-    sig { returns(T.nilable(::Shrine::Attacher)) }
-    def image_attacher; end
+    sig { params(options: T.untyped).returns(T.nilable(::Shrine::Attacher)) }
+    def image_attacher(**options); end
 
     sig { returns(T::Boolean) }
     def image_changed?; end
 
-    sig { returns(T.nilable(String)) }
-    def image_url; end
+    sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(String)) }
+    def image_url(*args, **options); end
   end
 
   class << self
