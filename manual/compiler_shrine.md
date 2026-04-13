@@ -20,17 +20,17 @@ class Photo
     sig { returns(T.nilable(::Shrine::UploadedFile)) }
     def image; end
 
-    sig { returns(T.nilable(::String)) }
-    def image_url; end
+    sig { params(value: T.untyped).returns(T.untyped) }
+    def image=(value); end
 
     sig { returns(T.nilable(::Shrine::Attacher)) }
     def image_attacher; end
 
-    sig { params(value: T.untyped).returns(T.untyped) }
-    def image=(value); end
-
     sig { returns(T::Boolean) }
     def image_changed?; end
+
+    sig { returns(T.nilable(String)) }
+    def image_url; end
   end
 
   class << self
