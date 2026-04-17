@@ -90,17 +90,16 @@ module Tapioca
                 )
               end
 
-              # Dynamically discover class methods defined by shrine on the model class.
-              constant.singleton_methods(false).sort
-                .filter { |m| m == name || m == :"#{name}=" || m.start_with?("#{name}_") }
-                .each do |class_method_name|
-                class_method_obj = constant.method(class_method_name)
-                class_module.create_method(
-                  class_method_name.to_s,
-                  parameters: compile_parameters(class_method_obj),
-                  return_type: class_return_type_for(name, class_method_name),
-                )
-              end
+              # Class method from entity plugin:
+              #   .<name>_attacher - returns a class-level attacher instance
+              next unless constant.respond_to?(:"#{name}_attacher")
+
+              class_method_obj = constant.method(:"#{name}_attacher")
+              class_module.create_method(
+                "#{name}_attacher",
+                parameters: compile_parameters(class_method_obj),
+                return_type: "::Shrine::Attacher",
+              )
             end
 
             klass << instance_module
@@ -145,20 +144,6 @@ module Tapioca
             nil
           when /\?$/
             "T::Boolean"
-          else
-            "T.untyped"
-          end
-        end
-
-        # Maps a class method name to its return type.
-        #
-        #   .<name>_attacher  -> entity plugin: returns an Attacher instance
-        #
-        #: (Symbol attachment_name, Symbol method_name) -> String?
-        def class_return_type_for(attachment_name, method_name)
-          case method_name
-          when :"#{attachment_name}_attacher"
-            "::Shrine::Attacher"
           else
             "T.untyped"
           end
