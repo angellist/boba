@@ -15,6 +15,12 @@ This compiler will generate the following RBI:
 ~~~rbi
 class Photo
   include ShrineGeneratedMethods
+  extend ShrineGeneratedClassMethods
+
+  module ShrineGeneratedClassMethods
+    sig { returns(::Shrine::Attacher) }
+    def image_attacher; end
+  end
 
   module ShrineGeneratedMethods
     sig { returns(T.nilable(::Shrine::UploadedFile)) }
@@ -31,11 +37,6 @@ class Photo
 
     sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(String)) }
     def image_url(*args, **options); end
-  end
-
-  class << self
-    sig { returns(::Shrine::Attacher) }
-    def image_attacher; end
   end
 end
 ~~~
