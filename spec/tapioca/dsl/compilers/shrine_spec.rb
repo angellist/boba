@@ -95,8 +95,9 @@ module Tapioca
 
                 class Photo
                   include ShrineGeneratedMethods
+                  extend ShrineGeneratedClassMethods
 
-                  class << self
+                  module ShrineGeneratedClassMethods
                     sig { returns(::Shrine::Attacher) }
                     def image_attacher; end
                   end
@@ -158,8 +159,9 @@ module Tapioca
 
                 class Product
                   include ShrineGeneratedMethods
+                  extend ShrineGeneratedClassMethods
 
-                  class << self
+                  module ShrineGeneratedClassMethods
                     sig { returns(::Shrine::Attacher) }
                     def image_attacher; end
 

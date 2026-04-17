@@ -21,6 +21,12 @@ module Tapioca
       # ~~~rbi
       # class Photo
       #   include ShrineGeneratedMethods
+      #   extend ShrineGeneratedClassMethods
+      #
+      #   module ShrineGeneratedClassMethods
+      #     sig { returns(::Shrine::Attacher) }
+      #     def image_attacher; end
+      #   end
       #
       #   module ShrineGeneratedMethods
       #     sig { returns(T.nilable(::Shrine::UploadedFile)) }
@@ -38,17 +44,13 @@ module Tapioca
       #     sig { params(args: T.untyped, options: T.untyped).returns(T.nilable(String)) }
       #     def image_url(*args, **options); end
       #   end
-      #
-      #   class << self
-      #     sig { returns(::Shrine::Attacher) }
-      #     def image_attacher; end
-      #   end
       # end
       # ~~~
       class Shrine < Tapioca::Dsl::Compiler
         include RBIHelper
 
         InstanceMethodModuleName = "ShrineGeneratedMethods"
+        ClassMethodModuleName = "ShrineGeneratedClassMethods"
 
         ConstantType = type_member { { fixed: T.class_of(Object) } }
 
@@ -70,6 +72,7 @@ module Tapioca
 
           root.create_path(constant) do |klass|
             instance_module = RBI::Module.new(InstanceMethodModuleName)
+            class_module = RBI::Module.new(ClassMethodModuleName)
 
             attachments.each do |attachment|
               name = attachment.attachment_name
@@ -88,16 +91,17 @@ module Tapioca
               end
 
               if constant.respond_to?(:"#{name}_attacher")
-                klass.create_method(
+                class_module.create_method(
                   "#{name}_attacher",
                   return_type: "::Shrine::Attacher",
-                  class_method: true,
                 )
               end
             end
 
             klass << instance_module
             klass.create_include(InstanceMethodModuleName)
+            klass << class_module
+            klass.create_extend(ClassMethodModuleName)
           end
         end
 
@@ -144,7 +148,7 @@ module Tapioca
         #: (UnboundMethod method_obj) -> Array[RBI::TypedParam]
         def compile_parameters(method_obj)
           method_obj.parameters.filter_map do |(type, name)|
-            name_str = (name || "arg").to_s
+            name_str = name ? name.to_s : "arg"
             case type
             when :req
               create_param(name_str, type: "T.untyped")
