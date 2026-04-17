@@ -98,8 +98,8 @@ module Tapioca
                   extend ShrineGeneratedClassMethods
 
                   module ShrineGeneratedClassMethods
-                    sig { returns(::Shrine::Attacher) }
-                    def image_attacher; end
+                    sig { params(options: T.untyped).returns(::Shrine::Attacher) }
+                    def image_attacher(**options); end
                   end
 
                   module ShrineGeneratedMethods
@@ -162,11 +162,11 @@ module Tapioca
                   extend ShrineGeneratedClassMethods
 
                   module ShrineGeneratedClassMethods
-                    sig { returns(::Shrine::Attacher) }
-                    def image_attacher; end
+                    sig { params(options: T.untyped).returns(::Shrine::Attacher) }
+                    def image_attacher(**options); end
 
-                    sig { returns(::Shrine::Attacher) }
-                    def video_attacher; end
+                    sig { params(options: T.untyped).returns(::Shrine::Attacher) }
+                    def video_attacher(**options); end
                   end
 
                   module ShrineGeneratedMethods

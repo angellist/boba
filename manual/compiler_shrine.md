@@ -18,8 +18,8 @@ class Photo
   extend ShrineGeneratedClassMethods
 
   module ShrineGeneratedClassMethods
-    sig { returns(::Shrine::Attacher) }
-    def image_attacher; end
+    sig { params(options: T.untyped).returns(::Shrine::Attacher) }
+    def image_attacher(**options); end
   end
 
   module ShrineGeneratedMethods

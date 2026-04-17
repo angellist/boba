@@ -24,8 +24,8 @@ module Tapioca
       #   extend ShrineGeneratedClassMethods
       #
       #   module ShrineGeneratedClassMethods
-      #     sig { returns(::Shrine::Attacher) }
-      #     def image_attacher; end
+      #     sig { params(options: T.untyped).returns(::Shrine::Attacher) }
+      #     def image_attacher(**options); end
       #   end
       #
       #   module ShrineGeneratedMethods
@@ -90,12 +90,17 @@ module Tapioca
                 )
               end
 
-              next unless constant.respond_to?(:"#{name}_attacher")
-
-              class_module.create_method(
-                "#{name}_attacher",
-                return_type: "::Shrine::Attacher",
-              )
+              # Dynamically discover class methods defined by shrine on the model class.
+              constant.singleton_methods(false).sort
+                .filter { |m| m == name || m == :"#{name}=" || m.start_with?("#{name}_") }
+                .each do |class_method_name|
+                class_method_obj = constant.method(class_method_name)
+                class_module.create_method(
+                  class_method_name.to_s,
+                  parameters: compile_parameters(class_method_obj),
+                  return_type: class_return_type_for(name, class_method_name),
+                )
+              end
             end
 
             klass << instance_module
@@ -145,7 +150,21 @@ module Tapioca
           end
         end
 
-        #: (UnboundMethod method_obj) -> Array[RBI::TypedParam]
+        # Maps a class method name to its return type.
+        #
+        #   .<name>_attacher  -> entity plugin: returns an Attacher instance
+        #
+        #: (Symbol attachment_name, Symbol method_name) -> String?
+        def class_return_type_for(attachment_name, method_name)
+          case method_name
+          when :"#{attachment_name}_attacher"
+            "::Shrine::Attacher"
+          else
+            "T.untyped"
+          end
+        end
+
+        #: (UnboundMethod | Method method_obj) -> Array[RBI::TypedParam]
         def compile_parameters(method_obj)
           method_obj.parameters.filter_map do |(type, name)|
             name_str = name.to_s
