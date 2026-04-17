@@ -67,7 +67,7 @@ module Tapioca
         # @override
         #: -> void
         def decorate
-          attachments = shrine_attachments
+          attachments = shrine_attachments(constant)
           return if attachments.empty?
 
           root.create_path(constant) do |klass|
@@ -90,12 +90,12 @@ module Tapioca
                 )
               end
 
-              if constant.respond_to?(:"#{name}_attacher")
-                class_module.create_method(
-                  "#{name}_attacher",
-                  return_type: "::Shrine::Attacher",
-                )
-              end
+              next unless constant.respond_to?(:"#{name}_attacher")
+
+              class_module.create_method(
+                "#{name}_attacher",
+                return_type: "::Shrine::Attacher",
+              )
             end
 
             klass << instance_module
@@ -107,10 +107,10 @@ module Tapioca
 
         private
 
-        #: -> Array[::Shrine::Attachment]
-        def shrine_attachments
-          constant.ancestors
-            .select { |ancestor| ancestor.is_a?(::Shrine::Attachment) }
+        #: (singleton(Object) klass) -> Array[::Shrine::Attachment]
+        def shrine_attachments(klass)
+          klass.ancestors
+            .filter_map { |ancestor| ancestor if ancestor.is_a?(::Shrine::Attachment) }
             .sort_by(&:attachment_name)
         end
 
@@ -148,7 +148,8 @@ module Tapioca
         #: (UnboundMethod method_obj) -> Array[RBI::TypedParam]
         def compile_parameters(method_obj)
           method_obj.parameters.filter_map do |(type, name)|
-            name_str = name ? name.to_s : "arg"
+            name_str = name.to_s
+            name_str = "arg" if name_str.empty?
             case type
             when :req
               create_param(name_str, type: "T.untyped")
