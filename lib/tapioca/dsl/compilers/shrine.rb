@@ -3,6 +3,8 @@
 
 return unless defined?(Shrine)
 
+require "tapioca/dsl/helpers/parameter_compilation"
+
 module Tapioca
   module Dsl
     module Compilers
@@ -47,7 +49,7 @@ module Tapioca
       # end
       # ~~~
       class Shrine < Tapioca::Dsl::Compiler
-        include RBIHelper
+        include Helpers::ParameterCompilation
 
         InstanceMethodModuleName = "ShrineGeneratedMethods"
         ClassMethodModuleName = "ShrineGeneratedClassMethods"
@@ -146,30 +148,6 @@ module Tapioca
             "T::Boolean"
           else
             "T.untyped"
-          end
-        end
-
-        #: (UnboundMethod | Method method_obj) -> Array[RBI::TypedParam]
-        def compile_parameters(method_obj)
-          method_obj.parameters.filter_map do |(type, name)|
-            name_str = name.to_s
-            name_str = "arg" if name_str.empty?
-            case type
-            when :req
-              create_param(name_str, type: "T.untyped")
-            when :opt
-              create_opt_param(name_str, type: "T.untyped", default: "T.unsafe(nil)")
-            when :rest
-              create_rest_param(name_str, type: "T.untyped")
-            when :keyreq
-              create_kw_param(name_str, type: "T.untyped")
-            when :key
-              create_kw_opt_param(name_str, type: "T.untyped", default: "T.unsafe(nil)")
-            when :keyrest
-              create_kw_rest_param(name_str, type: "T.untyped")
-            when :block
-              create_block_param(name_str, type: "T.untyped")
-            end
           end
         end
       end
