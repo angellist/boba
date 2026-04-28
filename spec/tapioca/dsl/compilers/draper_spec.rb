@@ -25,10 +25,6 @@ module Tapioca
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
                     create_table :posts do |t|
-                      t.string :title, limit: 100
-                      t.text :body
-                      t.integer :body_length
-                      t.boolean :hidden
                     end
                   end
                 end
@@ -53,10 +49,6 @@ module Tapioca
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
                     create_table :posts do |t|
-                      t.string :title, limit: 100
-                      t.text :body
-                      t.integer :body_length
-                      t.boolean :hidden
                     end
                   end
                 end
@@ -78,10 +70,6 @@ module Tapioca
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
                     create_table :posts do |t|
-                      t.string :title, limit: 100
-                      t.text :body
-                      t.integer :body_length
-                      t.boolean :hidden
                     end
                   end
                 end
@@ -124,10 +112,6 @@ module Tapioca
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
                     create_table :posts do |t|
-                      t.string :title, limit: 100
-                      t.text :body
-                      t.integer :body_length
-                      t.boolean :hidden
                     end
                   end
                 end
