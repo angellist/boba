@@ -210,6 +210,55 @@ module Tapioca
               refute_includes(rbi, "def post; end")
             end
 
+            it "supports namespaced source classes" do
+              # Both sides of the pair must be RBIfied:
+              #   - `Admin::PostDecorator` gets typed `object` / `model` returning
+              #     `::Admin::Post`
+              #   - `Admin::Post` gets a typed `decorate` returning
+              #     `::Admin::PostDecorator`
+              #
+              # Draper still installs an `alias_method "admin/post", :object` at
+              # runtime (slashed names are valid via `alias_method`), but `admin/post`
+              # cannot be expressed as `def admin/post; end` in RBI, so we
+              # intentionally do not emit it. `RBI::Scope#create_method` filters it
+              # out via `Tapioca::RBIHelper.valid_method_name?`.
+              add_ruby_file("schema.rb", <<~RUBY)
+                ActiveRecord::Migration.suppress_messages do
+                  ActiveRecord::Schema.define do
+                    create_table :admin_posts do |t|
+                    end
+                  end
+                end
+              RUBY
+
+              add_ruby_file("admin/post.rb", <<~RUBY)
+                module Admin; end
+                class Admin::Post < ActiveRecord::Base
+                  self.table_name = "admin_posts"
+                  include Draper::Decoratable
+                end
+              RUBY
+
+              add_ruby_file("admin/post_decorator.rb", <<~RUBY)
+                class Admin::PostDecorator < Draper::Decorator
+                end
+              RUBY
+
+              decorator_rbi = rbi_for("Admin::PostDecorator")
+              assert_includes(decorator_rbi, "class Admin::PostDecorator")
+              assert_includes(decorator_rbi, "sig { returns(::Admin::Post) }")
+              assert_includes(decorator_rbi, "def object; end")
+              assert_includes(decorator_rbi, "def model; end")
+              # The slashed underscore alias is silently dropped — verify it never
+              # leaks into the RBI.
+              refute_includes(decorator_rbi, "admin/post")
+
+              source_rbi = rbi_for("Admin::Post")
+              assert_includes(source_rbi, "class Admin::Post")
+              assert_includes(source_rbi, "sig { params(options: T.untyped).returns(::Admin::PostDecorator) }")
+              assert_includes(source_rbi, "def decorate(options = T.unsafe(nil)); end")
+            end
+
             it "respects the explicit object class set via decorates" do
               add_ruby_file("schema.rb", <<~RUBY)
                 ActiveRecord::Migration.suppress_messages do
