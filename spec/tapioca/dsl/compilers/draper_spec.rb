@@ -174,6 +174,42 @@ module Tapioca
               refute_includes(rbi, "def save")
             end
 
+            it "skips accessors that the decorator does not actually define" do
+              # Defends against future Draper changes where `model` or the underscore
+              # alias might disappear: we only emit accessors that runtime introspection
+              # confirms exist.
+              add_ruby_file("schema.rb", <<~RUBY)
+                ActiveRecord::Migration.suppress_messages do
+                  ActiveRecord::Schema.define do
+                    create_table :posts do |t|
+                    end
+                  end
+                end
+              RUBY
+
+              add_ruby_file("post.rb", <<~RUBY)
+                class Post < ActiveRecord::Base
+                  include Draper::Decoratable
+                end
+              RUBY
+
+              # Strip `model` and the `post` alias before the compiler inspects the
+              # class, leaving only `object`. This emulates a hypothetical Draper
+              # release that drops those convenience accessors. `undef_method` works
+              # for inherited methods (where `remove_method` would raise).
+              add_ruby_file("post_decorator.rb", <<~RUBY)
+                class PostDecorator < Draper::Decorator
+                  undef_method(:model) if method_defined?(:model)
+                  undef_method(:post) if method_defined?(:post)
+                end
+              RUBY
+
+              rbi = rbi_for(:PostDecorator)
+              assert_includes(rbi, "def object; end")
+              refute_includes(rbi, "def model; end")
+              refute_includes(rbi, "def post; end")
+            end
+
             it "respects the explicit object class set via decorates" do
               add_ruby_file("schema.rb", <<~RUBY)
                 ActiveRecord::Migration.suppress_messages do

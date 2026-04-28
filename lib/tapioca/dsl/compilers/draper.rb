@@ -139,17 +139,24 @@ module Tapioca
           object_class = decorator.object_class
           object_class_name = "::#{object_class.name}"
 
+          # Each accessor is gated on `method_defined?` so the generated RBI never
+          # claims a method that Draper hasn't actually installed at runtime. `object`
+          # / `model` are stable Draper APIs but the underscore alias is a Draper
+          # convention; the runtime check keeps the compiler robust if any of these
+          # change in a future Draper release.
           root.create_path(decorator) do |klass|
             instance_module = RBI::Module.new(InstanceMethodModuleName)
 
-            instance_module.create_method("object", return_type: object_class_name)
-            instance_module.create_method("model", return_type: object_class_name)
+            if decorator.method_defined?(:object)
+              instance_module.create_method("object", return_type: object_class_name)
+            end
+            if decorator.method_defined?(:model)
+              instance_module.create_method("model", return_type: object_class_name)
+            end
 
-            # `create_method` silently no-ops on names Prism rejects (e.g. `Foo::Bar`
-            # underscoring to `foo/bar`), so we only need to guard against `object` /
-            # `model` which we already create above.
             underscore_name = object_class.name.to_s.underscore
-            if underscore_name != "object" && underscore_name != "model"
+            if underscore_name != "object" && underscore_name != "model" &&
+                decorator.method_defined?(underscore_name.to_sym)
               instance_module.create_method(underscore_name, return_type: object_class_name)
             end
 
