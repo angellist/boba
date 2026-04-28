@@ -3,8 +3,6 @@
 
 return unless defined?(Draper)
 
-require "tapioca/dsl/helpers/parameter_compilation"
-
 module Tapioca
   module Dsl
     module Compilers
@@ -14,20 +12,13 @@ module Tapioca
       #
       # The compiler emits a typed `object` / `model` / underscored-source-name accessor
       # for every decorator, plus a typed `decorate` instance method on the source class.
-      # When the decorator uses `delegate_all`, every public instance method of the source
-      # class (column accessors, persistence methods, etc.) is also mirrored onto the
-      # decorator with `T.untyped` argument and return types, so that calls like
-      # `post.decorate.title` are visible to Sorbet. The source class's own RBI remains
-      # the authoritative type source.
       #
       # For example, with the following classes:
       # ~~~rb
       # class Post < ActiveRecord::Base
-      #   # columns: title:string, body:text, hidden:boolean, ...
       # end
       #
       # class PostDecorator < Draper::Decorator
-      #   delegate_all
       # end
       # ~~~
       #
@@ -35,20 +26,6 @@ module Tapioca
       # ~~~rbi
       # class PostDecorator
       #   include DraperGeneratedInstanceMethods
-      #   include DraperGeneratedDelegationMethods
-      #
-      #   module DraperGeneratedDelegationMethods
-      #     sig { returns(T.untyped) }
-      #     def title; end
-      #
-      #     sig { params(value: T.untyped).returns(T.untyped) }
-      #     def title=(value); end
-      #
-      #     sig { returns(T.untyped) }
-      #     def hidden?; end
-      #
-      #     # ... and every other public instance method on Post
-      #   end
       #
       #   module DraperGeneratedInstanceMethods
       #     sig { returns(::Post) }
@@ -74,11 +51,37 @@ module Tapioca
       #   end
       # end
       # ~~~
+      #
+      # ## Why `delegate_all` is not supported
+      #
+      # `delegate_all` forwards every public instance method of the source class via
+      # `method_missing`. Reflecting that into RBI requires emitting one explicit method
+      # per name — Sorbet ignores `method_missing` for type inference, and there is no
+      # other annotation that lets us say "this class has all the methods of that one"
+      # without the `is_a?` lie of declaring `class PostDecorator < Post`.
+      #
+      # Mirroring AR's full instance method set per decorator turned out to be wildly
+      # noisy in practice (several thousand lines per decorator on real models, mostly
+      # AR-internal methods like `__callbacks` and `_before_commit_callbacks` that no
+      # one calls through a decorator). Argument and return types also collapse to
+      # `T.untyped`, so the noise doesn't even buy strong typing.
+      #
+      # The recommended pattern is therefore to access the source through the typed
+      # `object` accessor — `decorator.object.title` carries the typing produced by
+      # Tapioca's `ActiveRecordColumns` compiler, with no per-decorator bloat.
+      #
+      # Concretely, with `Post#title` (a string column):
+      # ~~~rb
+      # post = Post.new(title: "post 1")
+      # post.title              # ✓ Sorbet sees ::String (from ActiveRecordColumns)
+      #
+      # decorator = post.decorate
+      # decorator.title         # ✗ Sorbet errors — even with `delegate_all`, no
+      #                         #   `title` is declared on PostDecorator
+      # decorator.object.title  # ✓ Sorbet sees ::String (via the typed `object`)
+      # ~~~
       class Draper < Tapioca::Dsl::Compiler
-        include Helpers::ParameterCompilation
-
         InstanceMethodModuleName = "DraperGeneratedInstanceMethods"
-        DelegationMethodModuleName = "DraperGeneratedDelegationMethods"
         DecoratableMethodModuleName = "DraperGeneratedDecoratableMethods"
 
         ConstantType = type_member { { fixed: T.class_of(Object) } }
@@ -152,10 +155,6 @@ module Tapioca
 
             klass << instance_module
             klass.create_include(InstanceMethodModuleName)
-
-            if decorator.include?(::Draper::AutomaticDelegation)
-              add_delegated_methods(klass, decorator, object_class)
-            end
           end
         end
 
@@ -175,78 +174,6 @@ module Tapioca
             klass << decoratable_module
             klass.create_include(DecoratableMethodModuleName)
           end
-        end
-
-        # Emits a `DraperGeneratedDelegationMethods` module mirroring every method
-        # returned by `delegatable_methods`. Parameter shape is preserved; types fall
-        # back to `T.untyped` since the source class's own RBI is the authoritative
-        # type source.
-        #: (RBI::Scope klass, singleton(::Draper::Decorator) decorator, Class[top] object_class) -> void
-        def add_delegated_methods(klass, decorator, object_class)
-          eagerly_define_attribute_methods(object_class)
-
-          method_names = delegatable_methods(decorator, object_class)
-          return if method_names.empty?
-
-          delegation_module = RBI::Module.new(DelegationMethodModuleName)
-
-          method_names.each do |method_name|
-            method_obj = T.unsafe(object_class).instance_method(method_name)
-            delegation_module.create_method(
-              method_name.to_s,
-              parameters: compile_parameters(method_obj),
-              return_type: "T.untyped",
-            )
-          end
-
-          klass << delegation_module
-          klass.create_include(DelegationMethodModuleName)
-        end
-
-        # ActiveRecord defines column accessors lazily; they only appear in `instance_methods`
-        # after `define_attribute_methods` runs. Trigger it so `delegate_all` picks up
-        # column-derived methods like `title`, `title=`, `title?`, etc.
-        #: (Class[top] object_class) -> void
-        def eagerly_define_attribute_methods(object_class)
-          return unless object_class.respond_to?(:define_attribute_methods)
-
-          T.unsafe(object_class).define_attribute_methods
-        end
-
-        # The set of method names that `delegate_all` would forward to `object` at
-        # runtime. Mirrors `Draper::AutomaticDelegation#delegatable?`.
-        #
-        # Set arithmetic — `delegatable = S − D − U − P`:
-        #
-        #   | sym | source                                       | role                                  |
-        #   |-----|----------------------------------------------|---------------------------------------|
-        #   | `S` | `object_class.public_instance_methods`       | candidates from the source class      |
-        #   | `D` | `::Draper::Decorator.public_instance_methods`| already on Decorator (covers Object)  |
-        #   | `U` | `decorator.instance_methods(false)`          | user-defined public/protected on sub  |
-        #   | `P` | `decorator.private_instance_methods(false)`  | user-defined private (short-circuits) |
-        #
-        # Example outcomes:
-        #
-        #   | method                              | S | D | U | P | delegated? |
-        #   |-------------------------------------|---|---|---|---|------------|
-        #   | `Post#title` (column accessor)      | ✓ | ✗ | ✗ | ✗ |     ✓      |
-        #   | `Post#save` (AR persistence)        | ✓ | ✗ | ✗ | ✗ |     ✓      |
-        #   | `Object#object_id` (via Post)       | ✓ | ✓ | ✗ | ✗ |     ✗      |
-        #   | `==` (Decorator overrides Post's)   | ✓ | ✓ | ✗ | ✗ |     ✗      |
-        #   | user wrote `def title` on decorator | ✓ | ✗ | ✓ | ✗ |     ✗      |
-        #   | user wrote `private def title`      | ✓ | ✗ | ✗ | ✓ |     ✗      |
-        #
-        # Names Ruby's parser rejects (e.g. `define_method(:"foo bar")`) are filtered
-        # out downstream by `RBI::Scope#create_method`, which calls
-        # `Tapioca::RBIHelper.valid_method_name?`.
-        #: (singleton(::Draper::Decorator) decorator, Class[top] object_class) -> Array[Symbol]
-        def delegatable_methods(decorator, object_class)
-          (
-            object_class.public_instance_methods -
-            ::Draper::Decorator.public_instance_methods -
-            decorator.instance_methods(false) -
-            decorator.private_instance_methods(false)
-          ).sort
         end
       end
     end

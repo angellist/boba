@@ -159,15 +159,14 @@ module Tapioca
               assert_equal(expected, rbi_for(:Post))
             end
 
-            it "delegates source instance methods when delegate_all is set" do
+            it "does not emit a delegation module even when delegate_all is set" do
+              # `delegate_all` is intentionally not reflected — see the compiler
+              # docstring for the reasoning.
               add_ruby_file("schema.rb", <<~RUBY)
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
                     create_table :posts do |t|
                       t.string :title, limit: 100
-                      t.text :body
-                      t.integer :body_length
-                      t.boolean :hidden
                     end
                   end
                 end
@@ -182,90 +181,13 @@ module Tapioca
               add_ruby_file("post_decorator.rb", <<~RUBY)
                 class PostDecorator < Draper::Decorator
                   delegate_all
-                end
-              RUBY
-
-              rbi = rbi_for(:PostDecorator)
-              assert_includes(rbi, "include DraperGeneratedDelegationMethods")
-              assert_includes(rbi, "module DraperGeneratedDelegationMethods")
-              # Column accessors materialized via define_attribute_methods.
-              assert_includes(rbi, "def title; end")
-              assert_includes(rbi, "def title=(value); end")
-              assert_includes(rbi, "def hidden?; end")
-              assert_includes(rbi, "def body; end")
-              assert_includes(rbi, "def body_length; end")
-              # Standard AR persistence methods.
-              assert_includes(rbi, "def save")
-              # Operator methods delegate too: AR's bracket accessors are forwarded by
-              # `method_missing`, so the generated RBI must include them.
-              assert_includes(rbi, "def [](")
-              assert_includes(rbi, "def []=(")
-            end
-
-            it "skips source methods that the decorator overrides as private" do
-              add_ruby_file("schema.rb", <<~RUBY)
-                ActiveRecord::Migration.suppress_messages do
-                  ActiveRecord::Schema.define do
-                    create_table :posts do |t|
-                      t.string :title, limit: 100
-                      t.text :body
-                    end
-                  end
-                end
-              RUBY
-
-              add_ruby_file("post.rb", <<~RUBY)
-                class Post < ActiveRecord::Base
-                  include Draper::Decoratable
-                end
-              RUBY
-
-              # `title` is privately overridden on the decorator. Draper's
-              # `delegatable?` short-circuits private methods, so the runtime
-              # never delegates `title` — and neither should our RBI.
-              add_ruby_file("post_decorator.rb", <<~RUBY)
-                class PostDecorator < Draper::Decorator
-                  delegate_all
-
-                  private
-
-                  def title
-                    "private title"
-                  end
-                end
-              RUBY
-
-              rbi = rbi_for(:PostDecorator)
-              refute_includes(rbi, "def title; end")
-              # Other source methods are still delegated.
-              assert_includes(rbi, "def body; end")
-            end
-
-            it "does not emit a delegation module when delegate_all is not set" do
-              add_ruby_file("schema.rb", <<~RUBY)
-                ActiveRecord::Migration.suppress_messages do
-                  ActiveRecord::Schema.define do
-                    create_table :posts do |t|
-                      t.string :title, limit: 100
-                    end
-                  end
-                end
-              RUBY
-
-              add_ruby_file("post.rb", <<~RUBY)
-                class Post < ActiveRecord::Base
-                  include Draper::Decoratable
-                end
-              RUBY
-
-              add_ruby_file("post_decorator.rb", <<~RUBY)
-                class PostDecorator < Draper::Decorator
                 end
               RUBY
 
               rbi = rbi_for(:PostDecorator)
               refute_includes(rbi, "DraperGeneratedDelegationMethods")
               refute_includes(rbi, "def title; end")
+              refute_includes(rbi, "def save")
             end
 
             it "respects the explicit object class set via decorates" do
