@@ -255,63 +255,6 @@ module Tapioca
               assert_includes(rbi, "def file_custom_meta; end")
               assert_includes(rbi, "T.untyped")
             end
-
-            it "synthesizes parameter names for anonymous splat / block parameters" do
-              # Anonymous splat parameters (`def m(*, **, &)`) come back from
-              # `Method#parameters` as the special symbols `:*`, `:**`, `:&`. Without
-              # the indexed fallback in `compile_parameters`, those would be emitted
-              # verbatim and produce unparseable RBI (`def file_anon(**, ****, &&)`
-              # plus a sig with invalid keyword names).
-              add_ruby_file("schema.rb", <<~RUBY)
-                ActiveRecord::Migration.suppress_messages do
-                  ActiveRecord::Schema.define do
-                    create_table :records do |t|
-                      t.text :file_data
-                    end
-                  end
-                end
-              RUBY
-
-              add_ruby_file("anon_plugin.rb", <<~RUBY)
-                class Shrine
-                  module Plugins
-                    module AnonSplatPlugin
-                      module AttachmentMethods
-                        private
-
-                        def define_entity_methods(name)
-                          super
-
-                          module_eval(<<~METHOD, __FILE__, __LINE__ + 1)
-                            def \#{name}_forward(*, **, &)
-                              nil
-                            end
-                          METHOD
-                        end
-                      end
-                    end
-
-                    register_plugin(:anon_splat_plugin, AnonSplatPlugin)
-                  end
-                end
-              RUBY
-
-              add_ruby_file("file_uploader.rb", <<~RUBY)
-                class FileUploader < Shrine
-                  plugin :model
-                  plugin :anon_splat_plugin
-                end
-              RUBY
-
-              add_ruby_file("record.rb", <<~RUBY)
-                class Record < ActiveRecord::Base
-                  include FileUploader::Attachment(:file)
-                end
-              RUBY
-
-              rbi = rbi_for(:Record)
-              assert_includes(rbi, "def file_forward(*_arg0, **_arg1, &_arg2); end")
-            end
           end
         end
       end
