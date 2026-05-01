@@ -47,8 +47,6 @@ module Tapioca
       # end
       # ~~~
       class Shrine < Tapioca::Dsl::Compiler
-        include RBIHelper
-
         InstanceMethodModuleName = "ShrineGeneratedMethods"
         ClassMethodModuleName = "ShrineGeneratedClassMethods"
 
@@ -149,11 +147,16 @@ module Tapioca
           end
         end
 
-        #: (UnboundMethod | Method method_obj) -> Array[RBI::TypedParam]
+        # Compiles a `Method` / `UnboundMethod#parameters` into the `RBI::TypedParam`
+        # array expected by `RBI::Scope#create_method`. Argument types default to
+        # `T.untyped` since shrine plugins don't carry sigs. Anonymous parameter names
+        # — including empty names and the special tokens `:*`, `:**`, `:&` — are
+        # replaced with `_arg{index}` so the generated RBI is syntactically valid.
+        #: ((Method | UnboundMethod) method_obj) -> Array[RBI::TypedParam]
         def compile_parameters(method_obj)
-          method_obj.parameters.filter_map do |(type, name)|
+          method_obj.parameters.each_with_index.filter_map do |(type, name), index|
             name_str = name.to_s
-            name_str = "arg" if name_str.empty?
+            name_str = "_arg#{index}" unless name_str.match?(/\A[A-Za-z_][A-Za-z0-9_]*\z/)
             case type
             when :req
               create_param(name_str, type: "T.untyped")
