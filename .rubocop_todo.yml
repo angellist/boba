@@ -24,11 +24,15 @@ Layout/SpaceInsideBlockBraces:
   Exclude:
     - 'lib/tapioca/dsl/compilers/attr_json.rb'
 
-# Offense count: 3
+# Offense count: 9
 Naming/ConstantName:
   Exclude:
     - 'lib/tapioca/dsl/compilers/attr_json.rb'
+    - 'lib/tapioca/dsl/compilers/draper.rb'
+    - 'lib/tapioca/dsl/compilers/flag_shih_tzu.rb'
+    - 'lib/tapioca/dsl/compilers/money_rails.rb'
     - 'lib/tapioca/dsl/compilers/paperclip.rb'
+    - 'lib/tapioca/dsl/compilers/shrine.rb'
 
 # Offense count: 4
 # This cop supports safe autocorrection (--autocorrect).

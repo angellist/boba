@@ -11,6 +11,7 @@ group :development do
   gem "minitest-reporters"
 
   gem "attr_json"
+  gem "draper"
   gem "graphql"
   gem "flag_shih_tzu"
   gem "kaminari-activerecord"
