@@ -68,7 +68,7 @@ module Tapioca
             .sort_by(&:name) # this is annoying, but we need to sort to force consistent ordering or the rbi checks fail
             .each do |definition|
               _, type, options = definition.original_args
-              attribute_name = definition.name
+              attribute_name = definition.name.to_s
               type_name = sorbet_type(type, array: !!options[:array], nilable: !!options[:nil])
 
               # Model: attr_json(:other_model_id, :string)
