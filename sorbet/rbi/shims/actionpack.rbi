@@ -1,1 +1,0 @@
-class ActionController::Base; end

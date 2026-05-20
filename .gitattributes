@@ -1,0 +1,10 @@
+# See https://git-scm.com/docs/gitattributes for more about git attribute files.
+
+*.rbi linguist-language=Ruby
+
+# Mark .rubocop_todo.yml as generated.
+.rubocop_todo.yml linguist-generated
+
+# Mark Tapioca RBI shims as generated.
+sorbet/rbi/dsl/** linguist-generated
+sorbet/rbi/gems/** linguist-generated
