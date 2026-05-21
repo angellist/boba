@@ -1,0 +1,65 @@
+version: 2
+updates:
+  - package-ecosystem: "bundler"
+    directory: "/"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "12:00" # UTC
+    groups:
+      bundler-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "rails"
+          - "actioncable"
+          - "actionmailbox"
+          - "actionmailer"
+          - "actionpack"
+          - "actiontext"
+          - "actionview"
+          - "activejob"
+          - "activemodel"
+          - "activerecord"
+          - "activestorage"
+          - "activesupport"
+          - "railties"
+          - "rubocop"
+          - "rubocop-*"
+      bundler-rails:
+        patterns:
+          - "rails"
+          - "actioncable"
+          - "actionmailbox"
+          - "actionmailer"
+          - "actionpack"
+          - "actiontext"
+          - "actionview"
+          - "activejob"
+          - "activemodel"
+          - "activerecord"
+          - "activestorage"
+          - "activesupport"
+          - "railties"
+      bundler-rubocop:
+        patterns:
+          - "rubocop"
+          - "rubocop-*"
+  - package-ecosystem: "github-actions"
+    directories:
+      - "/"
+      - "/.github/actions/*"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "12:00" # UTC
+    groups:
+      github-actions-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
