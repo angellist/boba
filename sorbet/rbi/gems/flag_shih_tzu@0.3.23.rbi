@@ -5,15 +5,14 @@
 # Please instead update this file by running `bin/tapioca gem flag_shih_tzu`.
 
 
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:14
 module ActiveModel
-  class << self
-    def deprecator; end
-    def eager_load!; end
-    def gem_version; end
-    def version; end
-  end
+  extend ::ActiveSupport::Autoload
 end
 
+# Open ActiveModel::Validations to define some additional ones
+#
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:16
 module ActiveModel::Validations
   include GeneratedInstanceMethods
   include ::ActiveSupport::Callbacks
@@ -27,25 +26,9 @@ module ActiveModel::Validations
   mixes_in_class_methods ::ActiveModel::Translation
   mixes_in_class_methods ::ActiveModel::Validations::HelperMethods
 
-  def errors; end
-  def invalid?(context = T.unsafe(nil)); end
-  def read_attribute_for_validation(*_arg0); end
-  def valid?(context = T.unsafe(nil)); end
-  def validate(context = T.unsafe(nil)); end
-  def validate!(context = T.unsafe(nil)); end
-  def validates_with(*args, &block); end
-
-  private
-
-  def init_internals; end
-  def initialize_dup(other); end
-  def raise_validation_error; end
-  def run_validations!; end
-
   module GeneratedClassMethods
     def __callbacks; end
     def __callbacks=(value); end
-    def __callbacks?; end
     def _validators; end
     def _validators=(value); end
     def _validators?; end
@@ -53,68 +36,161 @@ module ActiveModel::Validations
 
   module GeneratedInstanceMethods
     def __callbacks; end
-    def __callbacks?; end
     def _validators; end
     def _validators?; end
   end
 end
 
+# Use these validators in your model
+#
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:36
 module ActiveModel::Validations::HelperMethods
-  def validates_absence_of(*attr_names); end
-  def validates_acceptance_of(*attr_names); end
-  def validates_comparison_of(*attr_names); end
-  def validates_confirmation_of(*attr_names); end
-  def validates_exclusion_of(*attr_names); end
-  def validates_format_of(*attr_names); end
-  def validates_inclusion_of(*attr_names); end
-  def validates_length_of(*attr_names); end
-  def validates_numericality_of(*attr_names); end
-  def validates_presence_of(*attr_names); end
+  # Validates that the specified attributes are flags and are not blank.
+  # Happens by default on save. Example:
+  #
+  #  class Spaceship < ActiveRecord::Base
+  #    include FlagShihTzu
+  #
+  #    has_flags({ 1 => :warpdrive, 2 => :hyperspace }, :column => 'engines')
+  #    validates_presence_of_flags :engines
+  #  end
+  #
+  # The engines attribute must be a flag in the object and it cannot be blank.
+  #
+  # Configuration options:
+  # * <tt>:message</tt> - A custom error message (default is: "can't be blank").
+  # * <tt>:on</tt> - Specifies when this validation is active. Runs in all
+  #   validation contexts by default (+nil+), other options are <tt>:create</tt>
+  #   and <tt>:update</tt>.
+  # * <tt>:if</tt> - Specifies a method, proc or string to call to determine if
+  #   the validation should occur (e.g. <tt>:if => :allow_validation</tt>, or
+  #   <tt>:if => Proc.new { |user| user.signup_step > 2 }</tt>). The method, proc
+  #   or string should return or evaluate to a true or false value.
+  # * <tt>:unless</tt> - Specifies a method, proc or string to call to determine
+  #   if the validation should not occur (e.g. <tt>:unless => :skip_validation</tt>,
+  #   or <tt>:unless => Proc.new { |spaceship| spaceship.warp_step <= 2 }</tt>). The method,
+  #   proc or string should return or evaluate to a true or false value.
+  # * <tt>:strict</tt> - Specifies whether validation should be strict.
+  #   See <tt>ActiveModel::Validation#validates!</tt> for more information.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:64
   def validates_presence_of_flags(*attr_names); end
-  def validates_size_of(*attr_names); end
-
-  private
-
-  def _merge_attributes(attr_names); end
 end
 
+# A simple EachValidator that will check for the presence of the flags specified
+#
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:19
 class ActiveModel::Validations::PresenceOfFlagsValidator < ::ActiveModel::EachValidator
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:20
   def validate_each(record, attribute, value); end
 
   private
 
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu/validators.rb:28
   def check_flag(record, attribute); end
 end
 
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:4
 module FlagShihTzu
   include GeneratedInstanceMethods
 
   mixes_in_class_methods GeneratedClassMethods
   mixes_in_class_methods ::FlagShihTzu::ClassMethods
 
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:505
   def all_flags(colmn = T.unsafe(nil)); end
+
+  # Use with a checkbox form builder, like rails' or simple_form's
+  # :selected_flags, used in the example below, is a method defined
+  #   by flag_shih_tzu for bulk setting flags like this:
+  #
+  #     form_for @user do |f|
+  #       f.collection_check_boxes(:selected_flags,
+  #         f.object.as_flag_collection("flags",
+  #             :sent_warm_up_email,
+  #             :not_follow_up_called),
+  #         :first,
+  #         :last)
+  #     end
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:603
   def as_flag_collection(colmn = T.unsafe(nil), *args); end
+
+  # Use with chained_flags_with to find records with specific flags
+  #   set to the same values as on this record.
+  # For a record that has sent_warm_up_email = true and the other flags false:
+  #
+  #     user.chained_flags_with_signature
+  #     => [:sent_warm_up_email,
+  #         :not_follow_up_called,
+  #         :not_sent_final_email,
+  #         :not_scheduled_appointment]
+  #     User.chained_flags_with("flags", *user.chained_flags_with_signature)
+  #     => the set of Users that have the same flags set as user.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:578
   def chained_flags_with_signature(colmn = T.unsafe(nil), *args); end
+
+  # Performs the bitwise operation so the flag will return +false+.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:476
   def disable_flag(flag, colmn = T.unsafe(nil)); end
+
+  # Performs the bitwise operation so the flag will return +true+.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:468
   def enable_flag(flag, colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:490
   def flag_disabled?(flag, colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:483
   def flag_enabled?(flag, colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:497
   def flags(colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:539
   def has_flag?(colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:527
   def select_all_flags(colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:509
   def selected_flags(colmn = T.unsafe(nil)); end
+
+  # Useful for a form builder
+  # use selected_#{column}= for custom column names.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:517
   def selected_flags=(chosen_flags); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:501
   def set_flags(value, colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:533
   def unselect_all_flags(colmn = T.unsafe(nil)); end
+
+  # returns true if successful
+  # third parameter allows you to specify that `self` should
+  #   also have its in-memory flag attribute updated.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:546
   def update_flag!(flag, value, update_instance = T.unsafe(nil)); end
 
   private
 
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:612
   def collect_flags(*args); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:623
   def determine_flag_colmn_for(flag); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:619
   def get_bit_for(flag, colmn); end
 
   class << self
+    # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:10
     def included(base); end
   end
 
@@ -143,36 +219,101 @@ module FlagShihTzu
   end
 end
 
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:23
 module FlagShihTzu::ClassMethods
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:293
   def chained_flags_condition(colmn = T.unsafe(nil), *args); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:285
   def chained_flags_with(column = T.unsafe(nil), *args); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:257
   def check_flag(flag, colmn); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:275
   def determine_flag_colmn_for(flag); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:297
   def flag_keys(colmn = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:24
   def has_flags(*args); end
+
+  # Returns SQL statement to enable/disable flag.
+  # Automatically determines the correct column.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:270
   def set_flag_sql(flag, value, colmn = T.unsafe(nil), custom_table_name = T.unsafe(nil)); end
 
   private
 
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:462
   def active_record_class?; end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:321
   def chained_flags_values(colmn, *args); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:356
   def check_flag_column(colmn, custom_table_name = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:303
   def flag_full_column_name(table, column); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:307
   def flag_full_column_name_for_assignment(table, column); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:316
   def flag_value_range_for_column(colmn); end
+
+  # Returns the correct method to create a named scope.
+  # Use to prevent deprecation notices on Rails 3
+  #   when using +named_scope+ instead of +scope+.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:456
   def named_scope_method; end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:340
   def parse_flag_options(*args); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:410
   def sql_condition_for_flag(flag, colmn, enabled = T.unsafe(nil), custom_table_name = T.unsafe(nil)); end
+
+  # returns an array of integers suitable for a SQL IN statement.
+  #
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:429
   def sql_in_for_flag(flag, colmn); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:434
   def sql_set_for_flag(flag, colmn, enabled = T.unsafe(nil), custom_table_name = T.unsafe(nil)); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:449
   def valid_flag_column_name?(colmn); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:441
   def valid_flag_key?(flag_key); end
+
+  # pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:445
   def valid_flag_name?(flag_name); end
 end
 
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:8
 FlagShihTzu::DEFAULT_COLUMN_NAME = T.let(T.unsafe(nil), String)
+
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:21
 class FlagShihTzu::DuplicateFlagColumnException < ::Exception; end
+
+# TODO: Inherit from StandardException
+#
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:18
 class FlagShihTzu::IncorrectFlagColumnException < ::Exception; end
+
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:20
 class FlagShihTzu::NoSuchFlagException < ::Exception; end
+
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:19
 class FlagShihTzu::NoSuchFlagQueryModeException < ::Exception; end
+
+# taken from ActiveRecord::ConnectionAdapters::Column
+#
+# pkg:gem/flag_shih_tzu#lib/flag_shih_tzu.rb:6
 FlagShihTzu::TRUE_VALUES = T.let(T.unsafe(nil), Array)

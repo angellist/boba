@@ -5,82 +5,325 @@
 # Please instead update this file by running `bin/tapioca gem attr_json`.
 
 
+# pkg:gem/attr_json#lib/attr_json/version.rb:1
 module AttrJson
   class << self
+    # pkg:gem/attr_json#lib/attr_json.rb:22
     def efficient_to_s(obj); end
   end
 end
 
+# Represents a `attr_json` definition, on either a AttrJson::Record
+# or AttrJson::Model. Normally this class is only used by
+# AttrJson::AttributeDefinition::{Registry}.
+#
+# pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:10
 class AttrJson::AttributeDefinition
+  # @param name [Symbol,String]
+  # @param type [Symbol,ActiveModel::Type::Value] Symbol is looked up in
+  #   ActiveRecord::Type.lookup, but with `adapter: nil` for no custom
+  #   adapter-specific lookup.
+  #
+  # @option options store_key [Symbol,String]
+  # @option options container_attribute [Symbol,ActiveModel::Type::Value]
+  #   Only means something in a AttrJson::Record, no meaning in a AttrJson::Model.
+  # @option options default [Object,Symbol,Proc] (nil)
+  # @option options array [Boolean] (false)
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:26
   def initialize(name, type, options = T.unsafe(nil)); end
 
+  # Used for figuring out appropriate behavior in nested attribute implementation among
+  # other places. true if type is an array of things that are not nested models.
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:111
   def array_of_primitive_type?; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:95
   def array_type?; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:50
   def cast(value); end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:14
   def container_attribute; end
+
+  # Can be value or proc!
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:75
   def default_argument; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:58
   def deserialize(value); end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:62
   def has_custom_store_key?; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:70
   def has_default?; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:14
   def name; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:14
   def original_args; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:80
   def provide_default!; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:54
   def serialize(value); end
+
+  # Used for figuring out appropriate behavior for nested attribute implementation among
+  # other places. true if type is a nested model, either straight or polymorphic
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:101
   def single_model_type?; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:66
   def store_key; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:14
   def type; end
 
   class << self
+    # Can look up a symbol to a type, or leave a type alone, or raise if it's neither.
+    # Extracted into a method, so it can be called from AttrJson::Model#attr_json, for
+    # some timezone aware shenanigans.
+    #
+    # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:118
     def lookup_type(type); end
+
+    # pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:105
     def single_model_type?(arg_type); end
   end
 end
 
+# pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:11
 AttrJson::AttributeDefinition::NO_DEFAULT_PROVIDED = T.let(T.unsafe(nil), Object)
 
+# Attached to a class to record the json attributes registered,
+#  with either AttrJson::Record or AttrJson::Model.
+#
+# Think of it as mostly like a hash keyed by attribute name, value
+# an AttributeDefinition.
+#
+# It is expected to be used by AttrJson::Record and AttrJson::Model,
+# you shouldn't need to interact with it directly.
+#
+# It is intentionally immutable to make it harder to accidentally mutate
+# a registry shared with superclass in a `class_attribute`, instead of
+# properly assigning a new modified registry.
+#
+#     self.some_registry_attribute = self.some_registry_attribute.with(
+#        attr_definition_1, attr_definition_2
+#     )
+#     # => Returns a NEW AttributeDefinition object
+#
+# All references in code to "definition" are to a AttrJson::AttributeDefinition instance.
+#
+# pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:26
 class AttrJson::AttributeDefinition::Registry
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:27
   def initialize(hash = T.unsafe(nil)); end
 
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:40
   def [](key); end
+
+  # Returns all registered attributes as an array of symbols
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:64
   def attribute_names; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:104
   def container_attribute_registered?(attribute_name:, model:); end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:68
   def container_attributes; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:58
   def definitions; end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:36
   def fetch(key, *args, &block); end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:44
   def has_attribute?(key); end
+
+  # We need to lazily set the container type only the FIRST time
+  #
+  # While also avoiding this triggering ActiveRecord to actually go to DB,
+  # we don't want DB connection forced on boot, that's a problem for many apps,
+  # including that may not have a DB connection in initial development.
+  # (#type_for_attribute forces DB connection)
+  #
+  # AND we need to call container attriubte on SUB-CLASS AGAIN, iff sub-class
+  # has any of it's own new registrations, to make sure we get the right type in
+  # sub-class!
+  #
+  # So we just keep track of whether we've registered ourselves, so we can
+  # first time we need to.
+  #
+  # While current implementation is simple, this has ended up a bit fragile,
+  # a different API that doesn't require us to do this implicitly lazily
+  # might be preferred! But this is what we got for now.
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:100
   def register_container_attribute(attribute_name:, model:); end
+
+  # Can return nil if none found.
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:53
   def store_key_lookup(container_attribute, store_key); end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:48
   def type_for_attribute(key); end
+
+  # This is how you register additional definitions, as a non-mutating
+  # return-a-copy operation.
+  #
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:74
   def with(*definitions); end
 
   protected
 
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:110
   def add!(definition); end
+
+  # pkg:gem/attr_json#lib/attr_json/attribute_definition/registry.rb:120
   def store_key_index!(definition); end
 end
 
+# pkg:gem/attr_json#lib/attr_json/attribute_definition.rb:12
 AttrJson::AttributeDefinition::VALID_OPTIONS = T.let(T.unsafe(nil), Array)
 
+# Intentionally non-mutable, to avoid problems with subclass inheritance
+# and rails class_attribute. Instead, you set to new Config object
+# changed with {#merge}.
+#
+# pkg:gem/attr_json#lib/attr_json/config.rb:5
 class AttrJson::Config
+  # pkg:gem/attr_json#lib/attr_json/config.rb:30
   def initialize(options = T.unsafe(nil)); end
 
+  # pkg:gem/attr_json#lib/attr_json/config.rb:23
   def bad_cast; end
+
+  # pkg:gem/attr_json#lib/attr_json/config.rb:23
   def default_accepts_nested_attributes; end
+
+  # pkg:gem/attr_json#lib/attr_json/config.rb:23
   def default_container_attribute; end
+
+  # Returns a new Config object, with changes merged in.
+  #
+  # pkg:gem/attr_json#lib/attr_json/config.rb:44
   def merge(changes = T.unsafe(nil)); end
+
+  # pkg:gem/attr_json#lib/attr_json/config.rb:28
   def mode; end
+
+  # pkg:gem/attr_json#lib/attr_json/config.rb:23
   def time_zone_aware_attributes; end
+
+  # pkg:gem/attr_json#lib/attr_json/config.rb:23
   def unknown_key; end
 
   protected
 
+  # pkg:gem/attr_json#lib/attr_json/config.rb:50
   def attributes; end
 end
 
+# pkg:gem/attr_json#lib/attr_json/config.rb:17
 AttrJson::Config::DEFAULTS = T.let(T.unsafe(nil), Hash)
+
+# pkg:gem/attr_json#lib/attr_json/config.rb:11
 AttrJson::Config::MODEL_ALLOWED_KEYS = T.let(T.unsafe(nil), Array)
+
+# pkg:gem/attr_json#lib/attr_json/config.rb:6
 AttrJson::Config::RECORD_ALLOWED_KEYS = T.let(T.unsafe(nil), Array)
 
+# Meant for use in a plain class, turns it into an ActiveModel::Model
+# with attr_json support. NOT for use in an ActiveRecord::Base model,
+# see `Record` for ActiveRecord use.
+#
+# Creates an ActiveModel object with _typed_ attributes, easily serializable
+# to json, and with a corresponding ActiveModel::Type representing the class.
+# Meant for use as an attribute of a AttrJson::Record. Can be nested,
+# AttrJson::Models can have attributes that are other AttrJson::Models.
+#
+# @note Includes ActiveModel::Model whether you like it or not.
+#
+# You can control what happens if you set an unknown key (one that you didn't
+# register with `attr_json`) with the config attribute `attr_json_config(unknown_key:)`.
+# * :raise (default) raise ActiveModel::UnknownAttributeError
+# * :strip Ignore the unknown key and do not include it, without raising.
+# * :allow Allow the unknown key and it's value to be in the serialized hash,
+#     and written to the database. May be useful for legacy data or columns
+#     that other software touches, to let unknown keys just flow through.
+#
+#        class Something
+#          include AttrJson::Model
+#          attr_json_config(unknown_key: :allow)
+#          #...
+#        end
+#
+# Similarly, trying to set a Model-valued attribute with an object that
+# can't be cast to a Hash or Model at all will normally raise a
+# AttrJson::Type::Model::BadCast error, but you can set config `bad_cast: :as_nil`
+# to make it cast to nil, more like typical ActiveRecord cast.
+#
+#        class Something
+#          include AttrJson::Model
+#          attr_json_config(bad_cast: :as_nil)
+#          #...
+#        end
+#
+# ## Date-type timezone conversion
+#
+# By default, AttrJson::Model date/time attributes will be
+# [ActiveRecord timezone-aware](https://api.rubyonrails.org/classes/ActiveRecord/Timestamp.html)
+# based on settings of `config.active_record.time_zone_aware_attributes` and
+# `ActiveRecord::Base.time_zone_aware_types`.
+#
+# If you'd like to override this, you can set:
+#
+# ```
+# attr_json_config(time_zone_aware_attributes: true)
+# attr_json_config(time_zone_aware_attributes: false)
+# attr_json_config(time_zone_aware_attributes: [:datetime, :time]) # custom list of types
+# ```
+#
+# ## ActiveRecord `serialize`
+#
+# If you want to map a single AttrJson::Model to a json/jsonb column, you
+# can use ActiveRecord `serialize` feature.
+#
+# https://api.rubyonrails.org/classes/ActiveRecord/AttributeMethods/Serialization/ClassMethods.html
+#
+# We provide a simple shim to give you the right API for a "coder" for AR serialize:
+#
+# class ValueModel
+#   include AttrJson::Model
+#   attr_json :some_string, :string
+# end
+#
+# class SomeModel < ApplicationRecord
+#   serialize :some_json_column, ValueModel.to_serialize_coder
+# end
+#
+# # Strip nils
+#
+# When embedded in an `attr_json` attribute, models are normally serialized with `nil` values
+# stripped from hash where possible, for a more compact representation.
+# This can be set differently in the type.
+#
+#     attr_json :lang_and_value, LangAndValue.to_type(strip_nils: false)
+#
+# See #serializable_hash docs for possible values.
+#
+# pkg:gem/attr_json#lib/attr_json/model/cocoon_compat.rb:2
 module AttrJson::Model
   include ::ActiveModel::Serialization
   extend ::ActiveSupport::Concern
@@ -102,26 +345,120 @@ module AttrJson::Model
   mixes_in_class_methods ::ActiveModel::Conversion::ClassMethods
   mixes_in_class_methods ::AttrJson::Model::ClassMethods
 
+  # pkg:gem/attr_json#lib/attr_json/model.rb:289
   def initialize(attributes = T.unsafe(nil)); end
 
+  # Two AttrJson::Model objects are equal if they are the same class
+  # AND their #attributes are equal.
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:406
   def ==(other_object); end
+
+  # ActiveRecord objects [have a](https://github.com/rails/rails/blob/v5.1.5/activerecord/lib/active_record/nested_attributes.rb#L367-L374)
+  # `_destroy`, related to `marked_for_destruction?` functionality used with AR nested attributes.
+  # We don't mark for destruction, our nested attributes implementation just deletes immediately,
+  # but having this simple method always returning false makes things work more compatibly
+  # and smoothly with standard code for nested attributes deletion in form builders.
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:415
   def _destroy; end
+
+  # ActiveRecord JSON serialization will insist on calling
+  # this, instead of the specified type's #serialize, at least in some cases.
+  # So it's important we define it -- the default #as_json added by ActiveSupport
+  # will serialize all instance variables, which is not what we want.
+  #
+  # @param strip_nils [:symbol, Boolean] (default false) [true, false, :safely],
+  #   see #serializable_hash
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:394
   def as_json(options = T.unsafe(nil)); end
+
+  # ActiveModel method, called in initialize. overridden.
+  # from https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activemodel/lib/active_model/attribute_assignment.rb
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:307
   def assign_attributes(new_attributes); end
+
+  # like the ActiveModel::Attributes method
+  # like the ActiveModel::Attributes method
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:337
   def attribute_names; end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:301
   def attributes; end
+
+  # like ActiveModel::Attributes at
+  # https://github.com/rails/rails/blob/8015c2c2cf5c8718449677570f372ceb01318a32/activemodel/lib/active_model/attributes.rb#L120
+  #
+  # is not a full deep freeze
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:423
   def freeze; end
+
+  # This attribute from ActiveRecord make SimpleForm happy, and able to detect
+  # type.
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:332
   def has_attribute?(str); end
+
+  # Override from ActiveModel::Serialization to:
+  #
+  # * handle store_key settings
+  #
+  # * #serialize by type to make sure any values set directly on hash still
+  # get properly type-serialized.
+  #
+  # * custom logic for keeping nil values out of serialization to be more compact
+  #
+  # @param strip_nils [:symbol, Boolean] (default false) Should we keep keys with
+  #   `nil` values out of the serialization entirely? You might want to to keep
+  #   your in-database serialization compact. By default this method does not -- but
+  #   by default AttrJson::Type::Model sends `:safely` when serializing.
+  #     * false => do not strip nils
+  #     * :safely => strip nils only when there is no default value for the attribute,
+  #       so `nil` can still override the default value
+  #     * true => strip nils even if there is a default value -- in AttrJson
+  #       context, this means the default will be reapplied over nil on
+  #       every de-serialization!
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:360
   def serializable_hash(options = T.unsafe(nil)); end
+
+  # We deep_dup on #to_h, you want attributes unduped, ask for #attributes.
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:400
   def to_h; end
+
+  # This attribute from ActiveRecord makes SimpleForm happy, and able to detect
+  # type.
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:326
   def type_for_attribute(attr_name); end
 
   private
 
+  # pkg:gem/attr_json#lib/attr_json/model.rb:438
   def _attr_json_write(key, value); end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:448
   def _attr_json_write_unknown_attribute(key, value); end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:430
   def fill_in_defaults!; end
+
+  # inspired by https://github.com/rails/rails/blob/8015c2c2cf5c8718449677570f372ceb01318a32/activemodel/lib/active_model/attributes.rb
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:296
   def initialize_dup(other); end
+
+  # ActiveModel override.
+  # Don't take from instance variables, take from the attributes
+  # hash itself. Docs suggest we can override this for this very
+  # use case: https://github.com/rails/rails/blob/e1e3be7c02acb0facbf81a97bbfe6d1a6e9ca598/activemodel/lib/active_model/serialization.rb#L152-L168
+  #
+  # pkg:gem/attr_json#lib/attr_json/model.rb:465
   def read_attribute_for_serialization(key); end
 
   module GeneratedClassMethods
@@ -146,211 +483,727 @@ module AttrJson::Model
   end
 end
 
+# pkg:gem/attr_json#lib/attr_json/model.rb:111
 module AttrJson::Model::ClassMethods
+  # pkg:gem/attr_json#lib/attr_json/model.rb:213
   def attr_json(name, type, **options); end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:112
   def attr_json_config(new_values = T.unsafe(nil)); end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:184
   def attribute_names; end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:189
   def attribute_types; end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:139
   def new_from_serializable(attributes = T.unsafe(nil)); end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:179
   def to_serialization_coder; end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:163
   def to_type(strip_nils: T.unsafe(nil)); end
 
   private
 
+  # pkg:gem/attr_json#lib/attr_json/model.rb:264
   def _attr_json_maybe_wrap_timezone_aware(type); end
+
+  # pkg:gem/attr_json#lib/attr_json/model.rb:244
   def _attr_jsons_module; end
 end
 
+# Meant for mix-in in a AttrJson::Model class, defines some methods that
+# [cocoon](https://github.com/nathanvda/cocoon) insists upon, even though the
+# implementation doesn't really matter for getting cocoon to work with our Models
+# as nested models in forms with cocoon -- the methods just need to be there.
+#
+# pkg:gem/attr_json#lib/attr_json/model/cocoon_compat.rb:7
 module AttrJson::Model::CocoonCompat
   extend ::ActiveSupport::Concern
 
   mixes_in_class_methods ::AttrJson::Model::CocoonCompat::ClassMethods
 
+  # pkg:gem/attr_json#lib/attr_json/model/cocoon_compat.rb:22
   def marked_for_destruction?; end
+
+  # cocoon insists on asking, we don't know the answer, we'll just say 'no'
+  # PR to cocoon to not insist on this?
+  #
+  # pkg:gem/attr_json#lib/attr_json/model/cocoon_compat.rb:19
   def new_record?; end
 end
 
+# pkg:gem/attr_json#lib/attr_json/model/cocoon_compat.rb:10
 module AttrJson::Model::CocoonCompat::ClassMethods
+  # pkg:gem/attr_json#lib/attr_json/model/cocoon_compat.rb:12
   def reflect_on_association(*args); end
 end
 
+# Used to validate an attribute in an AttrJson::Model whose values are other models, when
+# you want validation errors on the nested models to post up.
+#
+# This is based on ActiveRecord's own ActiveRecord::Validations::AssociatedValidator, and actually forked
+# from it at https://github.com/rails/rails/blob/e37adfed4eff3b43350ec87222a922e9c72d9c1b/activerecord/lib/active_record/validations/associated.rb
+#
+# We used to simply use an ActiveRecord::Validations::AssociatedValidator, but as of https://github.com/jrochkind/attr_json/pull/220 (e1e798142d)
+# it got ActiveRecord-specific functionality that no longer worked with our use case.
+#
+# No problem, the implementation is simple, we can provide it here, based on the last version that did work.
+#
+# pkg:gem/attr_json#lib/attr_json/model/nested_model_validator.rb:13
 class AttrJson::Model::NestedModelValidator < ::ActiveModel::EachValidator
+  # pkg:gem/attr_json#lib/attr_json/model/nested_model_validator.rb:14
   def validate_each(record, attribute, value); end
 
   private
 
+  # pkg:gem/attr_json#lib/attr_json/model/nested_model_validator.rb:21
   def valid_object?(record); end
 end
 
+# The implementation is based on ActiveRecord::NestedAttributes, from
+# https://github.com/rails/rails/blob/a45f234b028fd4dda5338e5073a3bf2b8bf2c6fd/activerecord/lib/active_record/nested_attributes.rb
+#
+# Re-used, and customized/overrode methods to match our implementation.
+# Copied over some implementation so we can use in ActiveModel's that original
+# isn't compatible with.
+# The original is pretty well put together and has had very low churn history.
+#
+#
+# Much of the AR implementation, copied, just works,
+# if we define `'#{attribute_name}_attributes='` methods that work. That's mostly what
+# we have to do here.
+#
+# Unlike AR, we try to put most of our implementation in seperate
+# implementation helper instances, instead of adding a bazillion methods to the model itself.
+#
+# pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:4
 module AttrJson::NestedAttributes
   extend ::ActiveSupport::Concern
 
   mixes_in_class_methods ::AttrJson::NestedAttributes::ClassMethods
 end
 
+# Implementation of `build_` methods, called by the `build_` methods
+# {NestedAttributes} adds.
+#
+# pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:7
 class AttrJson::NestedAttributes::Builder
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:10
   def initialize(model, attr_name); end
 
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:8
   def attr_def; end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:8
   def attr_name; end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:15
   def build(params = T.unsafe(nil)); end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/builder.rb:8
   def model; end
 end
 
+# pkg:gem/attr_json#lib/attr_json/nested_attributes.rb:25
 module AttrJson::NestedAttributes::ClassMethods
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes.rb:49
   def attr_json_accepts_nested_attributes_for(*attr_names); end
 end
 
+# Rails has a weird "multiparameter attribute" thing, that is used for simple_form's
+# date/time html entry (datetime may be ALL it's ever been used for in Rails!),
+# using weird parameters in the HTTP query params like "dateattribute(2i)".
+# It is weird code, and I do NOT really understand the implementation, but it's also
+# very low-churn, hasn't changed much in recent Rails history.
+#
+# In Rails at present it's only on ActiveRecord, we need it used on our AttrJson::Models
+# too, so we copy and paste extract it here, from:
+# https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb
+#
+# We only use it in the `#{attr_name}_attributes=` methods added by {NestedAttributes},
+# that's enough to get what we need for support of this stuff in our stuff, for form submisisons
+# using rails-style date/time inputs as used eg in simple_form. And then we don't
+# need to polute anything outside of NestedAttributes module with this crazy stuff.
+#
+# pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:19
 class AttrJson::NestedAttributes::MultiparameterAttributeWriter
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:21
   def initialize(model); end
 
+  # Copied from Rails. https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb#L39
+  #
+  # Instantiates objects for all attribute classes that needs more than one constructor parameter. This is done
+  # by calling new on the column type or aggregation type (through composed_of) object with these parameters.
+  # So having the pairs written_on(1) = "2004", written_on(2) = "6", written_on(3) = "24", will instantiate
+  # written_on (a date type) with Date.new("2004", "6", "24"). You can also specify a typecast character in the
+  # parentheses to have the parameters typecasted before they're used in the constructor. Use i for Integer and
+  # f for Float. If all the values for a given attribute are empty, the attribute will be set to +nil+.
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:33
   def assign_multiparameter_attributes(pairs); end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:20
   def model; end
 
   protected
 
+  # copied from Rails https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb#L45
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:42
   def execute_callstack_for_multiparameter_attributes(callstack); end
+
+  # copied from Rails https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb#L65
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:63
   def extract_callstack_for_multiparameter_attributes(pairs); end
+
+  # copied from Rails https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb#L83
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:83
   def find_parameter_position(multiparameter_name); end
+
+  # copied from Rails https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb#L79
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/multiparameter_attribute_writer.rb:78
   def type_cast_attribute_value(multiparameter_name, value); end
 end
 
+# Implementation of `assign_nested_attributes` methods, called by the model
+# method of that name that {NestedAttributes} adds.
+#
+# pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:9
 class AttrJson::NestedAttributes::Writer
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:12
   def initialize(model, attr_name); end
 
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:19
   def assign_nested_attributes(attributes); end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:10
   def attr_def; end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:10
   def attr_name; end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:10
   def model; end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:17
   def nested_attributes_options(*_arg0, **_arg1, &_arg2); end
 
   protected
 
+  # Copied with significant modification from
+  # https://github.com/rails/rails/blob/master/activerecord/lib/active_record/nested_attributes.rb#L466
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:106
   def assign_nested_attributes_for_model_array(attributes_collection); end
+
+  # Implementation for an `#{attribute_name}_attributes=` method, when the attr_json
+  # attribute in question is recognized as an array of primitive values (not nested models)
+  #
+  # Really just exists to filter out blank/empty strings with reject_if.
+  #
+  # It will insist on filtering out empty strings and nils from arrays (ignores reject_if argument),
+  # since that's the only reason to use it. It will respect limit argument.
+  #
+  # Filtering out empty strings can be convenient for using a hidden field in a form to
+  # make sure an empty array gets set if all individual fields are removed from form using
+  # cocoon-like javascript.
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:57
   def assign_nested_attributes_for_primitive_array(attributes_array); end
+
+  # Copied with signficant modifications from:
+  # https://github.com/rails/rails/blob/master/activerecord/lib/active_record/nested_attributes.rb#L407
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:68
   def assign_nested_attributes_for_single_model(attributes); end
+
+  # Copied from ActiveRecord::NestedAttributes:
+  #
+  # Determines if a record with the particular +attributes+ should be
+  # rejected by calling the reject_if Symbol or Proc (if defined).
+  # The reject_if option is defined by +accepts_nested_attributes_for+.
+  #
+  # Returns false if there is a +destroy_flag+ on the attributes.
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:164
   def call_reject_if(association_name, attributes); end
+
+  # Copied from ActiveRecord::NestedAttributes
+  #
+  # Takes in a limit and checks if the attributes_collection has too many
+  # records. It accepts limit in the form of symbol, proc, or
+  # number-like object (anything that can be compared with an integer).
+  #
+  # Raises TooManyRecords error if the attributes_collection is
+  # larger than the limit.
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:190
   def check_record_limit!(limit, attributes_collection); end
+
+  # mutates attributes passsed in to remove multiparameter attributes,
+  # and returns multiparam in their own hash. Based on:
+  # https://github.com/rails/rails/blob/42a16a4d6514f28e05f1c22a5f9125d194d9c7cb/activerecord/lib/active_record/attribute_assignment.rb#L15-L25
+  # See AttrJson::NestedAttributes::MultiparameterAttributeWriter
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:227
   def extract_multi_parameter_attributes(attributes); end
+
+  # Copied from ActiveRecord::NestedAttributes unaltered.
+  #
+  # Determines if a hash contains a truthy _destroy key.
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:178
   def has_destroy_flag?(hash); end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:31
   def model_send(method, *args); end
+
+  # Copied from ActiveRecord::NestedAttributes
+  #
+  # Determines if a new record should be rejected by checking
+  # has_destroy_flag? or if a <tt>:reject_if</tt> proc exists for this
+  # association and evaluates to +true+.
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:213
   def reject_new_record?(association_name, attributes); end
+
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:35
   def unassignable_keys; end
+
+  # Unlike ActiveRecord, we don't have an allow_destroy option, so
+  # this is just `has_destroy_flag?`
+  #
+  # pkg:gem/attr_json#lib/attr_json/nested_attributes/writer.rb:219
   def will_be_destroyed?(association_name, attributes); end
 end
 
+# The mix-in to provide AttrJson support to ActiveRecord::Base models.
+# We call it `Record` instead of `ActiveRecord` to avoid confusing namespace
+# shadowing errors, sorry!
+#
+# @example
+#       class SomeModel < ActiveRecord::Base
+#         include AttrJson::Record
+#
+#         attr_json :a_number, :integer
+#       end
+#
+# pkg:gem/attr_json#lib/attr_json/record.rb:19
 module AttrJson::Record
   extend ::ActiveSupport::Concern
 
+  # Sync all values FROM the json_attributes json column TO rails attributes
+  #
+  # If values have for some reason gotten out of sync this will make them the
+  # identical objects again, with the container hash value being the source.
+  #
+  # In some cases, the values may already be equivalent but different objects --
+  # This is meant to ensure they are the _same object_ in both places, so
+  # mutation of mutable object will effect both places, for instance for dirty
+  # tracking.
+  #
+  # pkg:gem/attr_json#lib/attr_json/record.rb:52
   def attr_json_sync_to_rails_attributes; end
 end
 
+# pkg:gem/attr_json#lib/attr_json/record.rb:88
 module AttrJson::Record::ClassMethods
+  # pkg:gem/attr_json#lib/attr_json/record.rb:157
   def attr_json(name, type, **options); end
+
+  # pkg:gem/attr_json#lib/attr_json/record.rb:103
   def attr_json_config(new_values = T.unsafe(nil)); end
 
   private
 
+  # pkg:gem/attr_json#lib/attr_json/record.rb:244
   def _attr_jsons_module; end
 end
 
+# Implementation class called by #jsonb_contains scope method. Ordinarily
+# you don't need to use it yourself, but you can.
+#
+# pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:7
 class AttrJson::Record::QueryBuilder
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:9
   def initialize(relation, input_attributes); end
 
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:20
   def contains_not_relation; end
+
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:14
   def contains_relation; end
+
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:8
   def input_attributes; end
+
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:8
   def relation; end
 
   protected
 
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:56
   def add_to_param_hash!(param_hash, key_path_str, value); end
+
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:28
   def contains_relation_impl; end
+
+  # returns a hash with keys container attributes, values hashes of attributes
+  # belonging to that container attribute.
+  #
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:80
   def group_attributes_by_container; end
+
+  # pkg:gem/attr_json#lib/attr_json/record/query_builder.rb:43
   def merge_param_hash!(original, new); end
 end
 
+# Adds query-ing scopes into a AttrJson::Record, based
+# on postgres jsonb.
+#
+# Has to be mixed into something that also is a AttrJson::Record please!
+#
+# @example
+#      class MyRecord < ActiveRecord::Base
+#        include AttrJson::Record
+#        include AttrJson::Record::QueryScopes
+#
+#        attr_json :a_string, :string
+#      end
+#
+#      some_model.jsonb_contains(a_string: "foo").first
+#
+#      some_model.not_jsonb_contains(a_string: "bar").first
+#
+# See more in {file:README} docs.
+#
+# pkg:gem/attr_json#lib/attr_json/record/query_scopes.rb:25
 module AttrJson::Record::QueryScopes
   extend ::ActiveSupport::Concern
 end
 
+# A little wrapper to provide an object that provides #dump and #load method for use
+# as a coder second-argument for [ActiveRecord Serialization](https://api.rubyonrails.org/classes/ActiveRecord/AttributeMethods/Serialization/ClassMethods.html),
+# that simply delegates to #serialize and #deserialize from a ActiveModel::Type object.
+#
+# Created to be used with an AttrJson::Model type (AttrJson::Type::Model), but hypothetically
+# could be a shim from anything with serialize/deserialize to dump/load instead.
+#
+#    class ValueModel
+#      include AttrJson::Model
+#      attr_json :some_string, :string
+#    end
+#
+#    class SomeModel < ApplicationRecord
+#      serialize :some_json_column, ValueModel.to_serialize_coder
+#    end
+#
+# Note when used with an AttrJson::Model, it will dump/load from a HASH, not a
+# string. It assumes it's writing to a Json(b) column that wants/provides hashes,
+# not strings.
+#
+# pkg:gem/attr_json#lib/attr_json/serialization_coder_from_type.rb:24
 class AttrJson::SerializationCoderFromType
+  # pkg:gem/attr_json#lib/attr_json/serialization_coder_from_type.rb:26
   def initialize(type); end
 
+  # Dump and load methods to support ActiveRecord Serialization
+  # too.
+  #
+  # pkg:gem/attr_json#lib/attr_json/serialization_coder_from_type.rb:32
   def dump(value); end
+
+  # Dump and load methods to support ActiveRecord Serialization
+  # too. https://api.rubyonrails.org/classes/ActiveRecord/AttributeMethods/Serialization/ClassMethods.html
+  #
+  # pkg:gem/attr_json#lib/attr_json/serialization_coder_from_type.rb:38
   def load(value); end
+
+  # pkg:gem/attr_json#lib/attr_json/serialization_coder_from_type.rb:25
   def type; end
 end
 
+# pkg:gem/attr_json#lib/attr_json/type/array.rb:4
 module AttrJson::Type; end
 
+# You can wrap any ActiveModel::Type in one of these, and it's magically
+# a type representing an Array of those things, always returning
+# an array of those things on cast, serialize, and deserialize.
+#
+# Meant for use with AttrJson::Record and AttrJson::Model, may or
+# may not do something useful or without exceptions in other contexts.
+#
+#     AttrJson::Type::Array.new(base_type)
+#
+# pkg:gem/attr_json#lib/attr_json/type/array.rb:13
 class AttrJson::Type::Array < ::ActiveModel::Type::Value
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:15
   def initialize(base_type); end
 
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:14
   def base_type; end
+
+  # Soft-deprecated. You probably want to use
+  #
+  #    AttrJson::AttributeDefinition#array_of_primitive_type?
+  #
+  # instead where possible.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:55
   def base_type_primitive?; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:23
   def cast(value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:35
   def changed_in_place?(raw_old_value, new_value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:31
   def deserialize(value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:27
   def serialize(value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:19
   def type; end
+
+  # This is used only by our own keypath-chaining query stuff.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:40
   def value_for_contains_query(key_path_arr, value); end
 
   protected
 
+  # pkg:gem/attr_json#lib/attr_json/type/array.rb:60
   def convert_to_array(value); end
 end
 
+# A type that gets applied to the AR container/store jsonb attribute,
+# to do serialization/deserialization/cast using declared attr_jsons, to
+# json-able values, before calling super to original json-type, which will
+# actually serialize/deserialize the json.
+#
+# pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:9
 class AttrJson::Type::ContainerAttribute < ::ActiveRecord::Type::Json
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:15
   def initialize(model, container_attribute); end
 
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:19
   def cast(v); end
+
+  # Just like superclass, but we tell deserialize to NOT apply defaults,
+  # so we can consider default-application to be a change.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:63
   def changed_in_place?(raw_old_value, new_value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:14
   def container_attribute; end
+
+  # optional with_defaults arg is our own, not part of ActiveModel::Type API,
+  # used by {#changed_in_place?} so we can consider default application to
+  # be a change.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:47
   def deserialize(v, with_defaults: T.unsafe(nil)); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:14
   def model; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/container_attribute.rb:33
   def serialize(v); end
 end
 
+# An ActiveModel::Type representing a particular AttrJson::Model
+# class, supporting casting, serialization, and deserialization from/to
+# JSON-able serializable hashes.
+#
+# You create one with AttrJson::Model::Type.new(attr_json_model_class),
+# but normally that's only done in AttrJson::Model.to_type, there isn't
+# an anticipated need to create from any other place.
+#
+# pkg:gem/attr_json#lib/attr_json/type/model.rb:14
 class AttrJson::Type::Model < ::ActiveModel::Type::Value
+  # @param model [AttrJson::Model] the model _class_ object
+  # @param strip_nils [Symbol,Boolean] [true, false, or :safely]
+  #  (default :safely), As a type, should we strip nils when serialiing?
+  #  This value passed to AttrJson::Model#serialized_hash(strip_nils).
+  #  by default it's :safely, we strip nils when it can be done safely
+  #  to preserve default overrides.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:25
   def initialize(model, strip_nils: T.unsafe(nil)); end
 
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:35
   def cast(v); end
+
+  # these guys are definitely mutable, so we need this.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:100
   def changed_in_place?(raw_old_value, new_value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:71
   def deserialize(v); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:17
   def model; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:17
   def model=(_arg0); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:61
   def serialize(v); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:17
   def strip_nils; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:17
   def strip_nils=(_arg0); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:31
   def type; end
+
+  # This is used only by our own keypath-chaining query stuff.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/model.rb:105
   def value_for_contains_query(key_path_arr, value); end
 end
 
+# pkg:gem/attr_json#lib/attr_json/type/model.rb:15
 class AttrJson::Type::Model::BadCast < ::ArgumentError; end
 
+# AttrJson::Type::PolymorphicModel can be used to create attr_json attributes
+# that can hold any of various specified AttrJson::Model models. It is a
+# _somewhat_ experimental feature.
+#
+# "polymorphic" may not be quite the right word, but we use it out of analogy
+# with ActiveRecord [polymorphic assocications](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations),
+# which it resembles, as well as ActiveRecord [Single-Table Inheritance](http://guides.rubyonrails.org/association_basics.html#single-table-inheritance).
+#
+# Similar to these AR features, a PolymorphicModel-typed attribute will serialize the
+# _model name_ of a given value in a `type` json hash key, so it can deserialize
+# to the same correct model class.
+#
+# It can be used for single-model attributes, or arrays (which can be hetereogenous),
+# in either AttrJson::Record or nested AttrJson::Models. If `CD`, `Book`, `Person`,
+# and `Corporation` are all AttrJson::Model classes:
+#
+#      attr_json :favorite, AttrJson::Type::PolymorphicAttribute.new(CD, Book)
+#      attr_json :authors, AttrJson::Type::PolymorphicAttribute.new(Person, Corporation), array: true
+#
+# Currently, you need a specific enumerated list of allowed types, and they all
+# need to be AttrJson::Model classes. You can't at the moment have an "open" polymorphic
+# type that can accept any AttrJson::Model.
+#
+# You can change the json key that the "type" (class name) for a value is stored to,
+# when creating the type:
+#
+#      attr_json, :author, AttrJson::Type::PolymorphicAttribute.new(Person, Corporation, type_key: "__type__")
+#
+# But if you already have existing data in the db, that's gonna be problematic to change on the fly.
+#
+# You can set attributes with a hash, but it needs to have an appropriate `type` key
+# (or other as set by `type_key` arg). If it does not, or you try to set a non-hash
+# value, you will get a AttrJson::Type::PolymorphicModel::TypeError. (maybe a validation
+# error would be better? but it's not what it does now.)
+#
+# **Note** this
+# also applies to loading non-compliant data from the database. If you have non-compliant
+# data in the db, the only way to look at it will be as a serialized json string in top-level
+# {#json_attributes_before_cast} (or other relevant container attribute.)
+#
+# There is no built-in form support for PolymorphicModels, you'll have to work it out.
+#
+# ## jsonb_contains support
+#
+# There is basic jsonb_contains support, but no sophisticated type-casting like normal, beyond
+# the polymorphic attribute. But you can do:
+#
+#      MyRecord.jsonb_contains(author: { name: "foo"})
+#      MyRecord.jsonb_contains(author: { name: "foo", type: "Corporation"})
+#      MyRecord.jsonb_contains(author: Corporation.new(name: "foo"))
+#
+# Additionally, there is not_jsonb_contains, which creates the same query terms like jsonb_contains, but negated.
+#
+# pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:58
 class AttrJson::Type::PolymorphicModel < ::ActiveModel::Type::Value
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:62
   def initialize(*args); end
 
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:104
   def cast(v); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:108
   def deserialize(v); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:91
   def model_names; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:61
   def model_type_lookup; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:95
   def model_types; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:112
   def serialize(v); end
+
+  # ActiveModel method, symbol type label
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:100
   def type; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:126
   def type_for_model_name(model_name); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:61
   def type_key; end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:61
   def unrecognized_type; end
+
+  # This is used only by our own keypath-chaining query stuff.
+  # For PolymorphicModel type, it does no type casting, just
+  # sticks whatever you gave it in, which needs to be json-compat
+  # values.
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:134
   def value_for_contains_query(key_path_arr, value); end
 
   protected
 
+  # We need to make sure to call the correct operation on
+  # the model type, so that we get the same result as if
+  # we had called the type directly
+  #
+  # @param v [Object, nil] the value to cast or deserialize
+  # @param operation [Symbol] :cast or :deserialize
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:154
   def cast_or_deserialize(v, operation); end
+
+  # @param hash [Hash] the value to cast or deserialize
+  # @param operation [Symbol] :cast or :deserialize
+  #
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:170
   def model_from_hash(hash, operation); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:193
   def raise_bad_model_name(name, value); end
+
+  # pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:189
   def raise_missing_type_key(value); end
 end
 
+# pkg:gem/attr_json#lib/attr_json/type/polymorphic_model.rb:59
 class AttrJson::Type::PolymorphicModel::TypeError < ::TypeError; end
+
+# pkg:gem/attr_json#lib/attr_json/version.rb:2
 AttrJson::VERSION = T.let(T.unsafe(nil), String)

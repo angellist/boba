@@ -2,6 +2,6 @@
 .
 --ignore=tmp/
 --ignore=vendor/
-
+--parser=prism
 --enable-experimental-requires-ancestor
 --enable-experimental-rbs-comments

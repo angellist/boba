@@ -5,33 +5,62 @@
 # Please instead update this file by running `bin/tapioca gem noticed`.
 
 
+# pkg:gem/noticed#lib/noticed/version.rb:1
 module Noticed
   include ::ActiveSupport::Deprecation::DeprecatedConstantAccessor
 
+  # pkg:gem/noticed#lib/noticed.rb:28
   def parent_class; end
+
+  # pkg:gem/noticed#lib/noticed.rb:28
   def parent_class=(val); end
 
   class << self
+    # pkg:gem/noticed#lib/noticed.rb:16
     def deprecator; end
+
+    # pkg:gem/noticed#lib/noticed.rb:28
     def parent_class; end
+
+    # pkg:gem/noticed#lib/noticed.rb:28
     def parent_class=(val); end
+
+    # pkg:gem/noticed#lib/noticed/engine.rb:3
     def railtie_helpers_paths; end
+
+    # pkg:gem/noticed#lib/noticed/engine.rb:3
     def railtie_namespace; end
+
+    # pkg:gem/noticed#lib/noticed/engine.rb:3
     def railtie_routes_url_helpers(include_path_helpers = T.unsafe(nil)); end
+
+    # pkg:gem/noticed#lib/noticed/engine.rb:3
     def table_name_prefix; end
+
+    # pkg:gem/noticed#lib/noticed/engine.rb:3
     def use_relative_model_naming?; end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/api_client.rb:4
 module Noticed::ApiClient
   extend ::ActiveSupport::Concern
 
+  # Helper method for making POST requests from delivery methods
+  #
+  # Usage:
+  #   post_request("http://example.com", basic_auth: {user:, pass:}, headers: {}, json: {}, form: {})
+  #
+  # pkg:gem/noticed#lib/noticed/api_client.rb:12
   def post_request(url, args = T.unsafe(nil)); end
 end
 
 class Noticed::ApplicationJob < ::ActiveJob::Base
   class << self
-    def rescue_handlers; end
+    private
+
+    def __class_attr_rescue_handlers; end
+    def __class_attr_rescue_handlers=(new_value); end
   end
 end
 
@@ -43,112 +72,271 @@ class Noticed::ApplicationRecord < ::ActiveRecord::Base
   extend ::Kaminari::ConfigurationMethods::ClassMethods
 
   class << self
-    def _validators; end
-    def defined_enums; end
     def page(num = T.unsafe(nil)); end
-    def table_name_prefix; end
+
+    private
+
+    def __class_attr__validators; end
+    def __class_attr__validators=(new_value); end
+    def __class_attr_defined_enums; end
+    def __class_attr_defined_enums=(new_value); end
+    def __class_attr_table_name_prefix; end
+    def __class_attr_table_name_prefix=(new_value); end
   end
 end
 
 module Noticed::ApplicationRecord::GeneratedAssociationMethods; end
 module Noticed::ApplicationRecord::GeneratedAttributeMethods; end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:2
 class Noticed::BulkDeliveryMethod < ::Noticed::ApplicationJob
   include ::Noticed::ApiClient
   include ::Noticed::RequiredOptions
   extend ::Noticed::RequiredOptions::ClassMethods
   extend ::ActiveModel::Callbacks
 
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
   def _deliver_callbacks; end
-  def _run_deliver_callbacks(&block); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
+  def _run_deliver_callbacks; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
+  def _run_deliver_callbacks!(&block); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:12
   def config; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:32
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:41
   def evaluate_option(name); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:12
   def event; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:36
   def fetch_constant(name); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
   def logger; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
   def logger=(_arg0); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
   def logger?; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:14
   def perform(delivery_method_name, event, recipient: T.unsafe(nil), params: T.unsafe(nil), overrides: T.unsafe(nil)); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
   def required_option_names; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
   def required_option_names?; end
 
   class << self
-    def __callbacks; end
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
     def _deliver_callbacks; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
     def _deliver_callbacks=(value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
     def after_deliver(*args, **options, &block); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
     def around_deliver(*args, **options, &block); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
     def before_deliver(*args, **options, &block); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
     def logger; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
     def logger=(value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
     def logger?; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
     def required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
     def required_option_names=(value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
     def required_option_names?; end
+
+    private
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
+    def __class_attr___callbacks; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:8
+    def __class_attr___callbacks=(new_value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
+    def __class_attr_logger; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:10
+    def __class_attr_logger=(new_value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_method.rb:4
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:2
 module Noticed::BulkDeliveryMethods; end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:3
 class Noticed::BulkDeliveryMethods::Bluesky < ::Noticed::BulkDeliveryMethod
+  # bulk_deliver_by :bluesky do |config|
+  #   config.identifier = ENV["BLUESKY_ID"]
+  #   config.password = ENV["BLUESKY_PASSWORD"]
+  #   config.json = {text: "...", createdAt: "..."}
+  # end
+  #
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:12
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:40
   def host; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:44
   def identifier; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:29
   def start_session; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:25
   def token; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/bluesky.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/discord.rb:3
 class Noticed::BulkDeliveryMethods::Discord < ::Noticed::BulkDeliveryMethod
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/discord.rb:6
   def deliver; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/discord.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/discord.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:3
 class Noticed::BulkDeliveryMethods::Slack < ::Noticed::BulkDeliveryMethod
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:8
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:24
   def raise_if_not_ok?; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:29
   def success?(response); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:20
   def url; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/slack.rb:4
 Noticed::BulkDeliveryMethods::Slack::DEFAULT_URL = T.let(T.unsafe(nil), String)
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:3
 class Noticed::BulkDeliveryMethods::Test < ::Noticed::BulkDeliveryMethod
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:6
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
   def delivered; end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
   def delivered=(_arg0); end
+
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
   def delivered?; end
 
   class << self
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
     def delivered; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
     def delivered=(value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
     def delivered?; end
-    def required_option_names; end
+
+    private
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
+    def __class_attr_delivered; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:4
+    def __class_attr_delivered=(new_value); end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/test.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/bulk_delivery_methods/webhook.rb:3
 class Noticed::BulkDeliveryMethods::Webhook < ::Noticed::BulkDeliveryMethod
+  # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/webhook.rb:6
   def deliver; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/webhook.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/bulk_delivery_methods/webhook.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/coder.rb:4
 class Noticed::Coder
   class << self
+    # pkg:gem/noticed#lib/noticed/coder.rb:12
     def dump(data); end
+
+    # pkg:gem/noticed#lib/noticed/coder.rb:5
     def load(data); end
   end
 end
@@ -228,170 +416,383 @@ class Noticed::Deliverable::DeliverBy
   def computed_options(options, recipient); end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_method.rb:2
 class Noticed::DeliveryMethod < ::Noticed::ApplicationJob
   include ::Noticed::ApiClient
   include ::Noticed::RequiredOptions
   extend ::Noticed::RequiredOptions::ClassMethods
   extend ::ActiveModel::Callbacks
 
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
   def _deliver_callbacks; end
-  def _run_deliver_callbacks(&block); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
+  def _run_deliver_callbacks; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
+  def _run_deliver_callbacks!(&block); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:12
   def config; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:37
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:46
   def evaluate_option(name); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:12
   def event; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:41
   def fetch_constant(name); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
   def logger; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
   def logger=(_arg0); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
   def logger?; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:12
   def notification; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:14
   def params(*_arg0, **_arg1, &_arg2); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:16
   def perform(delivery_method_name, notification, recipient: T.unsafe(nil), params: T.unsafe(nil), overrides: T.unsafe(nil)); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:13
   def recipient(*_arg0, **_arg1, &_arg2); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:14
   def record(*_arg0, **_arg1, &_arg2); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
   def required_option_names; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
   def required_option_names?; end
 
   class << self
-    def __callbacks; end
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
     def _deliver_callbacks; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
     def _deliver_callbacks=(value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
     def after_deliver(*args, **options, &block); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
     def around_deliver(*args, **options, &block); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
     def before_deliver(*args, **options, &block); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
     def logger; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
     def logger=(value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
     def logger?; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
     def required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
     def required_option_names=(value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
     def required_option_names?; end
+
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
+    def __class_attr___callbacks; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:8
+    def __class_attr___callbacks=(new_value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
+    def __class_attr_logger; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:10
+    def __class_attr_logger=(new_value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_method.rb:4
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed.rb:22
 module Noticed::DeliveryMethods
   include ::ActiveSupport::Deprecation::DeprecatedConstantAccessor
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/action_cable.rb:3
 class Noticed::DeliveryMethods::ActionCable < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/action_cable.rb:10
   def channel; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/action_cable.rb:6
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/action_cable.rb:14
   def stream; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/action_cable.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/action_cable.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/action_push_native.rb:3
 class Noticed::DeliveryMethods::ActionPushNative < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/action_push_native.rb:6
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/action_push_native.rb:17
   def notification_class; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/action_push_native.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/action_push_native.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/discord.rb:3
 class Noticed::DeliveryMethods::Discord < ::Noticed::BulkDeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/discord.rb:6
   def deliver; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/discord.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/discord.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/email.rb:3
 class Noticed::DeliveryMethods::Email < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/email.rb:6
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/email.rb:16
   def params; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/email.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/email.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/microsoft_teams.rb:3
 class Noticed::DeliveryMethods::MicrosoftTeams < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/microsoft_teams.rb:6
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/microsoft_teams.rb:10
   def url; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/microsoft_teams.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/microsoft_teams.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:3
 class Noticed::DeliveryMethods::Slack < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:8
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:24
   def raise_if_not_ok?; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:29
   def success?(response); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:20
   def url; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/slack.rb:4
 Noticed::DeliveryMethods::Slack::DEFAULT_URL = T.let(T.unsafe(nil), String)
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:3
 class Noticed::DeliveryMethods::Test < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:6
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
   def delivered; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
   def delivered=(_arg0); end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
   def delivered?; end
 
   class << self
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
     def delivered; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
     def delivered=(value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
     def delivered?; end
-    def required_option_names; end
+
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
+    def __class_attr_delivered; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:4
+    def __class_attr_delivered=(new_value); end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/test.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:3
 class Noticed::DeliveryMethods::TwilioMessaging < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:26
   def account_sid; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:30
   def auth_token; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:38
   def credentials; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:4
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:14
   def json; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:34
   def phone_number; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:22
   def url; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/twilio_messaging.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/vonage_sms.rb:3
 class Noticed::DeliveryMethods::VonageSms < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/vonage_sms.rb:8
   def deliver; end
+
+  # pkg:gem/noticed#lib/noticed/delivery_methods/vonage_sms.rb:15
   def url; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/vonage_sms.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/vonage_sms.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/vonage_sms.rb:4
 Noticed::DeliveryMethods::VonageSms::DEFAULT_URL = T.let(T.unsafe(nil), String)
 
+# pkg:gem/noticed#lib/noticed/delivery_methods/webhook.rb:3
 class Noticed::DeliveryMethods::Webhook < ::Noticed::DeliveryMethod
+  # pkg:gem/noticed#lib/noticed/delivery_methods/webhook.rb:6
   def deliver; end
 
   class << self
-    def required_option_names; end
+    private
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/webhook.rb:3
+    def __class_attr_required_option_names; end
+
+    # pkg:gem/noticed#lib/noticed/delivery_methods/webhook.rb:3
+    def __class_attr_required_option_names=(new_value); end
   end
 end
 
+# pkg:gem/noticed#lib/noticed/engine.rb:2
 class Noticed::Engine < ::Rails::Engine; end
 
 class Noticed::EventJob < ::Noticed::ApplicationJob
   def perform(event); end
 end
 
+# pkg:gem/noticed#lib/noticed/has_notifications.rb:2
 module Noticed::HasNotifications
   extend ::ActiveSupport::Concern
 
   mixes_in_class_methods ::Noticed::HasNotifications::ClassMethods
 
+  # pkg:gem/noticed#lib/noticed/has_notifications.rb:41
   def current_adapter; end
 end
 
+# pkg:gem/noticed#lib/noticed/has_notifications.rb:16
 module Noticed::HasNotifications::ClassMethods
+  # pkg:gem/noticed#lib/noticed/has_notifications.rb:17
   def has_noticed_notifications(param_name: T.unsafe(nil), **options); end
 end
 
@@ -434,6 +835,7 @@ module Noticed::Readable::ClassMethods
   def mark_as_unseen(**kwargs); end
 end
 
+# pkg:gem/noticed#lib/noticed/required_options.rb:2
 module Noticed::RequiredOptions
   extend ::ActiveSupport::Concern
   include GeneratedInstanceMethods
@@ -453,27 +855,51 @@ module Noticed::RequiredOptions
   end
 end
 
+# pkg:gem/noticed#lib/noticed/required_options.rb:9
 module Noticed::RequiredOptions::ClassMethods
+  # pkg:gem/noticed#lib/noticed/required_options.rb:10
   def inherited(base); end
+
+  # pkg:gem/noticed#lib/noticed/required_options.rb:18
   def required_option(*names); end
+
+  # pkg:gem/noticed#lib/noticed/required_options.rb:15
   def required_options(*names); end
 end
 
+# pkg:gem/noticed#lib/noticed.rb:33
 class Noticed::ResponseUnsuccessful < ::StandardError
+  # pkg:gem/noticed#lib/noticed.rb:36
   def initialize(response, url, args); end
 
+  # pkg:gem/noticed#lib/noticed.rb:34
   def response; end
 end
 
+# pkg:gem/noticed#lib/noticed/translation.rb:2
 module Noticed::Translation
   extend ::ActiveSupport::Concern
 
+  # pkg:gem/noticed#lib/noticed/translation.rb:10
   def class_scope; end
+
+  # Returns the +i18n_scope+ for the class. Overwrite if you want custom lookup.
+  #
+  # pkg:gem/noticed#lib/noticed/translation.rb:6
   def i18n_scope; end
+
+  # pkg:gem/noticed#lib/noticed/translation.rb:23
   def scope_translation_key(key); end
+
+  # pkg:gem/noticed#lib/noticed/translation.rb:21
   def t(key, **options); end
+
+  # pkg:gem/noticed#lib/noticed/translation.rb:14
   def translate(key, **options); end
 end
 
+# pkg:gem/noticed#lib/noticed/version.rb:2
 Noticed::VERSION = T.let(T.unsafe(nil), String)
+
+# pkg:gem/noticed#lib/noticed.rb:31
 class Noticed::ValidationError < ::StandardError; end
