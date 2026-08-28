@@ -10,6 +10,7 @@ This list is an evergeen list of currently available compilers.
 * [AttrJson](compiler_attrjson.md)
 * [Draper](compiler_draper.md)
 * [FlagShihTzu](compiler_flagshihtzu.md)
+* [FriendlyId](compiler_friendlyid.md)
 * [Kaminari](compiler_kaminari.md)
 * [MoneyRails](compiler_moneyrails.md)
 * [Noticed](compiler_noticed.md)
