@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     boba (0.1.11)
-      tapioca (<= 0.19.1)
+      tapioca (<= 0.19.2)
 
 GEM
   remote: https://rubygems.org/
@@ -260,7 +260,7 @@ GEM
       zeitwerk (~> 2.6)
     rainbow (3.1.1)
     rake (13.4.2)
-    rbi (0.3.12)
+    rbi (0.4.3)
       prism (~> 1.0)
       rbs (>= 4.0.1)
     rbs (4.0.2)
@@ -319,10 +319,10 @@ GEM
     sorbet-static-and-runtime (0.6.13228)
       sorbet (= 0.6.13228)
       sorbet-runtime (= 0.6.13228)
-    spoom (1.7.15)
+    spoom (1.8.7)
       erubi (>= 1.10.0)
       prism (>= 0.28.0)
-      rbi (>= 0.3.3)
+      rbi (>= 0.4.2)
       rbs (>= 4.0.0.dev.5)
       rexml (>= 3.2.6)
       sorbet-static-and-runtime (>= 0.5.10187)
@@ -335,7 +335,7 @@ GEM
     sqlite3 (2.9.4-x86_64-linux-musl)
     state_machines (0.101.0)
     stringio (3.2.0)
-    tapioca (0.19.1)
+    tapioca (0.19.2)
       benchmark
       bundler (>= 2.2.25)
       netrc (>= 0.11.0)
@@ -344,7 +344,7 @@ GEM
       require-hooks (>= 0.2.2)
       rubydex (>= 0.1.0.beta10)
       sorbet-static-and-runtime (>= 0.6.12698)
-      spoom (>= 1.7.9)
+      spoom (>= 1.7.16)
       thor (>= 1.2.0)
       tsort
     terrapin (0.6.0)
@@ -493,7 +493,7 @@ CHECKSUMS
   railties (8.1.3) sha256=913eb0e0cb520aac687ffd74916bd726d48fa21f47833c6292576ef6a286de22
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
-  rbi (0.3.12) sha256=406ea58265942e7f2316744a11de742fdef8b2325bb6066c71c9765f53298eb2
+  rbi (0.4.3) sha256=cc090ae62c3246412b992954f54077d6046c9b04f1537a4d24bfae8714503eac
   rbs (4.0.2) sha256=af75671e66cd03434cc546622741ebf83f6197ec4328375805306330bf78ef25
   rdoc (7.2.0) sha256=8650f76cd4009c3b54955eb5d7e3a075c60a57276766ebf36f9085e8c9f23192
   regexp_parser (2.12.0) sha256=35a916a1d63190ab5c9009457136ae5f3c0c7512d60291d0d1378ba18ce08ebb
@@ -520,7 +520,7 @@ CHECKSUMS
   sorbet-static (0.6.13228-universal-darwin) sha256=d5e58c7e4f9f7f009af508d621054b04a5459defda2612bc2840019f903577c1
   sorbet-static (0.6.13228-x86_64-linux) sha256=022b7089753b890f072e5dc905b92a42a709e39ceb0e519920fee6d9047a6fe5
   sorbet-static-and-runtime (0.6.13228) sha256=b7420ff130082b70af81666978db2f9a9342a60a14f2e19f5b63d03c9a832f77
-  spoom (1.7.15) sha256=39698a3bf7841841ae83c6145d5e008290ddb9433e84d9025e017b915bd36a83
+  spoom (1.8.7) sha256=81960502cdf23aa991f015988aa5dd43325e23ae4318b8e00d541299cbdb70f6
   sqlite3 (2.9.4-aarch64-linux-gnu) sha256=ecabed721e6eaad54601d2685f09029d90025efc8d931040dc89cb3f8a2080ec
   sqlite3 (2.9.4-aarch64-linux-musl) sha256=ffb4255947fb54c8c3eeca97460c9702b40de91ce390455ef7367ca6a3929a31
   sqlite3 (2.9.4-arm64-darwin) sha256=1d5aad413a815d236e96d43f05a1acc600b6cd086800770342a3f9c2877499ff
@@ -529,7 +529,7 @@ CHECKSUMS
   sqlite3 (2.9.4-x86_64-linux-musl) sha256=3fc5e865b4be9a85d998203ef8d0c0fdcb92f20acf34a254346ff8a19088efec
   state_machines (0.101.0) sha256=cbcec89699a0388493226a4b18d790bd5d49c38ba782d2099342a3dd78bcbca3
   stringio (3.2.0) sha256=c37cb2e58b4ffbd33fe5cd948c05934af997b36e0b6ca6fdf43afa234cf222e1
-  tapioca (0.19.1) sha256=5de94d458950897ffe3d4e86a21eec48bb6a8775af85f80b1486b7ae7ba51823
+  tapioca (0.19.2) sha256=938731b07811aee8d23871b1aee8861d464fbaf2cfffbf79a62b0c869a5120ec
   terrapin (0.6.0) sha256=c9fea9f13a40dc7c75212d1b9d4ee7e4542ffe7811bf700a38ba30900b70285c
   thor (1.5.0) sha256=e3a9e55fe857e44859ce104a84675ab6e8cd59c650a49106a05f55f136425e73
   timeout (0.6.1) sha256=78f57368a7e7bbadec56971f78a3f5ecbcfb59b7fcbb0a3ed6ddc08a5094accb
