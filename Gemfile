@@ -22,6 +22,7 @@ group :development do
   gem "paperclip"
   gem "rails", "~> 8"
   gem "shrine"
+  gem "ruby_llm"
   gem "rubocop-rspec"
   gem "rubocop-shopify"
   gem "rubocop-sorbet"
