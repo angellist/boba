@@ -16,6 +16,7 @@ group :development do
   gem "flag_shih_tzu"
   gem "kaminari-activerecord"
   gem "money-rails"
+  gem "neighbor"
   gem "noticed", require: false
   gem "paperclip"
   gem "rails", "~> 8"
