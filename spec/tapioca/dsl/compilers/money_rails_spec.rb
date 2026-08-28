@@ -60,7 +60,7 @@ module Tapioca
                       sig { returns(T.nilable(::Money)) }
                       def price; end
 
-                      sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                      sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(T.any(::Money, ::Numeric, ::String))) }
                       def price=(value); end
                     end
                   end
@@ -91,7 +91,7 @@ module Tapioca
                     sig { returns(::Money) }
                     def price; end
 
-                    sig { params(value: ::Money).returns(::Money) }
+                    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(T.any(::Money, ::Numeric, ::String)) }
                     def price=(value); end
                   end
                 RBI
@@ -123,7 +123,7 @@ module Tapioca
                     sig { returns(::Money) }
                     def price; end
 
-                    sig { params(value: ::Money).returns(::Money) }
+                    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(T.any(::Money, ::Numeric, ::String)) }
                     def price=(value); end
                   end
                 RBI
@@ -161,7 +161,7 @@ module Tapioca
                       sig { returns(T.nilable(::Money)) }
                       def price; end
 
-                      sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                      sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(T.any(::Money, ::Numeric, ::String))) }
                       def price=(value); end
                     end
                   end
@@ -192,7 +192,7 @@ module Tapioca
                     sig { returns(T.nilable(::Money)) }
                     def price; end
 
-                    sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                    sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(T.any(::Money, ::Numeric, ::String))) }
                     def price=(value); end
                   end
                 RBI
@@ -224,7 +224,7 @@ module Tapioca
                     sig { returns(T.nilable(::Money)) }
                     def price; end
 
-                    sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                    sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(T.any(::Money, ::Numeric, ::String))) }
                     def price=(value); end
                   end
                 RBI
