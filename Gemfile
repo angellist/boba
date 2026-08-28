@@ -11,6 +11,7 @@ group :development do
   gem "minitest-reporters"
 
   gem "actionmcp"
+  gem "acts-as-taggable-on"
   gem "attr_json"
   gem "draper"
   gem "graphql"
