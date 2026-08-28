@@ -10,6 +10,7 @@ group :development do
   gem "minitest-hooks"
   gem "minitest-reporters"
 
+  gem "actionmcp"
   gem "attr_json"
   gem "draper"
   gem "graphql"

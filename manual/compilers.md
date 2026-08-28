@@ -5,6 +5,7 @@ This list is an evergeen list of currently available compilers.
 ## Compiler List
 
 <!-- START_COMPILER_LIST -->
+* [ActionMCPTool](compiler_actionmcptool.md)
 * [ActiveRecordAssociationsPersisted](compiler_activerecordassociationspersisted.md)
 * [ActiveRecordColumnsPersisted](compiler_activerecordcolumnspersisted.md)
 * [AttrJson](compiler_attrjson.md)
