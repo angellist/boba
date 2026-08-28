@@ -19,6 +19,7 @@ group :development do
   gem "noticed", require: false
   gem "paperclip"
   gem "rails", "~> 8"
+  gem "ransack"
   gem "shrine"
   gem "rubocop-rspec"
   gem "rubocop-shopify"

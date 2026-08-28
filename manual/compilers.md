@@ -14,5 +14,6 @@ This list is an evergeen list of currently available compilers.
 * [MoneyRails](compiler_moneyrails.md)
 * [Noticed](compiler_noticed.md)
 * [Paperclip](compiler_paperclip.md)
+* [Ransack](compiler_ransack.md)
 * [Shrine](compiler_shrine.md)
 <!-- END_COMPILER_LIST -->
