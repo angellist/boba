@@ -23,6 +23,9 @@ class Product
  include MoneyRailsGeneratedMethods
 
  module MoneyRailsGeneratedMethods
+   sig { returns(::Money::Currency) }
+   def currency_for_price; end
+
    sig { returns(::Money) }
    def price; end
 

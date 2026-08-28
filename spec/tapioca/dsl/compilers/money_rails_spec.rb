@@ -57,6 +57,9 @@ module Tapioca
                     extend MoneyRails::ActiveRecord::Monetizable::ClassMethods
 
                     module MoneyRailsGeneratedMethods
+                      sig { returns(::Money::Currency) }
+                      def currency_for_price; end
+
                       sig { returns(T.nilable(::Money)) }
                       def price; end
 
@@ -88,6 +91,9 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(::Money) }
                     def price; end
 
@@ -120,6 +126,9 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(::Money) }
                     def price; end
 
@@ -158,6 +167,9 @@ module Tapioca
                     extend MoneyRails::ActiveRecord::Monetizable::ClassMethods
 
                     module MoneyRailsGeneratedMethods
+                      sig { returns(::Money::Currency) }
+                      def currency_for_price; end
+
                       sig { returns(T.nilable(::Money)) }
                       def price; end
 
@@ -189,6 +201,9 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(T.nilable(::Money)) }
                     def price; end
 
@@ -221,6 +236,9 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(T.nilable(::Money)) }
                     def price; end
 

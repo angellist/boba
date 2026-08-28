@@ -33,6 +33,9 @@ module Tapioca
       #  include MoneyRailsGeneratedMethods
       #
       #  module MoneyRailsGeneratedMethods
+      #    sig { returns(::Money::Currency) }
+      #    def currency_for_price; end
+      #
       #    sig { returns(::Money) }
       #    def price; end
       #
@@ -124,6 +127,10 @@ module Tapioca
                 "#{attribute_name}=",
                 parameters: [create_param("value", type: setter_type_name)],
                 return_type: setter_type_name,
+              )
+              instance_module.create_method(
+                "currency_for_#{attribute_name}",
+                return_type: column_type_option.untyped? ? "T.untyped" : "::Money::Currency",
               )
             end
 
