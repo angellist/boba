@@ -9,10 +9,20 @@ module Tapioca
       # `Tapioca::Dsl::Compilers::RubyLLM` decorates RBI files for models using the `acts_as_*` DSL of the
       # `ruby_llm` gem. https://github.com/crmne/ruby_llm
       #
-      # The gem includes its DSL into `ActiveRecord::Base` from an `ActiveSupport.on_load(:active_record)`
-      # hook in its railtie, and each `acts_as_chat` / `acts_as_message` / `acts_as_model` /
-      # `acts_as_tool_call` call then mixes the matching methods module into the model. None of that survives
-      # gem RBI generation.
+      # The `acts_as_*` class methods themselves are out of reach of a compiler and of gem RBI generation
+      # alike: the gem includes `RubyLLM::ActiveRecord::ActsAs` into `ActiveRecord::Base` from an
+      # `on_load(:active_record)` hook inside a **railtie initializer**, so nothing short of booting the
+      # application runs it. Declare that one include in a shim, and the DSL types itself from the gem RBI:
+      #
+      # ~~~rbi
+      # # sorbet/rbi/shims/ruby_llm.rbi
+      # class ActiveRecord::Base
+      #   include RubyLLM::ActiveRecord::ActsAs
+      # end
+      # ~~~
+      #
+      # What is left for a compiler is per model: the methods module each `acts_as_*` call mixes into the
+      # class that declares it.
       #
       # For example, with the following `ActiveRecord::Base` subclass:
       #
@@ -29,26 +39,33 @@ module Tapioca
       # # typed: true
       # class Chat
       #   include RubyLLM::ActiveRecord::ChatMethods
-      #   include RubyLLM::ActiveRecord::ActsAs
-      #   extend RubyLLM::ActiveRecord::ActsAs::ClassMethods
       # end
       # ~~~
       #
-      # The mixins are read off the model as it is actually configured, so `ask`, `with_instructions`,
-      # `with_tool` and the rest keep the signatures they have in the gem RBI, and a model using the legacy
-      # `ActsAsLegacy` API gets the modules that go with it. Models that never call an `acts_as_*` method are
-      # left alone.
+      # The module is declared rather than re-implemented, so `ask`, `with_instructions`,
+      # `with_runtime_instructions` and the rest keep the signatures they have in the gem RBI. Models that
+      # never call an `acts_as_*` method are left alone.
       class RubyLLM < Tapioca::Dsl::Compiler
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
 
-        MODULE_PREFIX = "RubyLLM::"
+        # One module per `acts_as_*`, under both the current and the legacy API; the names are fixed, so
+        # there is nothing to discover by walking ancestors with a name prefix.
+        MIXINS = [
+          "RubyLLM::ActiveRecord::ChatMethods",
+          "RubyLLM::ActiveRecord::MessageMethods",
+          "RubyLLM::ActiveRecord::ModelMethods",
+          "RubyLLM::ActiveRecord::ToolCallMethods",
+          "RubyLLM::ActiveRecord::ChatLegacyMethods",
+          "RubyLLM::ActiveRecord::MessageLegacyMethods",
+        ] #: Array[String]
 
         # @override
         #: -> void
         def decorate
+          mixins = self.class.mixins_of(constant)
+
           root.create_path(constant) do |model|
-            ruby_llm_modules(constant.ancestors).each { |name| model.create_include(name) }
-            ruby_llm_modules(constant.singleton_class.ancestors).each { |name| model.create_extend(name) }
+            mixins.each { |name| model.create_include(name) }
           end
         end
 
@@ -58,29 +75,17 @@ module Tapioca
           def gather_constants
             descendants_of(::ActiveRecord::Base)
               .reject(&:abstract_class?)
-              .select { |model| acts_as_model?(model) }
+              .select { |model| mixins_of(model).any? }
           end
 
           # The DSL itself is included into `ActiveRecord::Base`, so every model carries it. What tells a
           # model apart is the methods module an `acts_as_*` call mixed into the model itself.
-          #: (singleton(::ActiveRecord::Base) model) -> bool
-          def acts_as_model?(model)
+          #: (singleton(::ActiveRecord::Base) model) -> Array[String]
+          def mixins_of(model)
             own_ancestors = model.ancestors - ::ActiveRecord::Base.ancestors
+            names = own_ancestors.filter_map(&:name)
 
-            own_ancestors.any? { |ancestor| ancestor.name&.start_with?(MODULE_PREFIX) }
-          end
-        end
-
-        private
-
-        #: (Array[Module[top]] ancestors) -> Array[String]
-        def ruby_llm_modules(ancestors)
-          ancestors.filter_map do |ancestor|
-            name = ancestor.name
-            next unless name
-            next unless name.start_with?(MODULE_PREFIX)
-
-            name
+            MIXINS & names
           end
         end
       end

@@ -77,9 +77,10 @@ module Tapioca
 
               rbi = rbi_for(:Chat)
 
-              assert_includes(rbi, "include RubyLLM::ActiveRecord::ChatMethods")
-              assert_includes(rbi, "include RubyLLM::ActiveRecord::ActsAs")
-              assert_includes(rbi, "extend RubyLLM::ActiveRecord::ActsAs::ClassMethods")
+              assert_includes(rbi, "include RubyLLM::ActiveRecord::ChatMethods\n")
+
+              refute_includes(rbi, "include RubyLLM::ActiveRecord::ActsAs\n")
+              refute_includes(rbi, "extend RubyLLM::ActiveRecord::ActsAs::ClassMethods\n")
             end
           end
         end
