@@ -40,7 +40,7 @@ module Tapioca
           end
 
           describe "decorate" do
-            it "generates the ransack class and relation methods" do
+            it "generates the relation methods ransack reaches by delegation" do
               add_ruby_file("schema.rb", <<~RUBY)
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
@@ -60,8 +60,6 @@ module Tapioca
                 # typed: strong
 
                 class Post
-                  extend Ransack::Adapters::ActiveRecord::Base
-
                   module GeneratedAssociationRelationMethods
                     sig { params(params: T.untyped, options: T.untyped).returns(::Ransack::Search) }
                     def ransack(params = nil, options = nil); end

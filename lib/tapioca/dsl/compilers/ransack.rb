@@ -11,9 +11,11 @@ module Tapioca
       # `Tapioca::Dsl::Compilers::Ransack` decorates RBI files for models searchable with the `ransack` gem.
       # https://github.com/activerecord-hackery/ransack
       #
-      # Ransack extends `ActiveRecord::Base` from an `ActiveSupport.on_load(:active_record)` hook, which does
-      # not run during gem RBI generation, so neither the class methods (`ransack`, `ransacker`,
-      # `ransackable_attributes`, ...) nor their relation-delegated counterparts are visible to Sorbet.
+      # The class methods (`ransack`, `ransacker`, `ransackable_attributes`, ...) need no compiler: ransack
+      # extends `ActiveRecord::Base` from an `ActiveSupport.on_load(:active_record)` hook, and anything that
+      # loads `ActiveRecord::Base` during gem RBI generation fires it, so tapioca records the extend in the
+      # gem RBI. What stays invisible is the relation side: `ActiveRecord::Relation` reaches those methods by
+      # delegating to the model class, which Sorbet cannot follow.
       #
       # For example, with the following `ActiveRecord::Base` subclass:
       #
@@ -28,8 +30,6 @@ module Tapioca
       # # post.rbi
       # # typed: true
       # class Post
-      #   extend Ransack::Adapters::ActiveRecord::Base
-      #
       #   module GeneratedAssociationRelationMethods
       #     sig { params(params: T.untyped, options: T.untyped).returns(::Ransack::Search) }
       #     def ransack(params = nil, options = nil); end
@@ -48,9 +48,8 @@ module Tapioca
       # end
       # ~~~
       #
-      # The class methods come from the gem's own `Ransack::Adapters::ActiveRecord::Base` module, so they only
-      # need the `extend` to be made explicit. The relation methods are generated because `ActiveRecord::Relation`
-      # reaches them through delegation to the model class, which Sorbet cannot see.
+      # The signatures are the ones the gem RBI already carries for
+      # `Ransack::Adapters::ActiveRecord::Base`; only the delegation is re-stated.
       class Ransack < Tapioca::Dsl::Compiler
         include Helpers::ActiveRecordConstantsHelper
 
@@ -60,8 +59,6 @@ module Tapioca
         #: -> void
         def decorate
           root.create_path(constant) do |model|
-            model.create_extend("Ransack::Adapters::ActiveRecord::Base")
-
             [RelationMethodsModuleName, AssociationRelationMethodsModuleName].each do |module_name|
               relation_methods_module = model.create_module(module_name)
 
