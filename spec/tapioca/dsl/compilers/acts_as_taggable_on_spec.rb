@@ -66,8 +66,12 @@ module Tapioca
 
               rbi = rbi_for(:Post)
 
-              assert_includes(rbi, "include ActsAsTaggableOn::Taggable::Core")
-              assert_includes(rbi, "extend ActsAsTaggableOn::Taggable")
+              ["Core", "Collection", "Caching", "Ownership", "Related"].each do |mixin|
+                assert_includes(rbi, "include ActsAsTaggableOn::Taggable::#{mixin}\n")
+                assert_includes(rbi, "extend ActsAsTaggableOn::Taggable::#{mixin}::ClassMethods\n")
+              end
+
+              refute_includes(rbi, "extend ActsAsTaggableOn::Taggable\n")
               assert_includes(rbi, "def skill_list; end")
               assert_includes(rbi, "def skill_list=(new_tags); end")
               assert_includes(rbi, "def all_skills_list; end")

@@ -9,9 +9,11 @@ module Tapioca
       # `Tapioca::Dsl::Compilers::ActsAsTaggableOn` decorates RBI files for models using the
       # `acts-as-taggable-on` gem. https://github.com/mbleigh/acts-as-taggable-on
       #
-      # The gem extends `ActiveRecord::Base` from an `ActiveSupport.on_load(:active_record)` hook and, for every
-      # tag context a model declares, defines methods in an anonymous mixin. Neither is visible during gem RBI
-      # generation, so a taggable model reaches Sorbet without its tagging API.
+      # `acts_as_taggable_on` itself needs no compiler: the gem extends `ActiveRecord::Base` from an
+      # `ActiveSupport.on_load(:active_record)` hook, and anything that loads `ActiveRecord::Base` during gem
+      # RBI generation fires it, so tapioca records the extend in the gem RBI. What only exists per model is
+      # what the declaration then installs on the declaring class: the five mixin pairs that carry the
+      # tagging API, and one set of accessors per tag context.
       #
       # For example, with the following `ActiveRecord::Base` subclass:
       #
@@ -28,9 +30,9 @@ module Tapioca
       # # typed: true
       # class Post
       #   include ActsAsTaggableOn::Taggable::Core
-      #   include ActsAsTaggableOn::Taggable::Collection
       #   extend ActsAsTaggableOn::Taggable::Core::ClassMethods
-      #   extend ActsAsTaggableOn::Taggable
+      #   include ActsAsTaggableOn::Taggable::Collection
+      #   extend ActsAsTaggableOn::Taggable::Collection::ClassMethods
       #
       #   sig { returns(::ActsAsTaggableOn::TagList) }
       #   def all_tags_list; end
@@ -60,11 +62,15 @@ module Tapioca
       # end
       # ~~~
       #
-      # The mixins the gem adds to the model are declared rather than re-implemented, so `tagged_with`,
-      # `tag_list_on` and the rest keep the signatures they have in the gem RBI. Only the per-context methods,
-      # which exist for the contexts of this model alone, are generated.
+      # The mixins are declared rather than re-implemented, so `tagged_with`, `tag_list_on` and the rest keep
+      # the signatures they have in the gem RBI. Only the per-context methods, which exist for the contexts of
+      # this model alone, are generated.
       class ActsAsTaggableOn < Tapioca::Dsl::Compiler
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
+
+        # Every `acts_as_taggable_on` call installs this set; the names are fixed, so there is nothing to
+        # discover by walking ancestors.
+        MIXINS = ["Core", "Collection", "Caching", "Ownership", "Related"] #: Array[String]
 
         # @override
         #: -> void
@@ -73,8 +79,10 @@ module Tapioca
           return if tag_types.empty?
 
           root.create_path(constant) do |model|
-            taggable_modules(constant.ancestors).each { |name| model.create_include(name) }
-            taggable_modules(constant.singleton_class.ancestors).each { |name| model.create_extend(name) }
+            MIXINS.each do |mixin|
+              model.create_include("ActsAsTaggableOn::Taggable::#{mixin}")
+              model.create_extend("ActsAsTaggableOn::Taggable::#{mixin}::ClassMethods")
+            end
 
             tag_types.each do |tag_type|
               create_context_methods(model, tag_type)
@@ -124,17 +132,6 @@ module Tapioca
               return_type: "T.untyped",
               class_method: class_method,
             )
-          end
-        end
-
-        #: (Array[Module[top]] ancestors) -> Array[String]
-        def taggable_modules(ancestors)
-          ancestors.filter_map do |ancestor|
-            name = ancestor.name
-            next unless name
-            next unless name.start_with?("ActsAsTaggableOn::")
-
-            name
           end
         end
       end
