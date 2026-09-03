@@ -26,10 +26,10 @@ This compiler will produce the RBI file `post.rbi` with the following content:
 class Post
   include PaperTrail::Model::InstanceMethods
 
-  sig { returns(T.nilable(::Post)) }
+  sig { returns(T.nilable(::PaperTrail::Version)) }
   def version; end
 
-  sig { params(value: T.nilable(::Post)).returns(T.nilable(::Post)) }
+  sig { params(value: T.nilable(::PaperTrail::Version)).returns(T.nilable(::PaperTrail::Version)) }
   def version=(value); end
 
   sig { returns(T.nilable(::String)) }
@@ -40,5 +40,6 @@ class Post
 end
 ~~~
 
-`version` is named by the `:version` option, so its name is only knowable per model. The `versions`
+`version` holds the version record the model was reified from; it is named by the `:version` option
+and typed by `versions: { class_name: ... }`, so both are only knowable per model. The `versions`
 association is declared with `has_many`, which Tapioca's own association compiler already sees.

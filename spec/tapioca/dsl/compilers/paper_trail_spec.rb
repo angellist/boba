@@ -112,10 +112,10 @@ module Tapioca
                   sig { params(value: T.nilable(::String)).returns(T.nilable(::String)) }
                   def paper_trail_event=(value); end
 
-                  sig { returns(T.nilable(::Post)) }
+                  sig { returns(T.nilable(::PaperTrail::Version)) }
                   def version; end
 
-                  sig { params(value: T.nilable(::Post)).returns(T.nilable(::Post)) }
+                  sig { params(value: T.nilable(::PaperTrail::Version)).returns(T.nilable(::PaperTrail::Version)) }
                   def version=(value); end
                 end
               RBI
@@ -123,7 +123,7 @@ module Tapioca
               assert_equal(expected, rbi_for(:Post))
             end
 
-            it "names the reified accessor after the :version option" do
+            it "names and types the reified accessor after the model's options" do
               add_ruby_file("schema.rb", <<~RUBY)
                 ActiveRecord::Migration.suppress_messages do
                   ActiveRecord::Schema.define do
@@ -149,8 +149,14 @@ module Tapioca
               RUBY
 
               add_ruby_file("post.rb", <<~RUBY)
+                class PostVersion < ActiveRecord::Base
+                  self.table_name = "versions"
+
+                  include PaperTrail::VersionConcern
+                end
+
                 class Post < ActiveRecord::Base
-                  has_paper_trail version: :revision
+                  has_paper_trail version: :revision, versions: { class_name: "PostVersion" }
                 end
               RUBY
 
@@ -166,10 +172,10 @@ module Tapioca
                   sig { params(value: T.nilable(::String)).returns(T.nilable(::String)) }
                   def paper_trail_event=(value); end
 
-                  sig { returns(T.nilable(::Post)) }
+                  sig { returns(T.nilable(::PostVersion)) }
                   def revision; end
 
-                  sig { params(value: T.nilable(::Post)).returns(T.nilable(::Post)) }
+                  sig { params(value: T.nilable(::PostVersion)).returns(T.nilable(::PostVersion)) }
                   def revision=(value); end
                 end
               RBI

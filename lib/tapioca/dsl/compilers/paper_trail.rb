@@ -32,10 +32,10 @@ module Tapioca
       # class Post
       #   include PaperTrail::Model::InstanceMethods
       #
-      #   sig { returns(T.nilable(::Post)) }
+      #   sig { returns(T.nilable(::PaperTrail::Version)) }
       #   def version; end
       #
-      #   sig { params(value: T.nilable(::Post)).returns(T.nilable(::Post)) }
+      #   sig { params(value: T.nilable(::PaperTrail::Version)).returns(T.nilable(::PaperTrail::Version)) }
       #   def version=(value); end
       #
       #   sig { returns(T.nilable(::String)) }
@@ -46,7 +46,8 @@ module Tapioca
       # end
       # ~~~
       #
-      # `version` is named by the `:version` option, so its name is only knowable per model. The `versions`
+      # `version` holds the version record the model was reified from; it is named by the `:version` option
+      # and typed by `versions: { class_name: ... }`, so both are only knowable per model. The `versions`
       # association is declared with `has_many`, which Tapioca's own association compiler already sees.
       class PaperTrail < Tapioca::Dsl::Compiler
         ConstantType = type_member { { fixed: T.class_of(::ActiveRecord::Base) } }
@@ -54,7 +55,8 @@ module Tapioca
         # @override
         #: -> void
         def decorate
-          reified_type = "T.nilable(::#{constant})"
+          version_class_name = T.unsafe(constant).version_class_name.to_s.delete_prefix("::")
+          reified_type = "T.nilable(::#{version_class_name})"
           version_name = T.unsafe(constant).version_association_name.to_s
 
           root.create_path(constant) do |model|
