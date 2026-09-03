@@ -14,6 +14,7 @@ group :development do
   gem "draper"
   gem "graphql"
   gem "flag_shih_tzu"
+  gem "friendly_id"
   gem "kaminari-activerecord"
   gem "money-rails"
   gem "noticed", require: false
