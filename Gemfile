@@ -19,6 +19,7 @@ group :development do
   gem "kaminari-activerecord"
   gem "money-rails"
   gem "noticed", require: false
+  gem "paper_trail"
   gem "paperclip"
   gem "rails", "~> 8"
   gem "shrine"

@@ -15,6 +15,7 @@ This list is an evergeen list of currently available compilers.
 * [Kaminari](compiler_kaminari.md)
 * [MoneyRails](compiler_moneyrails.md)
 * [Noticed](compiler_noticed.md)
+* [PaperTrail](compiler_papertrail.md)
 * [Paperclip](compiler_paperclip.md)
 * [Shrine](compiler_shrine.md)
 <!-- END_COMPILER_LIST -->
