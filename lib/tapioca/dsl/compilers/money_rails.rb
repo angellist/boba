@@ -33,16 +33,24 @@ module Tapioca
       #  include MoneyRailsGeneratedMethods
       #
       #  module MoneyRailsGeneratedMethods
+      #    sig { returns(::Money::Currency) }
+      #    def currency_for_price; end
+      #
       #    sig { returns(::Money) }
       #    def price; end
       #
-      #    sig { params(value: ::Money).returns(::Money) }
+      #    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(::Money) }
       #    def price=(value); end
       #  end
       # end
       # ~~~
       class MoneyRails < Tapioca::Dsl::Compiler
         include RBIHelper
+
+        # `write_monetized` calls `value.to_money(...)` for anything that is not already a `Money`,
+        # so the writer accepts any object money-rails knows how to monetize, not only `Money`.
+        # https://github.com/RubyMoney/money-rails/blob/main/lib/money-rails/active_record/monetizable.rb
+        SetterValueType = "T.any(::Money, ::Numeric, ::String)"
 
         ConstantType = type_member do
           {
@@ -90,8 +98,10 @@ module Tapioca
             constant.monetized_attributes.each do |attribute_name, column_name|
               if column_type_option.untyped?
                 type_name = "T.untyped"
+                setter_type_name = "T.untyped"
               else
                 type_name = "::Money"
+                setter_type_name = SetterValueType
 
                 nilable_attribute = if constant < ::ActiveRecord::Base && column_type_option.persisted?
                   Boba::ActiveRecord::AttributeService.nilable_attribute?(
@@ -103,7 +113,10 @@ module Tapioca
                   true
                 end
 
-                type_name = as_nilable_type(type_name) if nilable_attribute
+                if nilable_attribute
+                  type_name = as_nilable_type(type_name)
+                  setter_type_name = as_nilable_type(setter_type_name)
+                end
               end
 
               # Model: monetize :amount_cents
@@ -112,8 +125,12 @@ module Tapioca
               instance_module.create_method(attribute_name, return_type: type_name)
               instance_module.create_method(
                 "#{attribute_name}=",
-                parameters: [create_param("value", type: type_name)],
+                parameters: [create_param("value", type: setter_type_name)],
                 return_type: type_name,
+              )
+              instance_module.create_method(
+                "currency_for_#{attribute_name}",
+                return_type: "::Money::Currency",
               )
             end
 

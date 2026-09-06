@@ -57,10 +57,13 @@ module Tapioca
                     extend MoneyRails::ActiveRecord::Monetizable::ClassMethods
 
                     module MoneyRailsGeneratedMethods
+                      sig { returns(::Money::Currency) }
+                      def currency_for_price; end
+
                       sig { returns(T.nilable(::Money)) }
                       def price; end
 
-                      sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                      sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(::Money)) }
                       def price=(value); end
                     end
                   end
@@ -88,10 +91,13 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(::Money) }
                     def price; end
 
-                    sig { params(value: ::Money).returns(::Money) }
+                    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(::Money) }
                     def price=(value); end
                   end
                 RBI
@@ -120,10 +126,13 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(::Money) }
                     def price; end
 
-                    sig { params(value: ::Money).returns(::Money) }
+                    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(::Money) }
                     def price=(value); end
                   end
                 RBI
@@ -158,10 +167,13 @@ module Tapioca
                     extend MoneyRails::ActiveRecord::Monetizable::ClassMethods
 
                     module MoneyRailsGeneratedMethods
+                      sig { returns(::Money::Currency) }
+                      def currency_for_price; end
+
                       sig { returns(T.nilable(::Money)) }
                       def price; end
 
-                      sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                      sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(::Money)) }
                       def price=(value); end
                     end
                   end
@@ -189,10 +201,13 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(T.nilable(::Money)) }
                     def price; end
 
-                    sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                    sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(::Money)) }
                     def price=(value); end
                   end
                 RBI
@@ -221,10 +236,13 @@ module Tapioca
 
                 expected = indented(<<~RBI, 2)
                   module MoneyRailsGeneratedMethods
+                    sig { returns(::Money::Currency) }
+                    def currency_for_price; end
+
                     sig { returns(T.nilable(::Money)) }
                     def price; end
 
-                    sig { params(value: T.nilable(::Money)).returns(T.nilable(::Money)) }
+                    sig { params(value: T.nilable(T.any(::Money, ::Numeric, ::String))).returns(T.nilable(::Money)) }
                     def price=(value); end
                   end
                 RBI
