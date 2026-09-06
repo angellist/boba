@@ -32,6 +32,15 @@ class Post
   def all_tags_list; end
 
   sig { params(options: T.untyped).returns(T.untyped) }
+  def find_related_on_tags(options = {}); end
+
+  sig { params(options: T.untyped).returns(T.untyped) }
+  def find_related_tags(options = {}); end
+
+  sig { params(klass: T.untyped, options: T.untyped).returns(T.untyped) }
+  def find_related_tags_for(klass, options = {}); end
+
+  sig { params(options: T.untyped).returns(T.untyped) }
   def tag_counts(options = {}); end
 
   sig { returns(::ActsAsTaggableOn::TagList) }

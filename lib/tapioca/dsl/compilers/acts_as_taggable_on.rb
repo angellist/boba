@@ -38,6 +38,15 @@ module Tapioca
       #   def all_tags_list; end
       #
       #   sig { params(options: T.untyped).returns(T.untyped) }
+      #   def find_related_on_tags(options = {}); end
+      #
+      #   sig { params(options: T.untyped).returns(T.untyped) }
+      #   def find_related_tags(options = {}); end
+      #
+      #   sig { params(klass: T.untyped, options: T.untyped).returns(T.untyped) }
+      #   def find_related_tags_for(klass, options = {}); end
+      #
+      #   sig { params(options: T.untyped).returns(T.untyped) }
       #   def tag_counts(options = {}); end
       #
       #   sig { returns(::ActsAsTaggableOn::TagList) }
@@ -117,6 +126,24 @@ module Tapioca
             "#{tag_type}_from",
             parameters: [create_param("owner", type: "T.untyped")],
             return_type: "::ActsAsTaggableOn::TagList",
+          )
+
+          # `Related` builds these off the same context list; `find_related_on_` is an alias of the first.
+          # They answer a relation of whichever class was asked for, so the return stays untyped.
+          ["find_related_#{tag_type}", "find_related_on_#{tag_type}"].each do |name|
+            model.create_method(
+              name,
+              parameters: [create_opt_param("options", type: "T.untyped", default: "{}")],
+              return_type: "T.untyped",
+            )
+          end
+          model.create_method(
+            "find_related_#{tag_type}_for",
+            parameters: [
+              create_param("klass", type: "T.untyped"),
+              create_opt_param("options", type: "T.untyped", default: "{}"),
+            ],
+            return_type: "T.untyped",
           )
 
           [false, true].each do |class_method|
