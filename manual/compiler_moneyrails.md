@@ -29,7 +29,7 @@ class Product
    sig { returns(::Money) }
    def price; end
 
-   sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(T.any(::Money, ::Numeric, ::String)) }
+   sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(::Money) }
    def price=(value); end
  end
 end

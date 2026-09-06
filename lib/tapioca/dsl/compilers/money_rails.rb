@@ -39,7 +39,7 @@ module Tapioca
       #    sig { returns(::Money) }
       #    def price; end
       #
-      #    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(T.any(::Money, ::Numeric, ::String)) }
+      #    sig { params(value: T.any(::Money, ::Numeric, ::String)).returns(::Money) }
       #    def price=(value); end
       #  end
       # end
@@ -126,11 +126,11 @@ module Tapioca
               instance_module.create_method(
                 "#{attribute_name}=",
                 parameters: [create_param("value", type: setter_type_name)],
-                return_type: setter_type_name,
+                return_type: type_name,
               )
               instance_module.create_method(
                 "currency_for_#{attribute_name}",
-                return_type: column_type_option.untyped? ? "T.untyped" : "::Money::Currency",
+                return_type: "::Money::Currency",
               )
             end
 
