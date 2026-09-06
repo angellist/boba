@@ -8,6 +8,7 @@ This list is an evergeen list of currently available compilers.
 * [ActionMCPTool](compiler_actionmcptool.md)
 * [ActiveRecordAssociationsPersisted](compiler_activerecordassociationspersisted.md)
 * [ActiveRecordColumnsPersisted](compiler_activerecordcolumnspersisted.md)
+* [ActsAsTaggableOn](compiler_actsastaggableon.md)
 * [AttrJson](compiler_attrjson.md)
 * [Draper](compiler_draper.md)
 * [FlagShihTzu](compiler_flagshihtzu.md)
