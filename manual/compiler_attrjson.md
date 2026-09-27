@@ -19,10 +19,10 @@ class Product
   extend AttrJson::Record::ClassMethods
 
   module AttrJsonGeneratedMethods
-    sig { returns(::Integer) }
+    sig { returns(T.nilable(::Integer)) }
     def price_cents; end
 
-    sig { params(value: Integer).returns(::Integer) }
+    sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
     def price_cents=(value); end
   end
 end

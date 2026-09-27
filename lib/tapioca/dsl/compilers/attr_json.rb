@@ -25,10 +25,10 @@ module Tapioca
       #   extend AttrJson::Record::ClassMethods
       #
       #   module AttrJsonGeneratedMethods
-      #     sig { returns(::Integer) }
+      #     sig { returns(T.nilable(::Integer)) }
       #     def price_cents; end
       #
-      #     sig { params(value: Integer).returns(::Integer) }
+      #     sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
       #     def price_cents=(value); end
       #   end
       # end
@@ -69,7 +69,11 @@ module Tapioca
             .each do |definition|
               _, type, options = definition.original_args
               attribute_name = definition.name.to_s
-              type_name = sorbet_type(type, array: !!options[:array], nilable: !!options[:nil])
+              array = !!options[:array]
+              # AttrJson has no option that forbids nil: a scalar attribute reads as nil until it is set,
+              # and an array one defaults to [] unless its default is overridden.
+              nilable = !array || (options.key?(:default) && options[:default].nil?)
+              type_name = sorbet_type(type, array: array, nilable: nilable)
 
               # Model: attr_json(:other_model_id, :string)
               # => other_model_id
