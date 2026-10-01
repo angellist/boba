@@ -27,3 +27,8 @@ class Product
   end
 end
 ~~~
+
+A scalar attribute reads as `nil` until it is set, so it is typed as nilable. As with columns in
+`ActiveRecordColumnsPersisted`, an unconditional presence validator (no `if:`, `unless:` or `on:`)
+types it as it is on a valid record instead: `validates :price_cents, presence: true` turns the
+methods above into `returns(::Integer)` and `params(value: ::Integer)`.

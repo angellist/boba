@@ -27,10 +27,8 @@ module Boba
           false
         end
 
-        #: (singleton(::ActiveRecord::Base) constant, String attribute) -> bool
+        #: (::ActiveModel::Validations::ClassMethods constant, String attribute) -> bool
         def has_unconditional_presence_validator?(constant, attribute)
-          return false unless constant.respond_to?(:validators_on)
-
           constant.validators_on(attribute).any? do |validator|
             unconditional_presence_validator?(validator)
           end
@@ -40,7 +38,7 @@ module Boba
 
         #: (ActiveModel::Validator validator) -> bool
         def unconditional_presence_validator?(validator)
-          return false unless validator.is_a?(::ActiveRecord::Validations::PresenceValidator)
+          return false unless validator.is_a?(::ActiveModel::Validations::PresenceValidator)
 
           unconditional_validator?(validator)
         end
