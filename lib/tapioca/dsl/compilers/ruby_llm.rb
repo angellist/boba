@@ -66,11 +66,6 @@ module Tapioca
           "RubyLLM::ActiveRecord::MessageLegacyMethods",
         ] #: Array[String]
 
-        # What `each` yields for the mixins that are `Enumerable`.
-        ELEMS = {
-          "RubyLLM::ActiveRecord::ChatMethods" => "::RubyLLM::Message",
-        } #: Hash[String, String]
-
         # @override
         #: -> void
         def decorate
@@ -79,18 +74,17 @@ module Tapioca
           root.create_path(constant) do |model|
             mixins.each { |name| model.create_include(name) }
 
-            elem = enumerable_elem(mixins)
-            model.create_type_variable("Elem", type: "type_member", fixed: elem) if elem
+            add_message_elem_type_member(model, mixins)
           end
         end
 
         private
 
-        #: (Array[String] mixins) -> String?
-        def enumerable_elem(mixins)
-          return unless constant < ::Enumerable
+        #: (RBI::Scope model, Array[String] mixins) -> void
+        def add_message_elem_type_member(model, mixins)
+          return unless constant < ::Enumerable && mixins.include?("RubyLLM::ActiveRecord::ChatMethods")
 
-          mixins.filter_map { |name| ELEMS[name] }.first
+          model.create_type_variable("Elem", type: "type_member", fixed: "::RubyLLM::Message")
         end
 
         class << self
