@@ -20,7 +20,7 @@ module Tapioca
 
         describe "Tapioca::Dsl::Compilers::AttrJson" do
           describe "decorate" do
-            it "types scalar attributes as nilable and array attributes as arrays" do
+            it "types attributes without a non-nil default as nilable" do
               add_ruby_file("address.rb", <<~RUBY)
                 class Address
                   include AttrJson::Model
@@ -57,10 +57,10 @@ module Tapioca
                     sig { params(value: T::Array[::String]).returns(T::Array[::String]) }
                     def tags=(value); end
 
-                    sig { returns(T.nilable(::Integer)) }
+                    sig { returns(::Integer) }
                     def zip_code; end
 
-                    sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
+                    sig { params(value: ::Integer).returns(::Integer) }
                     def zip_code=(value); end
                   end
                 end

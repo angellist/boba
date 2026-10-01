@@ -36,10 +36,11 @@ module Tapioca
       # end
       # ~~~
       #
-      # A scalar attribute reads as `nil` until it is set, so it is typed as nilable. As with columns in
-      # `ActiveRecordColumnsPersisted`, an unconditional presence validator (no `if:`, `unless:` or `on:`)
-      # types it as it is on a valid record instead: `validates :price_cents, presence: true` turns the
-      # methods above into `returns(::Integer)` and `params(value: ::Integer)`.
+      # A scalar attribute reads as `nil` until it is set, so it is typed as nilable unless it has a non-nil
+      # `default:`. As with columns in `ActiveRecordColumnsPersisted`, an unconditional presence validator
+      # (no `if:`, `unless:` or `on:`) types it as it is on a valid record instead:
+      # `validates :price_cents, presence: true` turns the methods above into `returns(::Integer)` and
+      # `params(value: ::Integer)`.
       class AttrJson < Tapioca::Dsl::Compiler
         # Class methods module is already defined in the gem rbi, so just reference it here.
         ClassMethodsModuleName = "AttrJson::Record::ClassMethods"
@@ -81,10 +82,11 @@ module Tapioca
               _, type, options = definition.original_args
               attribute_name = definition.name.to_s
               array = !!options[:array]
-              # AttrJson has no option that forbids nil: a scalar attribute reads as nil until it is set,
-              # and an array one defaults to [] unless its default is overridden. As with columns, an
-              # unconditional presence validator types the attribute as it is on a valid record.
-              nilable = !array || (options.key?(:default) && options[:default].nil?)
+              # AttrJson has no option that forbids nil: an attribute reads as nil unless it has a default,
+              # which AttrJson also fills in when a stored record lacks the key. An array one defaults to []
+              # on its own unless the default is overridden. As with columns, an unconditional presence
+              # validator types the attribute as it is on a valid record.
+              nilable = array ? options.key?(:default) && options[:default].nil? : options[:default].nil?
               nilable &&= !(validated && Boba::ActiveRecord::AttributeService.has_unconditional_presence_validator?(
                 validated,
                 attribute_name,
