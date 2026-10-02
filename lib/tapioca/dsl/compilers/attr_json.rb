@@ -3,6 +3,8 @@
 
 return unless defined?(AttrJson::Record)
 
+require "boba/active_record/attribute_service"
+
 module Tapioca
   module Dsl
     module Compilers
@@ -25,14 +27,20 @@ module Tapioca
       #   extend AttrJson::Record::ClassMethods
       #
       #   module AttrJsonGeneratedMethods
-      #     sig { returns(::Integer) }
+      #     sig { returns(T.nilable(::Integer)) }
       #     def price_cents; end
       #
-      #     sig { params(value: Integer).returns(::Integer) }
+      #     sig { params(value: T.nilable(::Integer)).returns(T.nilable(::Integer)) }
       #     def price_cents=(value); end
       #   end
       # end
       # ~~~
+      #
+      # A scalar attribute reads as `nil` until it is set, so it is typed as nilable unless it has a non-nil
+      # `default:`. As with columns in `ActiveRecordColumnsPersisted`, an unconditional presence validator
+      # (no `if:`, `unless:` or `on:`) types it as it is on a valid record instead:
+      # `validates :price_cents, presence: true` turns the methods above into `returns(::Integer)` and
+      # `params(value: ::Integer)`.
       class AttrJson < Tapioca::Dsl::Compiler
         # Class methods module is already defined in the gem rbi, so just reference it here.
         ClassMethodsModuleName = "AttrJson::Record::ClassMethods"
@@ -63,13 +71,27 @@ module Tapioca
         private
 
         def decorate_attributes(rbi_scope)
+          # Both AttrJson::Record and AttrJson::Model bring in ActiveModel validations; the check lets Sorbet see it.
+          klass = constant
+          validated = klass if klass.is_a?(::ActiveModel::Validations::ClassMethods)
+
           constant.attr_json_registry
             .definitions
             .sort_by(&:name) # this is annoying, but we need to sort to force consistent ordering or the rbi checks fail
             .each do |definition|
               _, type, options = definition.original_args
               attribute_name = definition.name.to_s
-              type_name = sorbet_type(type, array: !!options[:array], nilable: !!options[:nil])
+              array = !!options[:array]
+              # AttrJson has no option that forbids nil: an attribute reads as nil unless it has a default,
+              # which AttrJson also fills in when a stored record lacks the key. An array one defaults to []
+              # on its own unless the default is overridden. As with columns, an unconditional presence
+              # validator types the attribute as it is on a valid record.
+              nilable = array ? options.key?(:default) && options[:default].nil? : options[:default].nil?
+              nilable &&= !(validated && Boba::ActiveRecord::AttributeService.has_unconditional_presence_validator?(
+                validated,
+                attribute_name,
+              ))
+              type_name = sorbet_type(type, array: array, nilable: nilable)
 
               # Model: attr_json(:other_model_id, :string)
               # => other_model_id
